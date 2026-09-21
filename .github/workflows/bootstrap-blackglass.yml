@@ -3,13 +3,17 @@ name: Bootstrap Blackglass Baseline
 on:
   push:
     branches: [main]
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
 
 jobs:
   mirror:
-    if: github.event.head_commit.message == 'BOOTSTRAP BLACKGLASS MIRROR'
+    if: >
+      (github.event_name == 'push' && github.event.head_commit.message == 'BOOTSTRAP BLACKGLASS MIRROR') ||
+      (github.event_name == 'issues' && github.event.issue.title == 'BOOTSTRAP BLACKGLASS MIRROR')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout target repository
