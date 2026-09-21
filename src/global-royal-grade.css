@@ -1,0 +1,5 @@
+:root{background:#09040e!important;color-scheme:dark}
+html,body,#root{min-height:100%;background-color:#09040e!important}
+body{background:radial-gradient(ellipse at 50% 18%,#2a0d3e 0%,#150721 48%,#09040e 100%)!important}
+.lobbyPage,.tablePage,.tournamentPage,.shopPage,.historyPage,.supportPage{background-color:#0c0712!important}
+.panel,.hero,.inviteJoin,.hud,.modal,.sheet,.drawer,.cardPanel{background-color:rgba(15,8,22,.88)!important}
