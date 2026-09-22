@@ -46,3 +46,17 @@ jobs:
           path: dist/
           if-no-files-found: error
           retention-days: 7
+      - name: Install Chromium for BLACKGLASS browser QA
+        if: github.ref == 'refs/heads/visual-remaster'
+        run: npx playwright install --with-deps chromium
+      - name: Run BLACKGLASS Home/Lobby browser QA
+        if: github.ref == 'refs/heads/visual-remaster'
+        run: npm run qa:home
+      - name: Upload BLACKGLASS browser evidence
+        if: always() && github.ref == 'refs/heads/visual-remaster'
+        uses: actions/upload-artifact@v4
+        with:
+          name: blackglass-home-runtime-${{ github.sha }}
+          path: artifacts/browser-qa/
+          if-no-files-found: warn
+          retention-days: 14
