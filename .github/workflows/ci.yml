@@ -57,6 +57,17 @@ jobs:
       - name: Run BLACKGLASS Home/Lobby browser QA
         if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
         run: npm run qa:home
+      - name: Run BLACKGLASS internal Home browser QA
+        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
+        run: npm run qa:home-internal
+      - name: Upload BLACKGLASS internal browser evidence
+        if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
+        uses: actions/upload-artifact@v4
+        with:
+          name: blackglass-home-internal-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
+          path: artifacts/browser-qa-internal/
+          if-no-files-found: warn
+          retention-days: 14
       - name: Upload BLACKGLASS browser evidence
         if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
         uses: actions/upload-artifact@v4
