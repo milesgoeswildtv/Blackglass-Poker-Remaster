@@ -143,7 +143,11 @@ test('Join entry preserves six-character code semantics and real modal body', as
   await expect(dialog).toBeVisible();
   const input = dialog.locator('input').first();
   await expect(input).toHaveAttribute('maxlength', '6');
-  await input.fill('ab-12cd34');
+  await input.fill('ab12cd');
+  await expect(input).toHaveValue('AB12CD');
+  await input.fill('ab-cd');
+  await expect(input).toHaveValue('ABCD');
+  await input.fill('ab12cd');
   await expect(input).toHaveValue('AB12CD');
   await shot(page, 'home-modal-open-actual-join');
 });
