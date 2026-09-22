@@ -127,7 +127,7 @@ test('Join real body, six-character semantics and both action wiring paths survi
   await page.setViewportSize({ width: 1100, height: 760 });
   const observed = await openHome(page);
   await page.getByRole('button', { name: /JOIN GAME/i }).click();
-  const dialog = page.getByRole('dialog', { name: /join game/i });
+  const dialog = page.getByRole('dialog', { name: /Got a code/i });
   await expect(dialog).toBeVisible();
 
   const input = dialog.locator('input').first();
@@ -279,7 +279,7 @@ test('focus-visible survives on converged internal controls', async ({ page }) =
   await page.setViewportSize({ width: 1100, height: 760 });
   await openHome(page);
   await page.getByRole('button', { name: /JOIN GAME/i }).click();
-  const input = page.getByRole('dialog', { name: /join game/i }).locator('input').first();
+  const input = page.getByRole('dialog', { name: /Got a code/i }).locator('input').first();
   await input.focus();
   await expect(input).toBeFocused();
   const outline = await input.evaluate(el => getComputedStyle(el).outlineStyle);
