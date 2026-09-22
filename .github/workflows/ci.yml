@@ -2,23 +2,40 @@ name: Poker CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, visual-remaster]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - name: Checkout exact commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
-      - run: npm install
+      - name: Install dependencies
+        run: npm install
       - name: Production dependency audit
         run: npm run audit:prod
       - name: Full dependency audit
         run: npm run audit:all
-      - run: npm test
-      - run: npm run build
-      - run: npm run check:worker
+      - name: Run tests
+        run: npm test
+      - name: Build application
+        run: npm run build
+      - name: Validate Cloudflare Worker package
+        run: npm run check:worker
+      - name: Upload exact build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: crashout-poker-dist-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
