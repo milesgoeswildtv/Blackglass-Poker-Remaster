@@ -13,9 +13,14 @@ permissions:
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
+    env:
+      BLACKGLASS_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      BLACKGLASS_SOURCE_REF: ${{ github.head_ref || github.ref }}
     steps:
-      - name: Checkout exact commit
+      - name: Checkout exact source commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.BLACKGLASS_SOURCE_SHA }}
       - name: Set up Node 22
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -33,30 +38,30 @@ jobs:
       - name: Validate Cloudflare Worker package
         run: npm run check:worker
       - name: Stamp BLACKGLASS build provenance
-        if: github.ref == 'refs/heads/visual-remaster'
+        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
         run: |
-          printf '%s\n' "$GITHUB_SHA" > dist/BLACKGLASS_BUILD_SHA.txt
-          printf '%s\n' "$GITHUB_REF" > dist/BLACKGLASS_BUILD_REF.txt
+          printf '%s\n' "$BLACKGLASS_SOURCE_SHA" > dist/BLACKGLASS_BUILD_SHA.txt
+          printf '%s\n' "$BLACKGLASS_SOURCE_REF" > dist/BLACKGLASS_BUILD_REF.txt
           printf '%s\n' "$GITHUB_RUN_ID" > dist/BLACKGLASS_BUILD_RUN_ID.txt
-      - name: Upload exact visual-remaster build artifact
-        if: github.ref == 'refs/heads/visual-remaster'
+      - name: Upload exact BLACKGLASS build artifact
+        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: crashout-poker-dist-${{ github.sha }}
+          name: crashout-poker-dist-${{ env.BLACKGLASS_SOURCE_SHA }}
           path: dist/
           if-no-files-found: error
           retention-days: 7
       - name: Install Chromium for BLACKGLASS browser QA
-        if: github.ref == 'refs/heads/visual-remaster'
+        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
         run: npx playwright install --with-deps chromium
       - name: Run BLACKGLASS Home/Lobby browser QA
-        if: github.ref == 'refs/heads/visual-remaster'
+        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
         run: npm run qa:home
       - name: Upload BLACKGLASS browser evidence
-        if: always() && github.ref == 'refs/heads/visual-remaster'
+        if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
         uses: actions/upload-artifact@v4
         with:
-          name: blackglass-home-runtime-${{ github.sha }}
+          name: blackglass-home-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
           path: artifacts/browser-qa/
           if-no-files-found: warn
           retention-days: 14
