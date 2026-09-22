@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#09060d" />
+  <meta name="theme-color" content="#0C0B09" />
   <title>Crashout Poker</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" href="/fonts/source-sans-3-roman-400-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/archivo-narrow-700.woff2" as="font" type="font/woff2" crossorigin>
   <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
   <style>
-    .globalLegal{display:none;position:relative;z-index:20;width:min(1180px,calc(100% - 32px));margin:-16px auto 28px;padding:18px 4px 0;border-top:1px solid #302438;font:700 10px/1.5 "Arial Narrow","Roboto Condensed","Helvetica Neue Condensed",Arial,sans-serif;color:#776b7b;text-align:center}
-    .globalLegal.isHome{display:block}.globalLegal strong{color:#ad914e;letter-spacing:.12em}.globalLegal p{margin:4px 0 10px}.globalLegal div{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 14px}.globalLegal a{color:#9b8ca1;text-decoration:none}.globalLegal a:hover,.globalLegal a:focus{color:#e3c66d;text-decoration:underline}
-    @media(max-width:760px){.globalLegal{width:calc(100% - 18px);margin:-8px auto 20px;font-size:9px}}
+    .globalLegal{display:none;position:relative;z-index:20;width:min(1040px,calc(100% - 32px));margin:-10px auto 28px;padding:18px 4px 0;border-top:1px solid var(--cp-divider);font:500 12px/1.5 var(--cp-font-ui);color:var(--cp-text-muted);text-align:center}
+    .globalLegal.isHome{display:block}.globalLegal strong{color:var(--cp-text-secondary);font-family:var(--cp-font-display);font-weight:700;letter-spacing:.12em}.globalLegal p{margin:4px 0 10px}.globalLegal div{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 14px}.globalLegal a{color:var(--cp-text-secondary,#C6BBA6);text-decoration:none}.globalLegal a:hover{text-decoration:underline}.globalLegal a:focus-visible{outline:2px solid var(--cp-accent-focus);outline-offset:2px}
+    @media(max-width:760px){.globalLegal{width:calc(100% - 18px);margin:-8px auto 20px;font-size:12px}}
   </style>
 </head>
 <body>

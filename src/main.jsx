@@ -1,6 +1,7 @@
 import React from'react';
 import{createRoot}from'react-dom/client';
 import App from'./App.jsx';
+import'./production-system.css';
 import{installSessionRouting}from'./session.js';
 import{bootstrapPlatform}from'./platform.js';
 import{installPokerAudioUnlock}from'./poker-audio.js';
