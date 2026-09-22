@@ -286,3 +286,68 @@ test('focus-visible survives on converged internal controls', async ({ page }) =
   expect(outline).not.toBe('none');
   await shot(page, 'internal-focus-visible');
 });
+
+
+async function rect(locator) {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+  return box;
+}
+
+function overlaps(a, b, gap = 0) {
+  return !(a.x + a.width + gap <= b.x || b.x + b.width + gap <= a.x || a.y + a.height + gap <= b.y || b.y + b.height + gap <= a.y);
+}
+
+test('Join body has non-colliding code help and stacked actions at desktop and compact width', async ({ page }) => {
+  for (const viewport of [{ width: 1100, height: 760 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await openHome(page);
+    await page.getByRole('button', { name: /JOIN GAME/i }).click();
+    const dialog = page.getByRole('dialog', { name: /Got a code/i });
+    const input = dialog.locator('.homeJoinCode input');
+    const help = dialog.locator('.homeJoinCode small');
+    const tournament = dialog.locator('.homeJoinTournament');
+    const quick = dialog.locator('.homeJoinQuick');
+
+    const modalBox = await rect(dialog);
+    const inputBox = await rect(input);
+    const helpBox = await rect(help);
+    const tournamentBox = await rect(tournament);
+    const quickBox = await rect(quick);
+
+    expect(inputBox.width).toBeGreaterThanOrEqual(modalBox.width * 0.75);
+    expect(helpBox.y).toBeGreaterThanOrEqual(inputBox.y + inputBox.height + 3);
+    expect(tournamentBox.width).toBeGreaterThanOrEqual(modalBox.width * 0.75);
+    expect(quickBox.width).toBeGreaterThanOrEqual(modalBox.width * 0.75);
+    expect(quickBox.y).toBeGreaterThanOrEqual(tournamentBox.y + tournamentBox.height + 7);
+    expect(overlaps(tournamentBox, quickBox)).toBeFalsy();
+
+    await dialog.getByLabel('Close join game').click();
+  }
+});
+
+test('Create compact title does not collide with the close control', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openHome(page);
+  await page.getByRole('button', { name: /CREATE GAME/i }).click();
+  const dialog = page.getByRole('dialog', { name: /Build the room/i });
+  const title = await rect(dialog.locator('.homeCreateTitle h2'));
+  const close = await rect(dialog.getByLabel('Close create game settings'));
+  expect(overlaps(title, close, 6)).toBeFalsy();
+});
+
+test('Profile long identity stays contained inside the drawer', async ({ page }) => {
+  await page.setViewportSize({ width: 1180, height: 820 });
+  await openHome(page, { displayName: 'AshesToAshesAndBackAgain' });
+  await page.getByRole('button', { name: /Open player profile/i }).click();
+  const drawer = page.locator('.profileDrawer');
+  const header = drawer.locator('header');
+  const title = drawer.locator('h2');
+  const drawerBox = await rect(drawer);
+  const headerBox = await rect(header);
+  const titleBox = await rect(title);
+  expect(titleBox.x).toBeGreaterThanOrEqual(headerBox.x);
+  expect(titleBox.x + titleBox.width).toBeLessThanOrEqual(drawerBox.x + drawerBox.width - 16);
+  const overflow = await drawer.evaluate(el => el.scrollWidth - el.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+});
