@@ -32,7 +32,14 @@ jobs:
         run: npm run build
       - name: Validate Cloudflare Worker package
         run: npm run check:worker
-      - name: Upload exact build artifact
+      - name: Stamp BLACKGLASS build provenance
+        if: github.ref == 'refs/heads/visual-remaster'
+        run: |
+          printf '%s\n' "$GITHUB_SHA" > dist/BLACKGLASS_BUILD_SHA.txt
+          printf '%s\n' "$GITHUB_REF" > dist/BLACKGLASS_BUILD_REF.txt
+          printf '%s\n' "$GITHUB_RUN_ID" > dist/BLACKGLASS_BUILD_RUN_ID.txt
+      - name: Upload exact visual-remaster build artifact
+        if: github.ref == 'refs/heads/visual-remaster'
         uses: actions/upload-artifact@v4
         with:
           name: crashout-poker-dist-${{ github.sha }}
