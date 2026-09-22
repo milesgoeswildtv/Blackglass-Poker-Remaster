@@ -282,8 +282,19 @@ test('focus-visible survives on converged internal controls', async ({ page }) =
   const input = page.getByRole('dialog', { name: /Got a code/i }).locator('input').first();
   await input.focus();
   await expect(input).toBeFocused();
-  const outline = await input.evaluate(el => getComputedStyle(el).outlineStyle);
-  expect(outline).not.toBe('none');
+  const focus = await input.evaluate(el => {
+    const style = getComputedStyle(el);
+    return {
+      outlineStyle: style.outlineStyle,
+      outlineColor: style.outlineColor,
+      outlineWidth: style.outlineWidth,
+      outlineOffset: style.outlineOffset
+    };
+  });
+  expect(focus.outlineStyle).not.toBe('none');
+  expect(focus.outlineColor).toBe('rgb(242, 196, 95)');
+  expect(focus.outlineWidth).toBe('2px');
+  expect(focus.outlineOffset).toBe('2px');
   await shot(page, 'internal-focus-visible');
 });
 
