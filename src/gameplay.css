@@ -255,7 +255,7 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 .ftp3AvatarFallback{display:grid;place-items:center;background:var(--cp-surface-inset);color:var(--cp-text-primary);font-size:clamp(8px,1.8vw,13px);font-weight:900;z-index:1}
 .ftp3AvatarPhoto{object-fit:cover;background:var(--cp-surface-inset);z-index:2}
 .ftp3AvatarFrame{position:absolute;inset:-7%;width:114%;height:114%;object-fit:contain;pointer-events:none;filter:grayscale(.18) saturate(.72) drop-shadow(0 3px 5px #000a);z-index:3}
-.ftp3SeatCopy{min-width:0!important;width:100%!important;display:grid;gap:2px}
+.ftp3SeatCopy{min-width:0!important;width:calc(100% - 20px)!important;display:grid;gap:2px}
 .ftp3SeatCopy b{font-size:11px!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;color:var(--cp-text-primary);line-height:1}
 .ftp3SeatCopy strong{font-size:12px!important;color:var(--cp-text-primary);line-height:1;font-weight:900}
 .ftp3Pos{position:absolute;right:-6px!important;bottom:-7px!important;min-width:25px!important;height:25px!important;padding:0 5px;border-radius:var(--cp-radius-control);display:grid;place-items:center;background:var(--cp-surface-paper);border:1px solid var(--cp-border-strong);color:var(--cp-text-on-light);font-style:normal;font-size:11px!important;font-weight:900}
@@ -271,7 +271,7 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 .ftp3Board .card{position:relative!important;flex:1 1 0!important;min-width:0!important;width:auto!important;height:100%!important;min-height:0!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;overflow:hidden!important;padding:5px!important;line-height:.82!important;border-radius:var(--cp-radius-control)!important;border:1px solid rgba(0,0,0,.24)!important;background:#f6f3ef!important;box-shadow:0 2px 6px rgba(0,0,0,.28)!important;font-size:clamp(15px,3.25vw,22px)!important}
 .ftp3Board .card b,.ftp3Board .card span{position:static!important;display:block!important;width:auto!important;height:auto!important;margin:0!important;padding:0!important;line-height:.9!important;transform:none!important}
 .ftp3Board .card b{font-size:1em!important}
-.ftp3Board .card span{font-size:.72em!important;margin-top:3px!important}
+.ftp3Board .card span{font-size:max(.74em,11px)!important;margin-top:3px!important}
 .ftp3Street{align-self:center;min-width:52%;padding:3px 8px;background:transparent;border:0;color:var(--cp-text-secondary);text-align:center;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;text-shadow:0 2px 7px #000}
 .ftp3Pot{position:absolute;left:50%;top:47.5%!important;transform:translateX(-50%);min-width:27%!important;padding:2px 8px!important;background:transparent;border:0;text-align:center;z-index:11;box-shadow:none;text-shadow:0 2px 7px #000}
 .ftp3Pot small{display:block;color:var(--cp-text-secondary);font-size:11px;letter-spacing:.14em}
