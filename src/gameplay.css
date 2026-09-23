@@ -255,7 +255,7 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 .ftp3AvatarFallback{display:grid;place-items:center;background:var(--cp-surface-inset);color:var(--cp-text-primary);font-size:clamp(8px,1.8vw,13px);font-weight:900;z-index:1}
 .ftp3AvatarPhoto{object-fit:cover;background:var(--cp-surface-inset);z-index:2}
 .ftp3AvatarFrame{position:absolute;inset:-7%;width:114%;height:114%;object-fit:contain;pointer-events:none;filter:grayscale(.18) saturate(.72) drop-shadow(0 3px 5px #000a);z-index:3}
-.ftp3SeatCopy{min-width:0!important;width:calc(100% - 20px)!important;display:grid;gap:2px}
+.ftp3SeatCopy{min-width:0!important;width:100%!important;display:grid;gap:2px}
 .ftp3SeatCopy b{font-size:11px!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;color:var(--cp-text-primary);line-height:1}
 .ftp3SeatCopy strong{font-size:12px!important;color:var(--cp-text-primary);line-height:1;font-weight:900}
 .ftp3Pos{position:absolute;right:-6px!important;bottom:-7px!important;min-width:25px!important;height:25px!important;padding:0 5px;border-radius:var(--cp-radius-control);display:grid;place-items:center;background:var(--cp-surface-paper);border:1px solid var(--cp-border-strong);color:var(--cp-text-on-light);font-style:normal;font-size:11px!important;font-weight:900}
