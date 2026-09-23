@@ -258,7 +258,7 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 .ftp3SeatCopy{min-width:0!important;width:100%!important;display:grid;gap:2px}
 .ftp3SeatCopy b{font-size:11px!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;color:var(--cp-text-primary);line-height:1}
 .ftp3SeatCopy strong{font-size:12px!important;color:var(--cp-text-primary);line-height:1;font-weight:900}
-.ftp3Pos{position:absolute;right:-6px!important;bottom:-7px!important;min-width:25px!important;height:25px!important;padding:0 5px;border-radius:var(--cp-radius-control);display:grid;place-items:center;background:var(--cp-surface-paper);border:1px solid var(--cp-border-strong);color:var(--cp-text-on-light);font-style:normal;font-size:11px!important;font-weight:900}
+.ftp3Pos{position:absolute;right:-16px!important;bottom:-7px!important;min-width:25px!important;height:25px!important;padding:0 5px;border-radius:var(--cp-radius-control);display:grid;place-items:center;background:var(--cp-surface-paper);border:1px solid var(--cp-border-strong);color:var(--cp-text-on-light);font-style:normal;font-size:11px!important;font-weight:900}
 .ftp3Clock,.ftp3Win{position:absolute;left:50%;top:calc(100% + 4px);transform:translateX(-50%);font-style:normal;font-size:11px;font-weight:900;white-space:nowrap}
 .ftp3Clock{padding:2px 8px;border-radius:var(--cp-radius-control);background:var(--cp-surface-paper);border:1px solid var(--cp-border-strong);color:var(--cp-text-on-light)}
 .ftp3Win{color:var(--cp-state-success);background:var(--cp-surface-inset);padding:2px 5px}
