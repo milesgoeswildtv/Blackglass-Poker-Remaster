@@ -4,7 +4,6 @@ html.telegramMiniApp body{padding-top:max(var(--telegram-safe-top,0px),env(safe-
 .telegramMiniApp .globalLegal{display:none!important}
 .telegramMiniApp .homeShell,.telegramMiniApp .tablePage{min-height:var(--telegram-viewport-stable-height,100dvh)}
 .telegramMiniApp .homeFrame{width:min(1180px,calc(100% - 20px));padding-top:8px;padding-bottom:max(24px,var(--telegram-safe-bottom,0px))}
-.telegramMiniApp .homeEntry,.telegramMiniApp .homeGamePanel,.telegramMiniApp .profileDrawer{background:linear-gradient(180deg,color-mix(in srgb,var(--telegram-secondary-bg,#120b18) 88%,#09060d 12%),color-mix(in srgb,var(--telegram-bg,#09060d) 94%,#09060d 6%));border-color:color-mix(in srgb,var(--telegram-hint,#97899e) 28%,transparent)}
 .telegramMiniApp .profileShade{padding-top:var(--telegram-safe-top,0px);padding-bottom:var(--telegram-safe-bottom,0px)}
 .telegramMiniApp .profileDrawer{padding-bottom:max(18px,var(--telegram-safe-bottom,0px))}
 .telegramMiniApp .profileDrawer>header{padding-top:max(38px,calc(var(--telegram-safe-top,0px) + 18px))}
@@ -13,7 +12,7 @@ html.telegramMiniApp body{padding-top:max(var(--telegram-safe-top,0px),env(safe-
 .telegramMiniApp .telegramShopNotice{margin-top:12px;padding:12px 14px;border:1px solid rgba(215,183,84,.24);border-radius:12px;background:rgba(12,7,18,.78);color:#b8aebd;font:700 11px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-align:center}
 .telegramMiniApp .telegramShopNotice b{display:block;color:#dbc76f;letter-spacing:.06em;margin-bottom:3px}
 .telegramMiniApp .entryActions button,.telegramMiniApp .createChoice button,.telegramMiniApp .notificationToggle,.telegramMiniApp .discordLogin,.telegramMiniApp .primary{min-height:44px}
-.telegramMiniApp .toast{bottom:max(18px,calc(var(--telegram-safe-bottom,0px) + 10px))}
+.telegramMiniApp .homeToast{bottom:max(18px,calc(var(--telegram-safe-bottom,0px) + 10px))}
 .telegramMiniApp.telegramGameRoute .tablePage{padding-bottom:max(8px,var(--telegram-safe-bottom,0px))}
 .telegramMiniApp.telegramGameRoute .gameplayV3Page,.telegramMiniApp.telegramGameRoute .pregameTablePage{height:var(--telegram-viewport-stable-height,100dvh)!important;min-height:0!important}
 .telegramMiniApp.telegramGameRoute .ftp3Back{visibility:hidden!important;pointer-events:none!important}
@@ -21,5 +20,4 @@ html.telegramMiniApp body{padding-top:max(var(--telegram-safe-top,0px),env(safe-
  html.telegramMiniApp .homeFrame{width:min(100% - 12px,1180px)}
     .telegramMiniApp .profileShade{justify-content:stretch}
  .telegramMiniApp .profileDrawer{width:100vw;max-width:none;border-left:0}
- .telegramMiniApp .homeHero{margin-top:2px}
 }
