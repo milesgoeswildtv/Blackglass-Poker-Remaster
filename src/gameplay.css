@@ -363,7 +363,7 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   .ftp3Hero{bottom:22.5dvh!important}
 }
 @media(min-width:761px) and (max-height:700px){
-  .ftp3ActionDock{padding:4px 10px 34px!important}
+  .ftp3ActionDock{padding:4px 10px 31px!important}
   .ftp3ActionDock:before{top:2px;height:1px}
   .ftp3ActionRow{gap:5px}
   .ftp3ActionRow button{min-height:32px;padding:3px 4px}
