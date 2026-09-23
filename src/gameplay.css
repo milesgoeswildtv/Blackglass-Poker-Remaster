@@ -362,6 +362,18 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   .ftp3Stage{top:max(9.4dvh,calc(var(--ftp-safe-top) + 48px))!important;height:min(69dvh,121.5vw)!important}
   .ftp3Hero{bottom:22.5dvh!important}
 }
+@media(min-width:761px) and (max-height:700px){
+  .ftp3ActionDock{padding:4px 10px 34px!important}
+  .ftp3ActionDock:before{top:2px;height:1px}
+  .ftp3ActionRow{gap:5px}
+  .ftp3ActionRow button{min-height:32px;padding:3px 4px}
+  .ftp3ActionRow button small{margin-top:1px}
+  .ftp3RaiseRow{margin-top:3px;gap:6px;padding:1px 4px}
+  .ftp3RaiseRow button{height:24px;min-width:38px;padding:0 6px}
+  .ftp3UtilityBar{bottom:2px!important}
+  .ftp3UtilityBar:before{inset:-2px 0 -1px}
+  .ftp3UtilityBar button{height:30px!important}
+}
 @media(min-width:761px){
   .gameplayV3Page{--ftp-frame-half:min(38vw,490px);left:50%!important;right:auto!important;width:min(76vw,980px)!important;transform:translateX(-50%);box-shadow:0 0 90px #000d}
   .ftp3Stage{height:75dvh!important;max-height:860px}
