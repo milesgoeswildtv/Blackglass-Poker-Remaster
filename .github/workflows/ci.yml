@@ -60,6 +60,35 @@ jobs:
       - name: Run BLACKGLASS internal Home browser QA
         if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
         run: npm run qa:home-internal
+      - name: Resolve prior gameplay geometry baseline
+        if: github.ref == 'refs/heads/visual-remaster' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRIOR_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          run_id="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${PRIOR_SHA}&status=completed&per_page=20" --jq '.workflow_runs | map(select(.name == "Poker CI" and .conclusion == "success")) | .[0].id // empty')"
+          if [ -n "$run_id" ]; then
+            artifact_id="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/artifacts" --jq '.artifacts | map(select(.name | startswith("blackglass-gameplay-runtime-"))) | .[0].id // empty')"
+            if [ -n "$artifact_id" ]; then
+              mkdir -p artifacts/gameplay-baseline /tmp/blackglass-gameplay-baseline
+              gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" > /tmp/blackglass-gameplay-baseline.zip
+              unzip -q /tmp/blackglass-gameplay-baseline.zip -d /tmp/blackglass-gameplay-baseline
+              geometry="$(find /tmp/blackglass-gameplay-baseline -name geometry.json -print -quit)"
+              if [ -n "$geometry" ]; then cp "$geometry" artifacts/gameplay-baseline/geometry.json; fi
+            fi
+          fi
+      - name: Run BLACKGLASS gameplay browser QA
+        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
+        run: npm run qa:gameplay
+      - name: Upload BLACKGLASS gameplay browser evidence
+        if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
+        uses: actions/upload-artifact@v4
+        with:
+          name: blackglass-gameplay-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
+          path: artifacts/browser-qa-gameplay/
+          if-no-files-found: error
+          retention-days: 14
       - name: Upload BLACKGLASS internal browser evidence
         if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
         uses: actions/upload-artifact@v4
