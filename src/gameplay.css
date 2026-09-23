@@ -24,7 +24,10 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   isolation:isolate;
   color:var(--cp-text-primary);
   font-family:var(--cp-font-ui);
-  background:radial-gradient(ellipse at 50% 34%,rgba(242,196,95,.085) 0,rgba(155,106,43,.025) 27%,transparent 48%),linear-gradient(90deg,#070605 0,#0c0b09 18%,#12100d 50%,#0c0b09 82%,#070605 100%)!important;
+  background:
+    radial-gradient(circle at 18% 16%,rgba(242,196,95,.13) 0 1.2%,rgba(155,106,43,.06) 1.3% 9%,transparent 23%),
+    radial-gradient(circle at 82% 16%,rgba(242,196,95,.1) 0 1%,rgba(155,106,43,.045) 1.1% 8%,transparent 21%),
+    linear-gradient(180deg,#17130f 0 9%,#0d0c0a 9.2% 64%,#090806 64.2% 100%)!important;
   background-size:cover!important;
   background-position:center top!important;
   background-repeat:no-repeat!important;
@@ -36,7 +39,11 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   inset:0;
   z-index:1;
   pointer-events:none;
-  background:radial-gradient(ellipse at 50% 25%,transparent 0 28%,rgba(0,0,0,.2) 58%,rgba(0,0,0,.68) 100%),linear-gradient(90deg,rgba(0,0,0,.62),transparent 18%,transparent 82%,rgba(0,0,0,.62));
+  background:
+    linear-gradient(90deg,rgba(8,7,6,.92) 0 5%,transparent 5.2% 94.8%,rgba(8,7,6,.92) 95% 100%),
+    linear-gradient(180deg,transparent 0 63%,rgba(43,34,24,.34) 63.2% 64%,rgba(7,6,5,.86) 64.2% 100%),
+    repeating-linear-gradient(90deg,transparent 0 12%,rgba(242,232,213,.018) 12.1% 12.3%,transparent 12.4% 25%),
+    radial-gradient(ellipse at 50% 38%,transparent 0 42%,rgba(0,0,0,.54) 78%,rgba(0,0,0,.86) 100%);
 }
 .gameplayV3Page:after{
   content:"";
@@ -44,7 +51,9 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   inset:0;
   z-index:1;
   pointer-events:none;
-  opacity:var(--cp-texture-world-full);background-image:repeating-linear-gradient(0deg,rgba(242,232,213,.14) 0 1px,transparent 1px 4px);
+  opacity:1;background-image:
+    linear-gradient(90deg,transparent 7%,rgba(155,106,43,.12) 7.1% 7.25%,transparent 7.35% 92.65%,rgba(155,106,43,.12) 92.75% 92.9%,transparent 93%),
+    repeating-linear-gradient(0deg,rgba(242,232,213,.018) 0 1px,transparent 1px 5px);
 }
 .gameplayV3Page>*{position:relative;z-index:2}
 .gameplayV3Page button:focus-visible,.gameplayV3Page input:focus-visible,.gameplayV3Page [role="button"]:focus-visible{outline:2px solid var(--cp-accent-focus);outline-offset:2px;box-shadow:none}
@@ -62,17 +71,18 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   grid-template-columns:92px 1fr 92px!important;
   align-items:start!important;
   gap:10px!important;
-  background:none!important;
-  border:0!important;
-  border-radius:0!important;
-  box-shadow:none!important;
+  background:linear-gradient(180deg,rgba(29,25,20,.96),rgba(14,12,10,.96))!important;
+  border:1px solid var(--cp-border-default)!important;
+  border-top:0!important;
+  border-radius:0 0 var(--cp-radius-plate) var(--cp-radius-plate)!important;
+  box-shadow:inset 0 -1px rgba(0,0,0,.55),0 8px 20px rgba(0,0,0,.34)!important;
   backdrop-filter:none!important;
   -webkit-backdrop-filter:none!important;
   pointer-events:none!important;
   overflow:visible!important;
   z-index:100!important;
 }
-.ftp3Header:before,.ftp3Header:after{display:none!important;content:none!important}
+.ftp3Header:before{display:block!important;content:""!important;position:absolute;left:66px;right:66px;bottom:7px;height:1px;background:linear-gradient(90deg,transparent,var(--cp-accent-material),transparent);opacity:.65}.ftp3Header:after{display:none!important;content:none!important}
 .ftp3Header button{font:inherit;cursor:pointer}
 .ftp3Back{pointer-events:auto!important}
 
@@ -107,16 +117,18 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   pointer-events:none!important;
   text-shadow:none;
   font-family:var(--cp-font-display);
-  background:none!important;
-  border:0!important;
-  box-shadow:none!important;
+  background:var(--cp-surface-inset)!important;
+  border:1px solid var(--cp-border-subtle)!important;
+  box-shadow:inset 0 1px rgba(242,232,213,.04),0 3px 8px #0008!important;
+  padding:5px 12px 6px!important;
+  border-radius:var(--cp-radius-plate)!important;
 }
 .ftp3HeaderBrand:before,.ftp3HeaderBrand:after{display:none!important;content:none!important}
 .ftp3HeaderBrand strong{color:var(--cp-text-primary);font-size:clamp(12px,2.9vw,19px)!important;line-height:1!important;letter-spacing:.06em;text-shadow:0 2px 7px #000}
 .ftp3HeaderBrand span{display:flex;align-items:center;gap:7px;color:var(--cp-text-secondary);font-size:clamp(11px,2vw,13px)!important;line-height:1!important;white-space:nowrap;text-transform:uppercase;letter-spacing:.07em}
 .ftp3HeaderBrand i{width:3px;height:3px;border-radius:0;background:var(--cp-border-strong)}
 .ftp3TopCommands{position:absolute;right:10px;bottom:5px;display:flex;gap:5px;pointer-events:auto!important;z-index:102}
-.ftp3TopCommands button{height:24px;padding:0 8px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-plate);color:var(--cp-text-secondary);font:inherit;font-size:11px;font-weight:900;letter-spacing:.04em;box-shadow:0 4px 12px #0007}
+.ftp3TopCommands button{height:26px;padding:0 9px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:linear-gradient(180deg,#2b251d,#15120f);color:var(--cp-text-secondary);font:inherit;font-size:11px;font-weight:900;letter-spacing:.04em;box-shadow:inset 0 1px rgba(242,232,213,.07),inset 0 -2px #0008,0 4px 12px #0008}
 .ftp3TopCommands button.active{border-color:var(--cp-accent-focus);background:var(--cp-surface-raised);color:var(--cp-text-primary)}
 .ftp3TopCommands button.danger{border-color:var(--cp-state-danger);background:#21130f;color:var(--cp-on-danger)}
 
@@ -135,19 +147,21 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 }
 .ftp3TableShell{
   position:absolute;
-  inset:0;
-  border-radius:46%/49%;
-  background:linear-gradient(145deg,#080706 0,#211b14 15%,#0d0c0a 38%,#2b2117 52%,#0b0a08 74%,#18130e 100%);
-  border:1px solid #392d20;
-  box-shadow:0 3.4dvh 5dvh rgba(0,0,0,.72),0 0 0 2px #070605,inset 0 1px rgba(242,232,213,.09),inset 0 -10px 22px rgba(0,0,0,.72);
+  inset:-3.2% -4.8%;
+  border-radius:47%/49%;
+  background:linear-gradient(155deg,#090806 0,#2c2116 10%,#100d0a 27%,#3a2b1d 48%,#120f0b 70%,#261c13 88%,#080706 100%);
+  border:1px solid #5a4630;
+  box-shadow:0 4.4dvh 6dvh rgba(0,0,0,.78),0 0 0 3px #080706,0 0 0 5px #241b13,inset 0 2px rgba(242,232,213,.1),inset 0 -16px 24px rgba(0,0,0,.76);
 }
+.ftp3TableShell:before{content:"";position:absolute;inset:1.2%;border-radius:inherit;border:1px solid rgba(242,232,213,.08);box-shadow:inset 0 0 0 4px rgba(0,0,0,.34);pointer-events:none}
+.ftp3TableShell:after{content:"";position:absolute;left:15%;right:15%;bottom:-3.5%;height:5%;background:linear-gradient(180deg,#21180f,#090705);clip-path:polygon(4% 0,96% 0,100% 100%,0 100%);box-shadow:0 8px 16px #000a;z-index:-1;pointer-events:none}
 .ftp3Rail{
   position:absolute;
-  inset:2.1%;
+  inset:3.2%;
   border-radius:inherit;
-  padding:3.3%;
+  padding:5.2%;
   background:linear-gradient(90deg,#100d0a,#30251a 12%,#17120d 28%,#3b2d1e 50%,#17120d 72%,#30251a 88%,#100d0a);
-  box-shadow:inset 0 2px rgba(242,232,213,.09),inset 0 -5px 8px rgba(0,0,0,.58),0 0 0 1px #59452f,0 0 0 4px #090806;
+  box-shadow:inset 0 2px rgba(242,232,213,.1),inset 0 -8px 12px rgba(0,0,0,.66),0 0 0 1px #70563a,0 0 0 5px #090806,0 0 0 7px #2a2016;
 }
 .ftp3FeltSurface{
   width:100%;
@@ -157,12 +171,12 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   overflow:hidden;
   background:
     radial-gradient(ellipse at 50% 40%,rgba(242,232,213,.035),transparent 38%),radial-gradient(ellipse at 50% 54%,#1c211b 0,#141814 48%,#0d100d 100%)!important;
-  box-shadow:inset 0 0 54px rgba(0,0,0,.78),inset 0 0 0 1px #3a382d;
+  box-shadow:inset 0 0 68px rgba(0,0,0,.82),inset 0 0 0 1px #474437,inset 0 -10px 18px rgba(0,0,0,.32);
 }
 .ftp3FeltSurface:after{content:"";position:absolute;inset:3.2%;border-radius:inherit;border:1px solid rgba(198,187,166,.1);box-shadow:inset 0 0 30px rgba(0,0,0,.38);background-image:repeating-linear-gradient(17deg,rgba(242,232,213,.012) 0 1px,transparent 1px 5px);opacity:.75}
-.ftp3CenterMark{position:absolute;left:50%;top:29.5%;transform:translateX(-50%);width:34%;text-align:center;opacity:.14;z-index:3;pointer-events:none;font-family:var(--cp-font-display)}
+.ftp3CenterMark{position:absolute;left:50%;top:28.8%;transform:translateX(-50%) rotate(-.5deg);width:38%;text-align:center;opacity:.42;z-index:3;pointer-events:none;font-family:var(--cp-font-display);padding:4px 5px;border-top:1px solid rgba(198,187,166,.16);border-bottom:1px solid rgba(198,187,166,.1);mix-blend-mode:screen}
 .ftp3CenterMark img{display:none}
-.ftp3CenterMark strong{display:block;color:var(--cp-text-secondary);font-size:clamp(8px,1.75vw,13px);font-weight:700;letter-spacing:.14em;white-space:nowrap}
+.ftp3CenterMark strong{display:block;color:#b6aa95;font-size:clamp(9px,1.9vw,14px);font-weight:700;letter-spacing:.16em;white-space:nowrap;text-shadow:0 1px #000}
 .ftp3CenterMark span{display:block;margin-top:2px;color:var(--cp-text-muted);font-size:clamp(6px,1.25vw,9px);font-weight:600;letter-spacing:.3em;white-space:nowrap}
 
 .ftp3PregameDecor{position:absolute;inset:9% 9% 15%;z-index:4;pointer-events:none;overflow:hidden;border-radius:42%/47%;opacity:.72}
@@ -241,8 +255,8 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   justify-content:center;
   flex-direction:column;
 }
-.ftp3SeatPlaque:before{content:"";position:absolute;left:33px;right:5px;top:4px;bottom:4px;border-left:1px solid var(--cp-divider);border-top:1px solid rgba(242,232,213,.035);pointer-events:none}
-.ftp3SeatPlaque:after{content:"";position:absolute;left:36px;right:5px;bottom:4px;height:3px;background:linear-gradient(90deg,var(--cp-border-strong),transparent 76%);opacity:.42;pointer-events:none}
+.ftp3SeatPlaque:before{content:"";position:absolute;left:34px;top:5px;bottom:5px;border-left:1px solid var(--cp-divider);box-shadow:1px 0 rgba(242,232,213,.025);pointer-events:none}
+.ftp3SeatPlaque:after{content:"";position:absolute;z-index:-1;inset:-4px -7px -5px -7px;border:1px solid #3f3326;background:linear-gradient(180deg,#17130f,#0b0908);box-shadow:0 6px 14px #0009,inset 0 1px rgba(242,232,213,.05);clip-path:polygon(0 0,94% 0,100% 18%,100% 100%,6% 100%,0 82%);pointer-events:none}
 .ftp3Seat.turn .ftp3SeatPlaque{border-color:var(--cp-accent-focus);background:linear-gradient(180deg,#34291b,#1b1711)!important;box-shadow:inset 4px 0 0 var(--cp-accent-focus),inset 0 1px rgba(242,232,213,.1),0 6px 14px rgba(0,0,0,.58)}
 .ftp3Seat.folded{opacity:.58;filter:grayscale(.78) contrast(.9)}
 .ftp3Seat.folded .ftp3SeatPlaque{border-style:dashed}
@@ -254,19 +268,19 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 .ftp3Seat.winner .ftp3SeatPlaque{filter:brightness(1.14) saturate(1.14);border:1px solid var(--cp-state-success);box-shadow:inset 3px 0 0 var(--cp-state-success),inset 0 1px rgba(242,232,213,.08),0 2px 6px rgba(0,0,0,.28)}
 .ftp3Seat.winner .ftp3AvatarFrame{filter:grayscale(.15) drop-shadow(0 3px 5px #0008)}
 .ftp3IdentityAvatar{display:grid;place-items:center;aspect-ratio:1;overflow:visible}
-.ftp3Avatar{position:absolute;left:3px!important;top:50%;transform:translateY(-50%);width:28px!important;max-width:none!important;z-index:5}
-.ftp3AvatarFallback,.ftp3AvatarPhoto{position:absolute;inset:8%;width:84%;height:84%;border-radius:50%;border:1px solid var(--cp-border-strong);box-shadow:inset 0 0 0 2px #0b0a08}
+.ftp3Avatar{position:absolute;left:-5px!important;top:50%;transform:translateY(-50%);width:38px!important;max-width:none!important;z-index:5;filter:drop-shadow(0 4px 7px #000b)}
+.ftp3AvatarFallback,.ftp3AvatarPhoto{position:absolute;inset:8%;width:84%;height:84%;border-radius:50%;border:2px solid #8a6a43;box-shadow:0 0 0 2px #0b0a08,inset 0 0 0 1px rgba(242,232,213,.1)}
 .ftp3AvatarFallback{display:grid;place-items:center;background:var(--cp-surface-inset);color:var(--cp-text-primary);font-size:clamp(8px,1.8vw,13px);font-weight:900;z-index:1}
 .ftp3AvatarPhoto{object-fit:cover;background:var(--cp-surface-inset);z-index:2}
 .ftp3AvatarFrame{position:absolute;inset:-7%;width:114%;height:114%;object-fit:contain;pointer-events:none;filter:grayscale(.18) saturate(.72) drop-shadow(0 3px 5px #000a);z-index:3}
-.ftp3SeatCopy{min-width:0!important;width:100%!important;display:grid;gap:2px}
+.ftp3SeatCopy{min-width:0!important;width:100%!important;display:grid;grid-template-rows:auto auto;gap:2px;padding-left:2px;position:relative}.ftp3SeatCopy:after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:linear-gradient(90deg,var(--cp-accent-material),transparent);opacity:.45}
 .ftp3SeatCopy b{font-size:11px!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;color:var(--cp-text-primary);line-height:1}
 .ftp3SeatCopy strong{font-size:12px!important;color:var(--cp-text-primary);line-height:1;font-weight:900}
-.ftp3Pos{position:absolute;right:-16px!important;bottom:-7px!important;min-width:25px!important;height:25px!important;padding:0 5px;border-radius:var(--cp-radius-control);display:grid;place-items:center;background:#d8cbb3;border:1px solid #18130e;color:var(--cp-text-on-light);font-style:normal;font-size:11px!important;font-weight:900;box-shadow:0 3px 7px #0009}
+.ftp3Pos{position:absolute;right:-17px!important;bottom:-8px!important;min-width:27px!important;height:27px!important;padding:0 5px;border-radius:1px;display:grid;place-items:center;background:#d8cbb3;border:2px solid #18130e;color:var(--cp-text-on-light);font-style:normal;font-size:11px!important;font-weight:900;box-shadow:0 4px 8px #000b;transform:rotate(-2deg)}
 .ftp3Clock,.ftp3Win{position:absolute;left:50%;top:calc(100% + 4px);transform:translateX(-50%);font-style:normal;font-size:11px;font-weight:900;white-space:nowrap}
-.ftp3Clock{padding:3px 9px;border-radius:var(--cp-radius-control);background:var(--cp-surface-paper);border:2px solid #18130e;color:var(--cp-text-on-light);box-shadow:0 3px 8px #0009}
+.ftp3Clock{padding:3px 10px;border-radius:1px;background:var(--cp-surface-paper);border:2px solid #18130e;color:var(--cp-text-on-light);box-shadow:0 4px 9px #000b;letter-spacing:.05em}
 .ftp3Win{color:var(--cp-state-success);background:var(--cp-surface-inset);padding:2px 5px}
-.ftp3Away{position:absolute;right:4px;top:-12px;padding:2px 6px;border-radius:var(--cp-radius-control);border:1px dashed var(--cp-border-default);background:var(--cp-surface-inset);color:var(--cp-text-secondary);font-style:normal;font-size:11px;font-weight:900;letter-spacing:.08em}
+.ftp3Away{position:absolute;right:-5px;top:-13px;padding:2px 7px;border-radius:1px;border:1px solid var(--cp-border-default);background:#17130f;color:var(--cp-text-secondary);font-style:normal;font-size:11px;font-weight:900;letter-spacing:.1em;box-shadow:0 3px 8px #0009;transform:rotate(1deg)}
 .ftp3SeatKick{position:absolute;right:-7px;top:-8px;width:20px;height:20px;padding:0;border-radius:var(--cp-radius-control);border:1px solid var(--cp-state-danger);background:var(--cp-surface-inset);color:var(--cp-on-danger);font:inherit;font-size:12px;line-height:1;pointer-events:auto;cursor:pointer}
 .ftp3Bet{position:absolute;z-index:15!important;transform:translate(-50%,-50%)!important;display:flex;align-items:center;gap:3px;padding:0!important;background:transparent;border:0;color:var(--cp-text-primary);font-size:11px!important;box-shadow:none;text-shadow:0 2px 5px #000}
 .ftp3Bet img{width:18px!important;height:18px!important;object-fit:contain}
@@ -277,7 +291,7 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 .ftp3Board .card b{font-size:1em!important}
 .ftp3Board .card span{font-size:max(.74em,11px)!important;margin-top:3px!important}
 .ftp3Street{align-self:center;min-width:52%;padding:3px 8px;background:transparent;border:0;color:var(--cp-text-secondary);text-align:center;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;text-shadow:0 2px 7px #000}
-.ftp3Pot{position:absolute;left:50%;top:47.5%!important;transform:translateX(-50%);min-width:27%!important;padding:4px 10px!important;background:rgba(13,12,10,.88);border:1px solid var(--cp-border-subtle);text-align:center;z-index:11;box-shadow:inset 0 1px rgba(242,232,213,.05),0 4px 10px #0008;text-shadow:none}
+.ftp3Pot{position:absolute;left:50%;top:47.5%!important;transform:translateX(-50%);min-width:27%!important;padding:4px 10px!important;background:#14110d;border:1px solid #4b3b2b;text-align:center;z-index:11;box-shadow:inset 0 1px rgba(242,232,213,.06),inset 0 -2px #0008,0 5px 12px #0009;text-shadow:none;clip-path:polygon(3% 0,97% 0,100% 20%,100% 100%,0 100%,0 20%)}
 .ftp3Pot small{display:block;color:var(--cp-text-secondary);font-size:11px;letter-spacing:.14em}
 .ftp3Pot strong{display:block;color:var(--cp-text-primary);font-size:clamp(16px,3.5vw,24px)!important;line-height:1}
 .ftp3SidePots{position:absolute;left:50%;top:54.5%!important;transform:translateX(-50%);width:62%!important;display:flex;justify-content:center;gap:5px!important;z-index:11}
@@ -289,24 +303,24 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 .ftp3HeroCards .card:first-child{transform:rotate(-3deg) translateX(3px)}.ftp3HeroCards .card:last-child{transform:rotate(3deg) translateX(-3px)}
 .ftp3Strength{position:absolute!important;left:calc(50% + 58px)!important;right:auto!important;top:auto!important;bottom:62px!important;transform:none!important;white-space:nowrap!important;min-width:108px!important;text-align:center!important;z-index:35!important;margin:0!important;padding:2px 6px;color:var(--cp-text-secondary);font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;background:transparent;border:0;text-shadow:0 2px 7px #000}
 .ftp3HeroPlaque{position:relative;z-index:3;width:100%;min-height:54px!important;padding:7px 28px 7px 50px!important;border:1px solid var(--cp-border-default)!important;border-radius:var(--cp-radius-plate)!important;background:linear-gradient(180deg,#30271c,#17130f 72%,#100e0b)!important;box-shadow:inset 0 1px rgba(242,232,213,.1),inset 0 -3px rgba(0,0,0,.5),0 6px 16px rgba(0,0,0,.58);display:flex;align-items:center}
-.ftp3HeroPlaque:before{content:"";position:absolute;left:45px;top:5px;bottom:5px;border-left:1px solid var(--cp-divider);pointer-events:none}
-.ftp3HeroAvatar{position:absolute;left:-9px;top:50%;transform:translateY(-50%);width:47px!important;height:47px!important;z-index:5;filter:drop-shadow(0 3px 5px #0009)}
+.ftp3HeroPlaque:before{content:"";position:absolute;left:45px;top:5px;bottom:5px;border-left:1px solid var(--cp-divider);pointer-events:none}.ftp3HeroPlaque:after{content:"";position:absolute;z-index:-1;inset:-6px -10px -7px;border:1px solid #4b3a29;background:linear-gradient(180deg,#1c1712,#0a0907);box-shadow:0 10px 22px #000c,inset 0 1px rgba(242,232,213,.06);clip-path:polygon(0 0,96% 0,100% 15%,100% 100%,4% 100%,0 85%);pointer-events:none}
+.ftp3HeroAvatar{position:absolute;left:-13px;top:50%;transform:translateY(-50%);width:55px!important;height:55px!important;z-index:5;filter:drop-shadow(0 5px 9px #000b)}
 .ftp3Hero.showdownDim{opacity:.42!important;filter:saturate(.52) brightness(.76)!important;transition:opacity .22s ease,filter .22s ease}
 .ftp3Hero.winner{opacity:1!important;filter:none!important}
 .ftp3Hero.winner .ftp3HeroPlaque{filter:brightness(1.14) saturate(1.14);border:1px solid var(--cp-state-success);box-shadow:inset 3px 0 0 var(--cp-state-success),inset 0 1px rgba(242,232,213,.08),0 2px 6px rgba(0,0,0,.28)}
 .ftp3Hero.winner .ftp3HeroAvatar{filter:grayscale(.12) drop-shadow(0 3px 5px #0008)}
 .ftp3HeroPlaque div{display:grid;gap:1px}.ftp3HeroPlaque small{color:var(--cp-text-muted);font-size:11px;letter-spacing:.16em}.ftp3HeroPlaque b{color:var(--cp-text-primary);font-size:18px}.ftp3HeroPlaque em{margin-left:auto;color:#fff;font-style:normal;font-size:11px;font-weight:900}.ftp3ExtraTime{position:absolute;right:8px;top:5px;padding:0;border:0;background:transparent;color:var(--cp-accent-focus);font:inherit;font-size:11px;font-weight:900;letter-spacing:.04em;cursor:pointer;pointer-events:auto;text-shadow:0 1px 4px #000}.ftp3ExtraTime:active{transform:translateY(1px)}
 
-.ftp3UtilityBar{position:absolute;left:12px!important;right:12px!important;bottom:4px!important;z-index:86;display:flex;gap:8px;pointer-events:none}
+.ftp3UtilityBar{position:absolute;left:12px!important;right:12px!important;bottom:4px!important;z-index:86;display:flex;gap:8px;pointer-events:none;padding:0 5px}.ftp3UtilityBar:before{content:"";position:absolute;inset:-4px 0 -3px;background:#0d0b09;border:1px solid #33291f;z-index:-1;box-shadow:0 5px 12px #0008}
 .ftp3UtilityBar button{pointer-events:auto;flex:1 1 0;min-width:0!important;height:38px!important;padding:0 10px!important;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:linear-gradient(180deg,#252019,#15120f);color:var(--cp-text-secondary);display:flex;align-items:center;justify-content:center;gap:7px;font:inherit;font-size:11px!important;font-weight:900;letter-spacing:.05em;box-shadow:inset 0 1px rgba(242,232,213,.06),0 6px 16px #0009}
 .ftp3UtilityBar button.active{border-color:var(--cp-accent-focus);color:var(--cp-text-primary);background:var(--cp-surface-raised)}.ftp3UtilityBar svg{width:18px;height:18px;stroke:currentColor;fill:none}
 
-.ftp3ActionDock{position:absolute!important;left:10px!important;right:10px!important;bottom:max(8px,var(--ftp-safe-bottom))!important;min-height:0!important;padding:9px 12px 48px!important;background:linear-gradient(180deg,rgba(29,25,20,.96),rgba(14,12,10,.98))!important;border:1px solid var(--cp-border-default)!important;border-radius:var(--cp-radius-plate)!important;box-shadow:inset 0 1px rgba(242,232,213,.07),inset 0 -3px #0008,0 10px 24px #000b!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;outline:0!important;z-index:80!important;display:block!important}
-.ftp3ActionDock:before{content:"";position:absolute;left:7px;right:7px;top:5px;height:1px;background:linear-gradient(90deg,transparent,var(--cp-accent-material),transparent);opacity:.55;pointer-events:none}.ftp3ActionDock:after{display:none!important;content:none!important}
+.ftp3ActionDock{position:absolute!important;left:10px!important;right:10px!important;bottom:max(8px,var(--ftp-safe-bottom))!important;min-height:0!important;padding:12px 14px 50px!important;background:linear-gradient(180deg,#282119 0,#17130f 42%,#0c0a08 100%)!important;border:1px solid #5a4630!important;border-radius:var(--cp-radius-plate)!important;box-shadow:inset 0 1px rgba(242,232,213,.1),inset 0 -5px #0009,0 14px 30px #000d,0 0 0 3px #090806!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;outline:0!important;z-index:80!important;display:block!important;clip-path:polygon(0 0,98.5% 0,100% 9%,100% 100%,1.5% 100%,0 91%)}
+.ftp3ActionDock:before{content:"";position:absolute;left:8px;right:8px;top:6px;height:3px;background:linear-gradient(90deg,var(--cp-accent-material),rgba(155,106,43,.12) 42%,transparent 80%);opacity:.75;pointer-events:none}.ftp3ActionDock:after{display:none!important;content:none!important}
 .ftp3ActionRow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.ftp3ActionRow button{min-height:42px;padding:5px 5px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:linear-gradient(180deg,#2b251d,#17130f);color:var(--cp-text-primary);font:inherit;font-weight:900;font-size:15px;line-height:1;box-shadow:inset 0 1px rgba(242,232,213,.08),inset 0 -3px #0008,0 3px 8px #0007}
+.ftp3ActionRow button{min-height:42px;padding:5px 5px;border-radius:1px;border:1px solid #574634;background:linear-gradient(180deg,#31291f 0,#1b1712 62%,#100d0b 100%);color:var(--cp-text-primary);font:inherit;font-weight:900;font-size:15px;line-height:1;box-shadow:inset 0 1px rgba(242,232,213,.1),inset 0 -4px #0009,0 4px 9px #0008;text-transform:uppercase;letter-spacing:.025em}
 .ftp3ActionRow button small{display:block;margin-top:3px;color:var(--cp-text-secondary);font-size:11px;font-weight:700;line-height:1}.ftp3ActionRow button.raise{background:linear-gradient(180deg,#3b2d1b,#21180e);border-color:var(--cp-accent-focus);color:var(--cp-accent-focus)}.ftp3ActionRow button.allin{background:linear-gradient(180deg,#472018,#25110e);border-color:var(--cp-state-danger);color:var(--cp-on-danger)}.ftp3ActionRow button:disabled{opacity:var(--cp-disabled-opacity);filter:grayscale(.65)}
-.ftp3RaiseRow{margin-top:6px;display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center}.ftp3RaiseRow>span{color:var(--cp-text-secondary);font-size:11px;white-space:nowrap}.ftp3RaiseRow>span b{color:var(--cp-text-primary)}.ftp3RaiseRow input{width:100%;accent-color:var(--cp-accent-focus)}.ftp3RaiseRow>div{display:flex;gap:5px}.ftp3RaiseRow button{height:30px;min-width:40px;padding:0 8px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-inset);color:var(--cp-text-secondary);font:inherit;font-size:11px}
+.ftp3RaiseRow{margin-top:7px;display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:5px 6px;background:#0e0c0a;border:1px solid var(--cp-border-subtle);box-shadow:inset 0 1px #000}.ftp3RaiseRow>span{color:var(--cp-text-secondary);font-size:11px;white-space:nowrap}.ftp3RaiseRow>span b{color:var(--cp-text-primary)}.ftp3RaiseRow input{width:100%;accent-color:var(--cp-accent-focus)}.ftp3RaiseRow>div{display:flex;gap:5px}.ftp3RaiseRow button{height:30px;min-width:40px;padding:0 8px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-inset);color:var(--cp-text-secondary);font:inherit;font-size:11px}
 .ftp3Watching{height:62px;display:grid;place-items:center;color:var(--cp-text-secondary);font-size:12px}
 .ftp3SittingOut{border:1px dashed var(--cp-border-default);border-radius:var(--cp-radius-plate);background:var(--cp-surface-inset);color:var(--cp-text-secondary);letter-spacing:.08em;font-size:11px;font-weight:900}
 .ftp3PreActions{display:grid;gap:6px}.ftp3PreActions>small{color:var(--cp-text-muted);font-size:11px;font-weight:900;letter-spacing:.14em}.ftp3PreActions>div{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.ftp3PreActions button{min-height:42px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-inset);color:var(--cp-text-secondary);font:inherit;font-size:11px;font-weight:900}.ftp3PreActions button.active{border-color:var(--cp-accent-focus);background:var(--cp-surface-raised);color:var(--cp-text-primary);box-shadow:inset 3px 0 0 var(--cp-accent-focus)}
@@ -330,7 +344,7 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   .ftp3SeatUnit>.ftp3Seat{width:19%!important}
   .ftp3SeatUnit[data-seat="0"]>.ftp3Seat{width:17.5%!important}
   .ftp3SeatPlaque{min-width:74px!important}
-  .ftp3Avatar{width:24px!important}
+  .ftp3Avatar{width:32px!important;left:-4px!important}
   .ftp3SeatCards{width:78%!important;height:min(4.8dvh,8.25vw)!important;min-height:38px!important}
   .ftp3Board{top:36%!important;width:57%!important}
   .ftp3Pot{top:47%!important}
@@ -352,5 +366,5 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   .gameplayV3Page{--ftp-frame-half:min(38vw,490px);left:50%!important;right:auto!important;width:min(76vw,980px)!important;transform:translateX(-50%);box-shadow:0 0 90px #000d}
   .ftp3Stage{height:75dvh!important;max-height:860px}
   .ftp3Hero{bottom:18.2dvh!important;width:min(28vw,240px)!important}
-  .ftp3Avatar{width:28px!important}
+  .ftp3Avatar{width:38px!important}
 }
