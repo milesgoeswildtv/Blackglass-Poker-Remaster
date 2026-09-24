@@ -279,7 +279,10 @@
 .pregameTablePage .ftp3HeroPlaque:before{border-left-color:#4c443c!important}
 .pregameTablePage .ftp3HeroPlaque small{color:#938a82!important;letter-spacing:.18em}
 .pregameTablePage .ftp3HeroPlaque b{color:#eee6dc!important}
-.pregameTablePage .ftp3HeroAvatar{filter:saturate(.78) brightness(.92) drop-shadow(0 4px 7px #000a)!important}
+.pregameTablePage .ftp3HeroAvatar{filter:brightness(.92) drop-shadow(0 4px 7px #000a)!important}
+.pregameTablePage .ftp3HeroAvatar .ftp3AvatarFrame{filter:grayscale(1) sepia(.08) brightness(.62) contrast(1.18) drop-shadow(0 3px 5px #000a)!important}
+.pregameTablePage .ftp3HeroAvatar .ftp3AvatarFallback,
+.pregameTablePage .ftp3HeroAvatar .ftp3AvatarPhoto{border-color:#5d5248!important;box-shadow:0 0 0 2px #0d0b09,inset 0 0 0 1px rgba(255,255,255,.04)!important}
 
 /* Dedicated pregame Back control: text-only, lightweight, and always tappable. */
 .pregameBack{
