@@ -26,6 +26,8 @@ export const assets={
     feltCashV2:`${root}/default/TABLE FELT V2.PNG?v=official-2`,
     lobbyDesktop:`${root}/default/desktop-background.png`,
     lobbyMobile:`${root}/default/mobile-background.png`,
+    gameplayBackgroundRemaster:`${root}/remaster/CRASHOUT_BACKGROUND_REMASTER.webp`,
+    gameplayTableRemaster:`${root}/remaster/CRASHOUT_TABLE_REMASTER.webp`,
     pot:`${root}/default/default-pot-chips.png`,
     starterCardBack:`${root}/crashout/CrashoutCardBack.PNG`,
     plaques:{idle:`${root}/default/default-player-plaque.png`,active:`${root}/default/default-player-plaque-active.png`,folded:`${root}/default/default-player-plaque-folded.png`,allIn:`${root}/default/default-player-plaque-all-in.png`},
