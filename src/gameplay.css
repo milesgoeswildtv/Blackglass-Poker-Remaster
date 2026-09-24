@@ -300,7 +300,6 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 
 
 @media(max-width:430px){
-  .gameplayV3Page:after{opacity:var(--cp-texture-world-minimum)}
   .ftp3SeatPlaque:before{display:none}
   .ftp3HeaderBrand{top:max(3px,env(safe-area-inset-top))!important;width:46%!important}
   .ftp3SeatUnit>.ftp3Seat{width:19%!important}
@@ -320,7 +319,6 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   .ftp3UtilityBar{left:8px!important;right:8px!important;gap:6px}.ftp3UtilityBar button{height:36px!important;padding:0 7px!important;font-size:11px!important}.ftp3UtilityBar svg{width:16px;height:16px}
 }
 @media(max-height:700px){
-  .gameplayV3Page:after{opacity:var(--cp-texture-world-minimum)}
   .ftp3Stage{height:66dvh!important}
   .ftp3Hero{bottom:22.5dvh!important}
 }
