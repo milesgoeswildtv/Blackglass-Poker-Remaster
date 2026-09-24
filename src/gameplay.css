@@ -1,4 +1,4 @@
-/* BG-WO-010 — AFTER HOURS live-table clean replacement. Protected gameplay geometry and semantics remain source-owned. */
+/* BLACKGLASS live visual integration — approved room + table assets. Protected gameplay geometry and semantics remain source-owned. */
 .gameplayV3Page,.pregameTablePage{
   --ftp-safe-top:max(0px,env(safe-area-inset-top),var(--telegram-safe-top,0px));
   --ftp-safe-right:max(0px,env(safe-area-inset-right),var(--telegram-safe-right,0px));
@@ -24,28 +24,14 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   isolation:isolate;
   color:var(--cp-text-primary);
   font-family:var(--cp-font-ui);
-  background:radial-gradient(ellipse at 50% 38%,rgba(242,196,95,.035),transparent 36%),linear-gradient(180deg,rgba(255,255,255,.012),transparent 18%,rgba(0,0,0,.18) 72%),var(--cp-bg-world)!important;
+  background-color:#120d08!important;
+  background-image:var(--gameplay-remaster-bg)!important;
   background-size:cover!important;
   background-position:center top!important;
   background-repeat:no-repeat!important;
   filter:none!important;
 }
-.gameplayV3Page:before{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:1;
-  pointer-events:none;
-  background:linear-gradient(90deg,rgba(0,0,0,.28),transparent 14%,transparent 86%,rgba(0,0,0,.28));
-}
-.gameplayV3Page:after{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:1;
-  pointer-events:none;
-  opacity:var(--cp-texture-world-full);background-image:repeating-linear-gradient(0deg,rgba(242,232,213,.14) 0 1px,transparent 1px 4px);
-}
+.gameplayV3Page:before,.gameplayV3Page:after{display:none!important;content:none!important}
 .gameplayV3Page>*{position:relative;z-index:2}
 .gameplayV3Page button:focus-visible,.gameplayV3Page input:focus-visible,.gameplayV3Page [role="button"]:focus-visible{outline:2px solid var(--cp-accent-focus);outline-offset:2px;box-shadow:none}
 
@@ -121,11 +107,13 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 
 .ftp3Stage{
   position:absolute!important;
-  top:max(10.4dvh,calc(var(--ftp-safe-top) + 54px))!important;
   left:50%!important;
-  height:min(70.5dvh,121.5vw)!important;
-  width:auto!important;
-  aspect-ratio:.69!important;
+  bottom:0!important;
+  top:auto!important;
+  width:min(100vw,760px)!important;
+  height:68dvh!important;
+  max-height:720px!important;
+  aspect-ratio:auto!important;
   transform:translateX(-50%)!important;
   margin:0!important;
   padding:0!important;
@@ -133,34 +121,26 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   z-index:20!important;
 }
 .ftp3TableShell{
-  position:absolute;
-  inset:0;
-  border-radius:46%/49%;
-  background:linear-gradient(135deg,#0d0c0a,#201c17 18%,#11100d 38%,#29231b 55%,#12110e 74%,#1c1813);
-  box-shadow:0 2.8dvh 4dvh rgba(0,0,0,.42),inset 0 0 0 1px var(--cp-border-strong),inset 0 0 0 3px rgba(0,0,0,.38);
+  position:absolute!important;
+  left:50%!important;
+  bottom:-1.5%!important;
+  width:min(118%,620px)!important;
+  height:auto!important;
+  max-height:96%!important;
+  object-fit:contain!important;
+  object-position:center bottom!important;
+  transform:translateX(-50%)!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  filter:drop-shadow(0 2.4dvh 2.6dvh rgba(0,0,0,.48));
+  pointer-events:none!important;
+  user-select:none!important;
+  z-index:2!important;
 }
-.ftp3Rail{
-  position:absolute;
-  inset:2.1%;
-  border-radius:inherit;
-  padding:3.3%;
-  background:linear-gradient(90deg,#17130f,#2b241a 18%,#1b1711 34%,#33291d 50%,#1a1610 68%,#292118 84%,#14110d);
-  box-shadow:inset 0 1px rgba(242,232,213,.08),inset 0 -2px rgba(0,0,0,.45),0 0 0 1px var(--cp-border-default);
-}
-.ftp3FeltSurface{
-  width:100%;
-  height:100%;
-  border-radius:45%/48%;
-  position:relative;
-  overflow:hidden;
-  background:
-    radial-gradient(ellipse at 50% 44%,rgba(155,106,43,.055),transparent 46%),linear-gradient(180deg,#17140f,#100e0b)!important;
-  box-shadow:inset 0 0 38px rgba(0,0,0,.72),inset 0 0 0 1px var(--cp-border-subtle);
-}
-.ftp3FeltSurface:after{content:"";position:absolute;inset:3.2%;border-radius:inherit;border:1px solid rgba(198,187,166,.09);box-shadow:inset 0 0 30px rgba(0,0,0,.38)}
-.ftp3CenterMark{position:absolute;left:50%;top:31%;transform:translateX(-50%);width:30%;text-align:center;opacity:.11;z-index:3;pointer-events:none}
-.ftp3CenterMark img{display:block;width:100%;filter:grayscale(1) sepia(.25) brightness(.82)}
-.ftp3CenterMark span{display:block;margin-top:-4%;color:var(--cp-text-muted);font-size:clamp(6px,1.45vw,10px);font-weight:900;letter-spacing:.24em;white-space:nowrap}
 
 .ftp3PregameDecor{position:absolute;inset:9% 9% 15%;z-index:4;pointer-events:none;overflow:hidden;border-radius:42%/47%;opacity:.72}
 .ftp3DecorCard,.ftp3DecorChip{position:absolute;display:block;object-fit:contain;filter:drop-shadow(0 6px 10px #0009)}
@@ -341,12 +321,12 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 }
 @media(max-height:700px){
   .gameplayV3Page:after{opacity:var(--cp-texture-world-minimum)}
-  .ftp3Stage{top:max(9.4dvh,calc(var(--ftp-safe-top) + 48px))!important;height:min(69dvh,121.5vw)!important}
+  .ftp3Stage{height:66dvh!important}
   .ftp3Hero{bottom:22.5dvh!important}
 }
 @media(min-width:761px){
   .gameplayV3Page{--ftp-frame-half:min(38vw,490px);left:50%!important;right:auto!important;width:min(76vw,980px)!important;transform:translateX(-50%);box-shadow:0 0 90px #000d}
-  .ftp3Stage{height:75dvh!important;max-height:860px}
+  .ftp3Stage{width:min(78vw,760px)!important;height:70dvh!important;max-height:720px!important;bottom:0!important}
   .ftp3Hero{bottom:18.2dvh!important;width:min(28vw,240px)!important}
   .ftp3Avatar{width:28px!important}
 }
