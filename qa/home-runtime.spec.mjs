@@ -235,9 +235,9 @@ test('Entry Gate action surfaces preserve existing interaction ownership', async
   await page.setViewportSize({ width: 390, height: 844 });
   await openEntryGate(page);
   await page.getByRole('button', { name: /ENTER KEY/i }).click();
-  await expect(page.getByLabel('HOST ACCESS KEY')).toBeVisible();
+  await expect(page.locator('.privateCodeEntry input')).toBeVisible();
   await page.getByRole('button', { name: /ENTER INVITE CODE/i }).click();
-  await expect(page.getByLabel('PRIVATE INVITE CODE')).toBeVisible();
+  await expect(page.locator('.privateCodeEntry input')).toBeVisible();
   await page.getByRole('button', { name: /ENGINE \+ FAIRNESS/i }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
 });
