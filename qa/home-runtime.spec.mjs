@@ -167,3 +167,77 @@ test('long player identity compresses without replacing Home architecture', asyn
   await expect(page.getByRole('button', { name: /Open player profile/i })).toContainText('AshesToAshesAndBackAgain');
   await shot(page, 'home-long-name');
 });
+
+
+async function mockEntryGateApis(page) {
+  const unexpected = [];
+  await page.route('https://telegram.org/js/telegram-web-app.js?*', route =>
+    route.fulfill({ status: 200, contentType: 'application/javascript', body: '' })
+  );
+  await page.route('**/api/**', async route => {
+    const request = route.request();
+    const apiPath = new URL(request.url()).pathname;
+    if (apiPath === '/api/auth/me') {
+      return route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Account required' })
+      });
+    }
+    unexpected.push(`${request.method()} ${apiPath}`);
+    return route.fulfill({
+      status: 501,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Unexpected Entry Gate QA API request' })
+    });
+  });
+  return unexpected;
+}
+
+async function openEntryGate(page) {
+  const unexpected = await mockEntryGateApis(page);
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'CRASHOUT POKER' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /ENTER KEY/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /ENTER INVITE CODE/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /ENGINE \+ FAIRNESS/i })).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  expect(unexpected).toEqual([]);
+}
+
+for (const [name, width, height] of [
+  ['entry-gate-390x844', 390, 844],
+  ['entry-gate-430x932', 430, 932],
+  ['entry-gate-landscape-844x390', 844, 390],
+  ['entry-gate-desktop-1440x900', 1440, 900]
+]) {
+  test(`renders approved Entry Gate at ${width}x${height}`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await openEntryGate(page);
+    await shot(page, name);
+  });
+}
+
+for (const [name, width, height] of [
+  ['home-approved-390x844', 390, 844],
+  ['home-approved-430x932', 430, 932],
+  ['home-approved-landscape-844x390', 844, 390],
+  ['home-approved-desktop-1440x900', 1440, 900]
+]) {
+  test(`renders approved Home composition at ${width}x${height}`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await openHome(page);
+    await shot(page, name);
+  });
+}
+
+test('Entry Gate action surfaces preserve existing interaction ownership', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openEntryGate(page);
+  await page.getByRole('button', { name: /ENTER KEY/i }).click();
+  await expect(page.getByLabel('HOST ACCESS KEY')).toBeVisible();
+  await page.getByRole('button', { name: /ENTER INVITE CODE/i }).click();
+  await expect(page.getByLabel('PRIVATE INVITE CODE')).toBeVisible();
+  await page.getByRole('button', { name: /ENGINE \+ FAIRNESS/i }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+});
