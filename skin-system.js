@@ -36,7 +36,7 @@ export function skinChoices(channel,inventory=[],ownerPreview=false){
 }
 export function skinChannelData(loadout,channel){
  const normalized=normalizeSkinLoadout(loadout),selected=SKIN_REGISTRY[normalized[channel]],fallback=SKIN_REGISTRY.default;
- return selected?.channels?.[channel]||fallback?.channels?.[channel]||{};
+ return{...(fallback?.channels?.[channel]||{}),...(selected?.channels?.[channel]||{})};
 }
 export function backgroundVariant(loadout,channel,variant='default'){
  const data=skinChannelData(loadout,channel);
