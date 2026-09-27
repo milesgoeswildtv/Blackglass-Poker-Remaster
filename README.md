@@ -2,7 +2,7 @@
 
 Private play-chip No-Limit Texas Hold’em for the Full Tilt community, built as a React/Vite frontend on a Cloudflare Worker with Durable Objects.
 
-## Current build — v0.54.0
+## Current build — v0.60.5
 
 ### Accounts + home
 - Discord OAuth is required before poker APIs can be used.
