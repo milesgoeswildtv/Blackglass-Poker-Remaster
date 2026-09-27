@@ -4,23 +4,32 @@ import'@puckeditor/core/puck.css';
 import'./puck-design-lab.css';
 
 const STORAGE_KEY='crashout-puck-spike-v1';
+const BASE=import.meta.env.BASE_URL||'/';
+const publicAsset=path=>`${BASE}${String(path).replace(/^\/+/, '')}`;
 
 const assetOptions=[
- {label:'Crashout Poker Logo',value:'/assets/remaster/entry-gate/CRASHOUT_LOGO.PNG'},
- {label:'Player Identity Panel',value:'/assets/remaster/homescreen/CRASHOUT_PLAYER_IDENTITY.PNG'},
- {label:'Create Game Panel',value:'/assets/remaster/homescreen/CRASHOUT_CREATE_GAME_PANEL.PNG'},
- {label:'Join Game Panel',value:'/assets/remaster/homescreen/CRASHOUT_JOIN_GAME_PANEL.PNG'},
- {label:'Booster Shop Panel',value:'/assets/remaster/homescreen/CRASHOUT_BOOSTER_PANEL.PNG'},
- {label:'Entry Primary Action',value:'/assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG'},
- {label:'Entry Utility Badge',value:'/assets/remaster/entry-gate/UTILITY_INFO_BADGE.PNG'}
+ {label:'Crashout Poker Logo',value:publicAsset('assets/remaster/entry-gate/CRASHOUT_LOGO.PNG')},
+ {label:'Player Identity Panel',value:publicAsset('assets/remaster/homescreen/CRASHOUT_PLAYER_IDENTITY.PNG')},
+ {label:'Create Game Panel',value:publicAsset('assets/remaster/homescreen/CRASHOUT_CREATE_GAME_PANEL.PNG')},
+ {label:'Join Game Panel',value:publicAsset('assets/remaster/homescreen/CRASHOUT_JOIN_GAME_PANEL.PNG')},
+ {label:'Booster Shop Panel',value:publicAsset('assets/remaster/homescreen/CRASHOUT_BOOSTER_PANEL.PNG')},
+ {label:'Entry Primary Action',value:publicAsset('assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG')},
+ {label:'Entry Utility Badge',value:publicAsset('assets/remaster/entry-gate/UTILITY_INFO_BADGE.PNG')}
 ];
 
 const backgroundOptions=[
- {label:'Home — Mobile',value:'/assets/remaster/homescreen/CRASHOUT_MOBILE_BG.PNG'},
- {label:'Entry Gate — Mobile',value:'/assets/remaster/entry-gate/CRASHOUT_MOBILE_BG.PNG'},
- {label:'Home — Desktop',value:'/assets/remaster/homescreen/CRASHOUT_DESKTOP_BG.PNG'},
- {label:'Entry Gate — Desktop',value:'/assets/remaster/entry-gate/CRASHOUT_DESKTOP_BG.PNG'}
+ {label:'Home — Mobile',value:publicAsset('assets/remaster/homescreen/CRASHOUT_MOBILE_BG.PNG')},
+ {label:'Entry Gate — Mobile',value:publicAsset('assets/remaster/entry-gate/CRASHOUT_MOBILE_BG.PNG')},
+ {label:'Home — Desktop',value:publicAsset('assets/remaster/homescreen/CRASHOUT_DESKTOP_BG.PNG')},
+ {label:'Entry Gate — Desktop',value:publicAsset('assets/remaster/entry-gate/CRASHOUT_DESKTOP_BG.PNG')}
 ];
+
+const primaryAction=publicAsset('assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG');
+const utilityBadge=publicAsset('assets/remaster/entry-gate/UTILITY_INFO_BADGE.PNG');
+const homeMobile=publicAsset('assets/remaster/homescreen/CRASHOUT_MOBILE_BG.PNG');
+const createPanel=publicAsset('assets/remaster/homescreen/CRASHOUT_CREATE_GAME_PANEL.PNG');
+const logoAsset=publicAsset('assets/remaster/entry-gate/CRASHOUT_LOGO.PNG');
+const profileAsset=publicAsset('assets/remaster/homescreen/CRASHOUT_PLAYER_IDENTITY.PNG');
 
 const spanOptions=Array.from({length:12},(_,i)=>({label:String(i+1),value:i+1}));
 const rowOptions=Array.from({length:12},(_,i)=>({label:String(i+1),value:i+1}));
@@ -36,7 +45,7 @@ const config={
    minHeight:{type:'number',min:640,max:1200}
   },
   defaultProps:{
-   background:'/assets/remaster/homescreen/CRASHOUT_MOBILE_BG.PNG',
+   background:homeMobile,
    minHeight:844
   },
   render:({children,background,minHeight})=><div className="puckSpikeCanvas" style={{backgroundImage:`linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.18)),url("${background}")`,minHeight:Number(minHeight)||844}}>{children}</div>
@@ -51,7 +60,7 @@ const config={
     fit:{type:'select',options:[{label:'Contain',value:'contain'},{label:'Cover',value:'cover'},{label:'Fill',value:'fill'}]}
    },
    defaultProps:{
-    asset:'/assets/remaster/homescreen/CRASHOUT_CREATE_GAME_PANEL.PNG',
+    asset:createPanel,
     columns:12,
     rows:4,
     fit:'contain'
@@ -80,15 +89,15 @@ const config={
    label:'Safe Control Shell',
    fields:{
     asset:{type:'select',options:[
-     {label:'Primary Action',value:'/assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG'},
-     {label:'Utility Badge',value:'/assets/remaster/entry-gate/UTILITY_INFO_BADGE.PNG'}
+     {label:'Primary Action',value:primaryAction},
+     {label:'Utility Badge',value:utilityBadge}
     ]},
     label:{type:'text',contentEditable:true},
     columns:{type:'select',options:spanOptions},
     rows:{type:'select',options:rowOptions}
    },
    defaultProps:{
-    asset:'/assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG',
+    asset:primaryAction,
     label:'OPEN',
     columns:6,
     rows:3
@@ -100,13 +109,13 @@ const config={
 
 const initialData={
  content:[
-  {type:'Asset',props:{id:'spike-logo',asset:'/assets/remaster/entry-gate/CRASHOUT_LOGO.PNG',columns:9,rows:4,fit:'contain'}},
-  {type:'Asset',props:{id:'spike-profile',asset:'/assets/remaster/homescreen/CRASHOUT_PLAYER_IDENTITY.PNG',columns:12,rows:4,fit:'fill'}},
+  {type:'Asset',props:{id:'spike-logo',asset:logoAsset,columns:9,rows:4,fit:'contain'}},
+  {type:'Asset',props:{id:'spike-profile',asset:profileAsset,columns:12,rows:4,fit:'fill'}},
   {type:'Text',props:{id:'spike-text',text:'CREATE GAME',columns:7,rows:2,fontSize:24,align:'left'}},
-  {type:'Asset',props:{id:'spike-create',asset:'/assets/remaster/homescreen/CRASHOUT_CREATE_GAME_PANEL.PNG',columns:12,rows:5,fit:'fill'}},
-  {type:'ControlShell',props:{id:'spike-control',asset:'/assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG',label:'OPEN',columns:6,rows:3}}
+  {type:'Asset',props:{id:'spike-create',asset:createPanel,columns:12,rows:5,fit:'fill'}},
+  {type:'ControlShell',props:{id:'spike-control',asset:primaryAction,label:'OPEN',columns:6,rows:3}}
  ],
- root:{props:{background:'/assets/remaster/homescreen/CRASHOUT_MOBILE_BG.PNG',minHeight:844}},
+ root:{props:{background:homeMobile,minHeight:844}},
  zones:{}
 };
 
