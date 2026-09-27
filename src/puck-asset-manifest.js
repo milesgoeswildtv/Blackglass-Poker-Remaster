@@ -2,9 +2,28 @@
 // Presentation-only. Paths are relative to public/ and are converted to deployment-safe URLs by PuckDesignLab.
 
 import{puckUploadedAssets}from'./puck-uploaded-assets.generated.js';
+import{SKIN_REGISTRY}from'../skin-system.js';
+
+const channelLabel={lobbyBg:'Lobby BG',gameRoomBg:'Game Room BG',gameplayTheme:'In-Game Theme',tableSkin:'Table Skin',menuTheme:'Menu / Panel Theme'};
+const skinAssets=[];
+const skinBackgrounds=[];
+const seen=new Set();
+for(const skin of Object.values(SKIN_REGISTRY)){
+ for(const[channel,data]of Object.entries(skin.channels||{})){
+  for(const[role,path]of Object.entries(data||{})){
+   if(!path)continue;
+   const key=`${skin.id}:${channel}:${role}:${path}`;
+   if(seen.has(key))continue;seen.add(key);
+   const item={id:`skin-${skin.id}-${channel}-${role}`,label:`Skin — ${skin.label} — ${channelLabel[channel]||channel} — ${role}`,path,kind:'asset'};
+   skinAssets.push(item);
+   if(channel==='lobbyBg'||channel==='gameRoomBg')skinBackgrounds.push(item);
+  }
+ }
+}
 
 export const puckApprovedAssets = [
   ...puckUploadedAssets,
+  ...skinAssets,
 
   // Brand / identity
   { id:'logo', label:'Brand — Crashout Poker Logo', path:'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG', kind:'asset' },
@@ -21,19 +40,12 @@ export const puckApprovedAssets = [
   { id:'entry-utility', label:'Entry — Utility Info Badge', path:'assets/remaster/entry-gate/UTILITY_INFO_BADGE.PNG', kind:'asset' },
   { id:'entry-info-2', label:'Entry — Info Bar 2', path:'assets/remaster/entry-gate/CRASHOUT_INFO_BAR_2.PNG', kind:'asset' },
   { id:'entry-input', label:'Entry — Input Field', path:'assets/remaster/entry-gate/CRASHOUT_INPUT_FIELD.PNG', kind:'asset' },
-  { id:'entry-master-panel', label:'Entry — Master Full-Screen Panel', path:'assets/remaster/entry-gate/CRASHOUT_MASTER_FULL_SCREEN_PANEL.PNG', kind:'asset' },
-
-  // Gameplay proof assets
-  { id:'gameplay-background', label:'Gameplay — Room Background', path:'assets/remaster/CRASHOUT_BACKGROUND_REMASTER.webp', kind:'asset' },
-  { id:'gameplay-table', label:'Gameplay — Table', path:'assets/remaster/CRASHOUT_TABLE_REMASTER.webp', kind:'asset' }
+  { id:'entry-master-panel', label:'Entry — Master Full-Screen Panel', path:'assets/remaster/entry-gate/CRASHOUT_MASTER_FULL_SCREEN_PANEL.PNG', kind:'asset' }
 ];
 
 export const puckApprovedBackgrounds = [
-  { id:'home-mobile', label:'Home — Mobile Background', path:'assets/remaster/homescreen/CRASHOUT_MOBILE_BG.PNG' },
-  { id:'home-landscape', label:'Home — Landscape Background', path:'assets/remaster/homescreen/CRASHOUT_LANDSCAPE_BG.PNG' },
-  { id:'home-desktop', label:'Home — Desktop Background', path:'assets/remaster/homescreen/CRASHOUT_DESKTOP_BG.PNG' },
+  ...skinBackgrounds.map(item=>({...item,label:item.label.replace(/^Skin — /,'')})),
   { id:'entry-mobile', label:'Entry — Mobile Background', path:'assets/remaster/entry-gate/CRASHOUT_MOBILE_BG.PNG' },
   { id:'entry-landscape', label:'Entry — Landscape Background', path:'assets/remaster/entry-gate/CRASHOUT_LANDSCAPE_BG.PNG' },
-  { id:'entry-desktop', label:'Entry — Desktop Background', path:'assets/remaster/entry-gate/CRASHOUT_DESKTOP_BG.PNG' },
-  { id:'gameplay-room', label:'Gameplay — Room Background', path:'assets/remaster/CRASHOUT_BACKGROUND_REMASTER.webp' }
+  { id:'entry-desktop', label:'Entry — Desktop Background', path:'assets/remaster/entry-gate/CRASHOUT_DESKTOP_BG.PNG' }
 ];
