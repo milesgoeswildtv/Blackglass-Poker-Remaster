@@ -1,5 +1,6 @@
 import React,{useMemo,useState}from'react';
 import{Puck}from'@puckeditor/core';
+import{puckApprovedAssets,puckApprovedBackgrounds}from'./puck-asset-manifest.js';
 import'@puckeditor/core/puck.css';
 import'./puck-design-lab.css';
 
@@ -7,22 +8,8 @@ const STORAGE_KEY='crashout-puck-spike-v1';
 const BASE=import.meta.env.BASE_URL||'/';
 const publicAsset=path=>`${BASE}${String(path).replace(/^\/+/, '')}`;
 
-const assetOptions=[
- {label:'Crashout Poker Logo',value:publicAsset('assets/remaster/entry-gate/CRASHOUT_LOGO.PNG')},
- {label:'Player Identity Panel',value:publicAsset('assets/remaster/homescreen/CRASHOUT_PLAYER_IDENTITY.PNG')},
- {label:'Create Game Panel',value:publicAsset('assets/remaster/homescreen/CRASHOUT_CREATE_GAME_PANEL.PNG')},
- {label:'Join Game Panel',value:publicAsset('assets/remaster/homescreen/CRASHOUT_JOIN_GAME_PANEL.PNG')},
- {label:'Booster Shop Panel',value:publicAsset('assets/remaster/homescreen/CRASHOUT_BOOSTER_PANEL.PNG')},
- {label:'Entry Primary Action',value:publicAsset('assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG')},
- {label:'Entry Utility Badge',value:publicAsset('assets/remaster/entry-gate/UTILITY_INFO_BADGE.PNG')}
-];
-
-const backgroundOptions=[
- {label:'Home — Mobile',value:publicAsset('assets/remaster/homescreen/CRASHOUT_MOBILE_BG.PNG')},
- {label:'Entry Gate — Mobile',value:publicAsset('assets/remaster/entry-gate/CRASHOUT_MOBILE_BG.PNG')},
- {label:'Home — Desktop',value:publicAsset('assets/remaster/homescreen/CRASHOUT_DESKTOP_BG.PNG')},
- {label:'Entry Gate — Desktop',value:publicAsset('assets/remaster/entry-gate/CRASHOUT_DESKTOP_BG.PNG')}
-];
+const assetOptions=puckApprovedAssets.map(item=>({label:item.label,value:publicAsset(item.path)}));
+const backgroundOptions=puckApprovedBackgrounds.map(item=>({label:item.label,value:publicAsset(item.path)}));
 
 const primaryAction=publicAsset('assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG');
 const utilityBadge=publicAsset('assets/remaster/entry-gate/UTILITY_INFO_BADGE.PNG');
@@ -41,8 +28,8 @@ function gridStyle(columns=12,rows=3){
 const config={
  root:{
   fields:{
-   background:{type:'select',options:backgroundOptions},
-   minHeight:{type:'number',min:640,max:1200}
+   background:{type:'select',label:'Allowed Background',options:backgroundOptions},
+   minHeight:{type:'number',label:'Canvas Height',min:640,max:1200}
   },
   defaultProps:{
    background:homeMobile,
@@ -54,10 +41,10 @@ const config={
   Asset:{
    label:'Approved Asset',
    fields:{
-    asset:{type:'select',options:assetOptions},
-    columns:{type:'select',options:spanOptions},
-    rows:{type:'select',options:rowOptions},
-    fit:{type:'select',options:[{label:'Contain',value:'contain'},{label:'Cover',value:'cover'},{label:'Fill',value:'fill'}]}
+    asset:{type:'select',label:'Allowed Asset',options:assetOptions},
+    columns:{type:'select',label:'Width (Grid Columns)',options:spanOptions},
+    rows:{type:'select',label:'Height (Grid Rows)',options:rowOptions},
+    fit:{type:'select',label:'Image Fit',options:[{label:'Contain',value:'contain'},{label:'Cover',value:'cover'},{label:'Fill',value:'fill'}]}
    },
    defaultProps:{
     asset:createPanel,
@@ -70,11 +57,11 @@ const config={
   Text:{
    label:'Safe Text',
    fields:{
-    text:{type:'text',contentEditable:true},
-    columns:{type:'select',options:spanOptions},
-    rows:{type:'select',options:rowOptions},
-    fontSize:{type:'number',min:10,max:48},
-    align:{type:'select',options:[{label:'Left',value:'left'},{label:'Center',value:'center'},{label:'Right',value:'right'}]}
+    text:{type:'text',label:'Text',contentEditable:true},
+    columns:{type:'select',label:'Width (Grid Columns)',options:spanOptions},
+    rows:{type:'select',label:'Height (Grid Rows)',options:rowOptions},
+    fontSize:{type:'number',label:'Font Size',min:10,max:48},
+    align:{type:'select',label:'Alignment',options:[{label:'Left',value:'left'},{label:'Center',value:'center'},{label:'Right',value:'right'}]}
    },
    defaultProps:{
     text:'CREATE GAME',
@@ -88,13 +75,13 @@ const config={
   ControlShell:{
    label:'Safe Control Shell',
    fields:{
-    asset:{type:'select',options:[
+    asset:{type:'select',label:'Allowed Control Asset',options:[
      {label:'Primary Action',value:primaryAction},
      {label:'Utility Badge',value:utilityBadge}
     ]},
-    label:{type:'text',contentEditable:true},
-    columns:{type:'select',options:spanOptions},
-    rows:{type:'select',options:rowOptions}
+    label:{type:'text',label:'Control Label',contentEditable:true},
+    columns:{type:'select',label:'Width (Grid Columns)',options:spanOptions},
+    rows:{type:'select',label:'Height (Grid Rows)',options:rowOptions}
    },
    defaultProps:{
     asset:primaryAction,
