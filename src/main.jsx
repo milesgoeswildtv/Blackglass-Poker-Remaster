@@ -1,6 +1,7 @@
 import React from'react';
 import{createRoot}from'react-dom/client';
 import App from'./App.jsx';
+import PuckDesignLab from'./PuckDesignLab.jsx';
 import'./production-system.css';
 import{installSessionRouting}from'./session.js';
 import{bootstrapPlatform}from'./platform.js';
@@ -11,12 +12,18 @@ import'./telegram.css';
 installPokerAudioUnlock();
 
 const root=createRoot(document.getElementById('root'));
+const isPuckDesignLab=()=>/^#\/design-lab\/puck(?:$|\?)/i.test(location.hash);
 
 function render(){
- root.render(<App/>);
+ root.render(isPuckDesignLab()?<PuckDesignLab/>:<App/>);
 }
 
 async function boot(){
+ if(isPuckDesignLab()){
+  render();
+  addEventListener('hashchange',()=>location.reload());
+  return;
+ }
  root.render(<div className="telegramBoot">Opening Crashout Poker…</div>);
  await bootstrapPlatform();
  installSessionRouting();
