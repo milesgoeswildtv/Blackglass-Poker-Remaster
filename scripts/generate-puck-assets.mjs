@@ -1,3 +1,8 @@
+if(process.env.WORKERS_CI==='1'&&process.env.WORKERS_CI_BRANCH&&process.env.WORKERS_CI_BRANCH!=='main'){
+ console.error(`Refusing Cloudflare Worker build from non-production branch: ${process.env.WORKERS_CI_BRANCH}`);
+ process.exit(1);
+}
+
 import fs from'node:fs';
 import path from'node:path';
 
