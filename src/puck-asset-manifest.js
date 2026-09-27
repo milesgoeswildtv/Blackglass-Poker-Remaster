@@ -1,7 +1,11 @@
 // CRASHOUT POKER — Puck visual-editor approved asset whitelist.
 // Presentation-only. Paths are relative to public/ and are converted to deployment-safe URLs by PuckDesignLab.
 
+import{puckUploadedAssets}from'./puck-uploaded-assets.generated.js';
+
 export const puckApprovedAssets = [
+  ...puckUploadedAssets,
+
   // Brand / identity
   { id:'logo', label:'Brand — Crashout Poker Logo', path:'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG', kind:'asset' },
   { id:'player-identity', label:'Home — Player Identity Panel', path:'assets/remaster/homescreen/CRASHOUT_PLAYER_IDENTITY.PNG', kind:'asset' },
