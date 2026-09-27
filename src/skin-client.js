@@ -1,4 +1,4 @@
-import{backgroundVariant,skinChannelData,themeAsset}from'../skin-system.js';
+import{SKIN_REGISTRY,backgroundVariant,normalizeSkinLoadout,skinChannelData,themeAsset}from'../skin-system.js';
 
 const BASE=import.meta.env.BASE_URL||'/';
 export function skinAssetUrl(value){const path=String(value||'');if(!path)return'';if(/^(?:https?:|data:|blob:)/i.test(path))return path;return`${BASE}${path.replace(/^\/+/, '')}`}
@@ -24,7 +24,7 @@ export function lobbySkinStyle(loadout={}){
 }
 
 export function gameSkinStyle(loadout={}){
- const gameplay=skinChannelData(loadout,'gameplayTheme');
+ const selected=normalizeSkinLoadout(loadout).gameplayTheme,gameplay=selected==='default'?{}:(SKIN_REGISTRY[selected]?.channels?.gameplayTheme||{});
  return{
   '--skin-game-bg-mobile':bg(backgroundVariant(loadout,'gameRoomBg','mobile')),
   '--skin-game-bg-desktop':bg(backgroundVariant(loadout,'gameRoomBg','desktop')),
@@ -38,7 +38,7 @@ export function gameSkinStyle(loadout={}){
 }
 export function tableSkinAsset(loadout={}){return skinAssetUrl(backgroundVariant(loadout,'tableSkin','default'))}
 export function gameplayThemeAssets(loadout={}){
- const data=skinChannelData(loadout,'gameplayTheme'),out={};
+ const selected=normalizeSkinLoadout(loadout).gameplayTheme,data=selected==='default'?{}:(SKIN_REGISTRY[selected]?.channels?.gameplayTheme||{}),out={};
  for(const[key,value]of Object.entries(data||{}))out[key]=skinAssetUrl(value);
  return out;
 }
