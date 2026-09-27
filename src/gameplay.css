@@ -1,5 +1,6 @@
 /* BLACKGLASS live visual integration — approved room + table assets. Protected gameplay geometry and semantics remain source-owned. */
 .gameplayV3Page,.pregameTablePage{
+  --gameplay-remaster-bg:var(--skin-game-bg-desktop,url('/assets/remaster/CRASHOUT_BACKGROUND_REMASTER.webp'));
   --ftp-safe-top:max(0px,env(safe-area-inset-top),var(--telegram-safe-top,0px));
   --ftp-safe-right:max(0px,env(safe-area-inset-right),var(--telegram-safe-right,0px));
   --ftp-safe-bottom:max(0px,env(safe-area-inset-bottom),var(--telegram-safe-bottom,0px));
@@ -275,12 +276,14 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
 
 .ftp3UtilityBar{position:absolute;left:12px!important;right:12px!important;bottom:4px!important;z-index:86;display:flex;gap:8px;pointer-events:none}
 .ftp3UtilityBar button{pointer-events:auto;flex:1 1 0;min-width:0!important;height:38px!important;padding:0 10px!important;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-plate);color:var(--cp-text-secondary);display:flex;align-items:center;justify-content:center;gap:7px;font:inherit;font-size:11px!important;font-weight:900;letter-spacing:.05em;box-shadow:0 6px 16px #0007}
+.ftp3UtilityBar button{background-image:var(--skin-gameplay-utility);background-size:100% 100%;background-repeat:no-repeat}
 .ftp3UtilityBar button.active{border-color:var(--cp-accent-focus);color:var(--cp-text-primary);background:var(--cp-surface-raised)}.ftp3UtilityBar svg{width:18px;height:18px;stroke:currentColor;fill:none}
 
 .ftp3ActionDock{position:absolute!important;left:10px!important;right:10px!important;bottom:max(8px,var(--ftp-safe-bottom))!important;min-height:0!important;padding:6px 12px 48px!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;outline:0!important;z-index:80!important;display:block!important}
 .ftp3ActionDock:before,.ftp3ActionDock:after{display:none!important;content:none!important}
 .ftp3ActionRow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .ftp3ActionRow button{min-height:42px;padding:5px 5px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-plate);color:var(--cp-text-primary);font:inherit;font-weight:900;font-size:15px;line-height:1;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.ftp3ActionRow button.fold{background-image:var(--skin-gameplay-fold);background-size:100% 100%;background-repeat:no-repeat}.ftp3ActionRow button:nth-child(2){background-image:var(--skin-gameplay-call);background-size:100% 100%;background-repeat:no-repeat}.ftp3ActionRow button.raise{background-image:var(--skin-gameplay-raise);background-size:100% 100%;background-repeat:no-repeat}.ftp3ActionRow button.allin{background-image:var(--skin-gameplay-all-in);background-size:100% 100%;background-repeat:no-repeat}
 .ftp3ActionRow button small{display:block;margin-top:3px;color:var(--cp-text-secondary);font-size:11px;font-weight:700;line-height:1}.ftp3ActionRow button.raise{background:var(--cp-surface-raised);border-color:var(--cp-accent-focus)}.ftp3ActionRow button.allin{background:var(--cp-surface-raised);border-color:var(--cp-border-strong);color:var(--cp-text-primary)}.ftp3ActionRow button:disabled{opacity:var(--cp-disabled-opacity);filter:grayscale(.65)}
 .ftp3RaiseRow{margin-top:6px;display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center}.ftp3RaiseRow>span{color:var(--cp-text-secondary);font-size:11px;white-space:nowrap}.ftp3RaiseRow>span b{color:var(--cp-text-primary)}.ftp3RaiseRow input{width:100%;accent-color:var(--cp-accent-focus)}.ftp3RaiseRow>div{display:flex;gap:5px}.ftp3RaiseRow button{height:30px;min-width:40px;padding:0 8px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-inset);color:var(--cp-text-secondary);font:inherit;font-size:11px}
 .ftp3Watching{height:62px;display:grid;place-items:center;color:var(--cp-text-secondary);font-size:12px}
@@ -328,3 +331,6 @@ body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)
   .ftp3Hero{bottom:18.2dvh!important;width:min(28vw,240px)!important}
   .ftp3Avatar{width:28px!important}
 }
+
+@media(max-width:760px){.gameplayV3Page,.pregameTablePage{--gameplay-remaster-bg:var(--skin-game-bg-mobile,var(--skin-game-bg-desktop,url('/assets/remaster/CRASHOUT_BACKGROUND_REMASTER.webp')))}}
+@media(orientation:landscape) and (max-height:620px){.gameplayV3Page,.pregameTablePage{--gameplay-remaster-bg:var(--skin-game-bg-landscape,var(--skin-game-bg-desktop,url('/assets/remaster/CRASHOUT_BACKGROUND_REMASTER.webp')))}}
