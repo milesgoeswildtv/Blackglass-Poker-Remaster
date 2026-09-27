@@ -285,6 +285,27 @@
 .pregameTablePage .ftp3HeroAvatar .ftp3AvatarPhoto{border-color:#5d5248!important;box-shadow:0 0 0 2px #0d0b09,inset 0 0 0 1px rgba(255,255,255,.04)!important}
 
 /* Dedicated pregame Back control: text-only, lightweight, and always tappable. */
+.pregameSkins{
+  position:fixed;
+  right:10px;
+  top:max(8px,env(safe-area-inset-top));
+  z-index:220;
+  min-width:62px;
+  min-height:30px;
+  padding:4px 10px;
+  border:1px solid rgba(213,180,113,.46);
+  border-radius:2px;
+  background:rgba(20,16,13,.86);
+  color:#eadfce;
+  font:inherit;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  box-shadow:0 5px 14px #0008;
+}
+.pregameSkins:active{transform:translateY(1px)}
+
 .pregameBack{
   position:fixed;
   left:10px;
