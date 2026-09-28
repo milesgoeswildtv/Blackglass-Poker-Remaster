@@ -44,7 +44,7 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   expect(await page.locator('.adWorkspace').evaluate(el=>({top:el.scrollTop,left:el.scrollLeft}))).toEqual({top:0,left:0});
   liveBox=await page.locator('iframe').boundingBox();
   expect(Math.abs(liveBox.width-realVp.width)).toBeLessThan(2);
-  await page.getByText('EDIT',{exact:true}).click();
+  await page.getByRole('button',{name:'EDIT',exact:true}).click();
   await expect(page.locator('.adTop')).toBeVisible();
   await expect(page.locator('.adDock')).toBeVisible();
 
