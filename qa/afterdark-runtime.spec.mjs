@@ -1,0 +1,60 @@
+import{test,expect}from'@playwright/test';
+import{mkdirSync}from'node:fs';
+
+const evidence='artifacts/browser-qa-afterdark';
+mkdirSync(evidence,{recursive:true});
+
+const surfaces=[
+ ['home','.homeShell'],
+ ['table-invite','.productionInvite'],
+ ['pregame','.pregameTablePage'],
+ ['gameplay','.gameplayV3Page'],
+ ['mtt-lobby','.afterdarkMttLobbyPage'],
+ ['mtt-break','.afterdarkMttBreakPage'],
+ ['result','.afterdarkResultPage']
+];
+
+for(const[surface,selector]of surfaces){
+ test('Afterdark surface '+surface+' renders without live API traffic',async({page})=>{
+  const api=[];
+  page.on('request',request=>{try{if(new URL(request.url()).pathname.startsWith('/api/'))api.push(request.url())}catch{}});
+  await page.goto('/?afterdarkPreview=1&afterdarkSurface='+surface,{waitUntil:'networkidle'});
+  await expect(page.locator(selector)).toBeVisible();
+  expect(api).toEqual([]);
+  await page.screenshot({path:evidence+'/'+surface+'.png',fullPage:surface==='home'||surface==='mtt-lobby'||surface==='result'});
+ });
+}
+
+test('Home stays scroll-capable while seated Pre-game and Gameplay are viewport locked',async({page})=>{
+ await page.goto('/?afterdarkPreview=1&afterdarkSurface=home');
+ const home=await page.evaluate(()=>({html:getComputedStyle(document.documentElement).overflowY,body:getComputedStyle(document.body).overflowY}));
+ expect(home.html).not.toBe('hidden');
+ expect(home.body).not.toBe('hidden');
+
+ for(const surface of['pregame','gameplay']){
+  await page.goto('/?afterdarkPreview=1&afterdarkSurface='+surface);
+  const locked=await page.evaluate(()=>({
+   html:getComputedStyle(document.documentElement).overflowY,
+   body:getComputedStyle(document.body).overflowY,
+   root:getComputedStyle(document.getElementById('root')).overflowY,
+   height:document.documentElement.scrollHeight,
+   viewport:innerHeight
+  }));
+  expect(locked.html).toBe('hidden');
+  expect(locked.body).toBe('hidden');
+  expect(locked.root).toBe('hidden');
+  expect(locked.height).toBeLessThanOrEqual(locked.viewport+2);
+ }
+});
+
+test('active surface manifest updates only that surface',async({page})=>{
+ await page.goto('/?afterdarkPreview=1&afterdarkSurface=gameplay');
+ await page.evaluate(()=>window.postMessage({
+  type:'afterdark:manifest',
+  surface:'gameplay',
+  breakpoint:'mobile',
+  manifest:{slots:{'gameplay.table':{layout:{desktop:{x:0,y:0},mobile:{x:12,y:8}},style:{desktop:{opacity:1},mobile:{opacity:.75}},asset:null}}}
+ },'*'));
+ await expect.poll(()=>page.locator('.ftp3Stage').evaluate(el=>el.style.translate)).toBe('12px 8px');
+ await expect.poll(()=>page.locator('.ftp3Stage').evaluate(el=>el.style.opacity)).toBe('0.75');
+});
