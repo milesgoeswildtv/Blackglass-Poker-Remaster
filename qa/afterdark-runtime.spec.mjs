@@ -52,8 +52,11 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
 
   const assetBefore=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
   const selectionBefore=await page.locator('.adSelection').boundingBox();
-  await frame.locator('body').evaluate(()=>window.scrollBy(0,80));
-  await page.waitForTimeout(120);
+  const iframeBox=await page.locator('iframe').boundingBox();
+  expect(iframeBox).toBeTruthy();
+  await page.mouse.move(iframeBox.x+iframeBox.width/2,iframeBox.y+iframeBox.height/2);
+  await page.mouse.wheel(0,240);
+  await page.waitForTimeout(180);
   const assetAfter=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
   const selectionAfter=await page.locator('.adSelection').boundingBox();
   expect(assetBefore&&assetAfter&&selectionBefore&&selectionAfter).toBeTruthy();
