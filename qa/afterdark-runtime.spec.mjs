@@ -27,6 +27,7 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await expect(page.getByText('SKIN + BACKGROUND')).toBeVisible();
   const magenta=page.getByRole('button',{name:/Magenta/i});
   await expect(magenta).toBeVisible();
+  console.log('AFTERDARK_MAGENTA_THUMB',await magenta.locator('img').getAttribute('src'));
   await magenta.click();
 
   await expect(page.locator('.adStatus')).toContainText(/Magenta/i);
