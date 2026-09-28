@@ -193,7 +193,7 @@ export default function AfterdarkPokerLab(){
  useEffect(send,[manifest,customAssets,effectiveBreakpoint]);
  useEffect(()=>{const fn=e=>{const d=e.data||{};if(d.type==='afterdark:ready'){setConnected(true);setTimeout(send,30)}if(d.type==='afterdark:rects'&&Array.isArray(d.rects))setRects(Object.fromEntries(d.rects.map(r=>[r.id,r])));if(!siteView&&d.type==='afterdark:select'&&(page.layout[d.id]||page.custom.some(x=>x.id===d.id))){setSelected(d.id);setEditOpen(false)}};addEventListener('message',fn);return()=>removeEventListener('message',fn)},[page,manifest,customAssets,effectiveBreakpoint,siteView]);
  useEffect(()=>{setConnected(false);setSelected('');setRects({})},[breakpoint,surfaceId]);
- useEffect(()=>{setConnected(false);setRects({})},[doc.skinId]);
+ useEffect(()=>{setConnected(false)},[doc.skinId]);
  useEffect(()=>{const update=()=>setViewport(realViewport());addEventListener('resize',update);window.visualViewport?.addEventListener('resize',update);return()=>{removeEventListener('resize',update);window.visualViewport?.removeEventListener('resize',update)}},[]);
 
  const stageWidth=breakpoint==='mobile'?'min(100%,'+frameWidth+'px)':frameWidth+'px',skin=SKIN_REGISTRY[doc.skinId]||SKIN_REGISTRY.default;
