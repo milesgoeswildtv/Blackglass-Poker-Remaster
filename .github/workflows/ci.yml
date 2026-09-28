@@ -57,6 +57,9 @@ jobs:
       - name: Run BLACKGLASS Home/Lobby browser QA
         if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
         run: npm run qa:home
+      - name: Run Afterdark visual editor browser QA
+        if: github.event_name == 'pull_request'
+        run: npm run qa:afterdark
       - name: Run BLACKGLASS internal Home browser QA
         if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
         run: npm run qa:home-internal
