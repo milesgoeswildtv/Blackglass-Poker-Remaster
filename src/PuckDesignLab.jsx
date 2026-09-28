@@ -1,22 +1,54 @@
-import React,{useMemo,useState}from'react';
+import React,{createContext,useContext,useMemo,useState}from'react';
 import{Puck}from'@puckeditor/core';
-import{puckApprovedAssets,puckApprovedBackgrounds}from'./puck-asset-manifest.js';
+import{puckApprovedAssets}from'./puck-asset-manifest.js';
+import{SKIN_REGISTRY}from'../skin-system.js';
 import'@puckeditor/core/puck.css';
 import'./puck-design-lab.css';
 
-const STORAGE_KEY='crashout-puck-spike-v1';
+const STORAGE_KEY='crashout-puck-spike-v2';
 const BASE=import.meta.env.BASE_URL||'/';
-const publicAsset=path=>`${BASE}${String(path).replace(/^\/+/, '')}`;
+const publicAsset=path=>`${BASE}${String(path||'').replace(/^\/+/, '')}`;
+const SkinPreviewContext=createContext({skinId:'default'});
 
 const assetOptions=puckApprovedAssets.map(item=>({label:item.label,value:publicAsset(item.path)}));
-const backgroundOptions=puckApprovedBackgrounds.map(item=>({label:item.label,value:publicAsset(item.path)}));
+const skinOptions=Object.values(SKIN_REGISTRY)
+ .filter(skin=>['default','normal','premium'].includes(String(skin.tier||'')))
+ .sort((a,b)=>a.id==='default'?-1:b.id==='default'?1:a.label.localeCompare(b.label))
+ .map(skin=>({label:`${skin.label}${skin.tier==='premium'?' — PREMIUM':skin.tier==='normal'?' — NORMAL':''}`,value:skin.id}));
+
+const channelOptions=[
+ {label:'Menu / Panel Theme',value:'menuTheme'},
+ {label:'In-Game Theme',value:'gameplayTheme'},
+ {label:'Table Skin',value:'tableSkin'}
+];
+const roleOptions=[
+ {label:'Identity Panel',value:'identity-panel'},
+ {label:'Host Bar',value:'host-bar'},
+ {label:'Create Panel',value:'create-panel'},
+ {label:'Join Panel',value:'join-panel'},
+ {label:'Shop Panel',value:'shop-panel'},
+ {label:'Utility Badge',value:'utility-badge'},
+ {label:'Input Field',value:'input-field'},
+ {label:'Primary Action',value:'primary-action'},
+ {label:'Small Button',value:'small-button'},
+ {label:'Master Panel',value:'master-panel'},
+ {label:'Avatar Frame',value:'avatar-frame'},
+ {label:'Card Back',value:'card-back'},
+ {label:'Player Plaque — Idle',value:'player-plaque-idle'},
+ {label:'Player Plaque — Active',value:'player-plaque-active'},
+ {label:'Player Plaque — Folded',value:'player-plaque-folded'},
+ {label:'Player Plaque — All In',value:'player-plaque-all-in'},
+ {label:'Action — Fold',value:'action-fold'},
+ {label:'Action — Call',value:'action-call'},
+ {label:'Action — Raise',value:'action-raise'},
+ {label:'Action — All In',value:'action-all-in'},
+ {label:'Utility Button',value:'utility-button'}
+];
 
 const primaryAction=publicAsset('assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG');
 const utilityBadge=publicAsset('assets/remaster/entry-gate/UTILITY_INFO_BADGE.PNG');
-const homeMobile=publicAsset('assets/remaster/homescreen/CRASHOUT_MOBILE_BG.PNG');
 const createPanel=publicAsset('assets/remaster/homescreen/CRASHOUT_CREATE_GAME_PANEL.PNG');
 const logoAsset=publicAsset('assets/remaster/entry-gate/CRASHOUT_LOGO.PNG');
-const profileAsset=publicAsset('assets/remaster/homescreen/CRASHOUT_PLAYER_IDENTITY.PNG');
 
 const spanOptions=Array.from({length:12},(_,i)=>({label:String(i+1),value:i+1}));
 const rowOptions=Array.from({length:12},(_,i)=>({label:String(i+1),value:i+1}));
@@ -24,22 +56,62 @@ const rowOptions=Array.from({length:12},(_,i)=>({label:String(i+1),value:i+1}));
 function gridStyle(columns=12,rows=3){
  return{gridColumn:`span ${Math.max(1,Math.min(12,Number(columns)||12))}`,gridRow:`span ${Math.max(1,Math.min(12,Number(rows)||3))}`};
 }
+function channelData(skinId,channel){
+ return SKIN_REGISTRY[skinId]?.channels?.[channel]||{};
+}
+function resolvedRole(skinId,channel,role){
+ const selected=channelData(skinId,channel),fallback=channelData('default',channel);
+ if(channel==='tableSkin')return selected.default||fallback.default||'';
+ return selected[role]||fallback[role]||'';
+}
+function resolvedBackground(skinId,surface){
+ const channel=surface==='game'?'gameRoomBg':'lobbyBg',selected=channelData(skinId,channel),fallback=channelData('default',channel);
+ return selected.default||selected.mobile||selected.desktop||selected.landscape||fallback.default||fallback.mobile||fallback.desktop||fallback.landscape||'';
+}
+
+function SkinAssetRender({channel,role,columns,rows,fit,puck}){
+ const{skinId}=useContext(SkinPreviewContext),path=resolvedRole(skinId,channel,role),src=publicAsset(path);
+ return <div ref={puck?.dragRef} className="puckSpikeAsset" style={gridStyle(columns,rows)}>{src?<img src={src} alt="" draggable="false" style={{objectFit:fit||'contain'}}/>:<span className="puckSpikeMissing">NO ASSET FOR THIS SLOT</span>}</div>;
+}
 
 const config={
  root:{
   fields:{
-   background:{type:'select',label:'Allowed Background',options:backgroundOptions},
+   previewSkin:{type:'select',label:'Preview Skin',options:skinOptions},
+   previewSurface:{type:'select',label:'Preview Background',options:[{label:'Lobby BG',value:'lobby'},{label:'Game Room BG',value:'game'}]},
    minHeight:{type:'number',label:'Canvas Height',min:640,max:1200}
   },
   defaultProps:{
-   background:homeMobile,
+   previewSkin:'default',
+   previewSurface:'lobby',
    minHeight:844
   },
-  render:({children,background,minHeight})=><div className="puckSpikeCanvas" style={{backgroundImage:`linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.18)),url("${background}")`,minHeight:Number(minHeight)||844}}>{children}</div>
+  render:({children,previewSkin,previewSurface,minHeight})=>{
+   const skinId=SKIN_REGISTRY[previewSkin]?previewSkin:'default',background=publicAsset(resolvedBackground(skinId,previewSurface));
+   return <SkinPreviewContext.Provider value={{skinId}}><div className="puckSpikeCanvas" data-preview-skin={skinId} style={{backgroundImage:background?`linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.18)),url("${background}")`:'none',minHeight:Number(minHeight)||844}}>{children}</div></SkinPreviewContext.Provider>;
+  }
  },
  components:{
+  SkinAsset:{
+   label:'Skinnable Asset Slot',
+   fields:{
+    channel:{type:'select',label:'Skin Channel',options:channelOptions},
+    role:{type:'select',label:'Asset Role',options:roleOptions},
+    columns:{type:'select',label:'Width (Grid Columns)',options:spanOptions},
+    rows:{type:'select',label:'Height (Grid Rows)',options:rowOptions},
+    fit:{type:'select',label:'Image Fit',options:[{label:'Contain',value:'contain'},{label:'Cover',value:'cover'},{label:'Fill',value:'fill'}]}
+   },
+   defaultProps:{
+    channel:'menuTheme',
+    role:'create-panel',
+    columns:12,
+    rows:4,
+    fit:'contain'
+   },
+   render:SkinAssetRender
+  },
   Asset:{
-   label:'Approved Asset',
+   label:'Static / Approved Asset',
    fields:{
     asset:{type:'select',label:'Allowed Asset',options:assetOptions},
     columns:{type:'select',label:'Width (Grid Columns)',options:spanOptions},
@@ -97,12 +169,12 @@ const config={
 const initialData={
  content:[
   {type:'Asset',props:{id:'spike-logo',asset:logoAsset,columns:9,rows:4,fit:'contain'}},
-  {type:'Asset',props:{id:'spike-profile',asset:profileAsset,columns:12,rows:4,fit:'fill'}},
+  {type:'SkinAsset',props:{id:'spike-profile',channel:'menuTheme',role:'identity-panel',columns:12,rows:4,fit:'fill'}},
   {type:'Text',props:{id:'spike-text',text:'CREATE GAME',columns:7,rows:2,fontSize:24,align:'left'}},
-  {type:'Asset',props:{id:'spike-create',asset:createPanel,columns:12,rows:5,fit:'fill'}},
+  {type:'SkinAsset',props:{id:'spike-create',channel:'menuTheme',role:'create-panel',columns:12,rows:5,fit:'fill'}},
   {type:'ControlShell',props:{id:'spike-control',asset:primaryAction,label:'OPEN',columns:6,rows:3}}
  ],
- root:{props:{background:homeMobile,minHeight:844}},
+ root:{props:{previewSkin:'default',previewSurface:'lobby',minHeight:844}},
  zones:{}
 };
 
@@ -133,14 +205,14 @@ export default function PuckDesignLab(){
  }
  return <main className="puckSpikeShell">
   <div className="puckSpikeBanner">
-   <div><strong>PUCK VISUAL EDITOR SPIKE</strong><span>LOCAL / MOCK / PRESENTATION ONLY</span>{savedAt&&<small>Saved locally {savedAt}</small>}</div>
+   <div><strong>PUCK VISUAL EDITOR SPIKE</strong><span>EDIT DEFAULT ONCE • USE PREVIEW SKIN TO TOGGLE ART • PUBLISH IS LOCAL ONLY</span>{savedAt&&<small>Saved locally {savedAt}</small>}</div>
    <button type="button" onClick={reset}>RESET LOCAL LAYOUT</button>
   </div>
   <Puck
    config={config}
    data={data}
    onPublish={publish}
-   headerTitle="Crashout Poker — Puck Spike"
+   headerTitle="Crashout Poker — Skin-Aware Puck"
    viewports={viewports}
    dnd={{behavior:'fluid'}}
    height="calc(100dvh - 52px)"
