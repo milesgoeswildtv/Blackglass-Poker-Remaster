@@ -10,7 +10,8 @@
   --ftp-bet-clearance:24px;
 }
 html,body,#root{min-height:100%}
-body:has(.gameplayV3Page){margin:0;overflow:hidden;background:var(--cp-bg-world)}
+html:has(.gameplayV3Page),html:has(.pregameTablePage),body:has(.gameplayV3Page),body:has(.pregameTablePage),#root:has(.gameplayV3Page),#root:has(.pregameTablePage){height:var(--telegram-viewport-stable-height,100dvh);min-height:0;overflow:hidden!important;overscroll-behavior:none}
+body:has(.gameplayV3Page),body:has(.pregameTablePage){margin:0;background:var(--cp-bg-world)}
 
 .gameplayV3Page{
   position:fixed!important;

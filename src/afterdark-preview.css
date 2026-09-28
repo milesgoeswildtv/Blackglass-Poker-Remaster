@@ -1,0 +1,11 @@
+html.afterdarkPreviewMode,html.afterdarkPreviewMode body,html.afterdarkPreviewMode #root{margin:0;min-height:100%;background:#080706}
+html.afterdarkPreviewMode body{overscroll-behavior:none}
+.afterdarkInvitePage{height:100dvh;min-height:0;overflow:hidden}
+.afterdarkMttBreakPage{height:100dvh;min-height:0;overflow:hidden;padding:0!important}
+.afterdarkMttBreakPage .mttBreakScreen{height:100dvh;min-height:0}
+.afterdarkBreakCopy{text-align:center}
+.afterdarkBreakCopy>div{display:flex;justify-content:center;gap:7px;margin:4px 0 12px}
+.afterdarkBreakCopy>div span{padding:6px 9px;border:1px solid #43354b;border-radius:999px;background:#100c14;color:#b9aabc;font-size:8px;font-weight:900;letter-spacing:.08em}
+.afterdarkBreakCopy>small{color:#756b7a;font-size:9px}
+.afterdarkMttLobbyPage,.afterdarkResultPage{min-height:100dvh}
+html.afterdarkPreviewMode button,html.afterdarkPreviewMode a{cursor:default}
