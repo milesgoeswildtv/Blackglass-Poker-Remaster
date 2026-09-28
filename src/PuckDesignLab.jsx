@@ -1,5 +1,5 @@
 import React,{createContext,useContext,useMemo,useState}from'react';
-import{Puck}from'@puckeditor/core';
+import{ActionBar,Puck,createUsePuck}from'@puckeditor/core';
 import{puckApprovedAssets}from'./puck-asset-manifest.js';
 import{SKIN_REGISTRY}from'../skin-system.js';
 import'@puckeditor/core/puck.css';
@@ -9,6 +9,7 @@ const STORAGE_KEY='crashout-puck-spike-v2';
 const BASE=import.meta.env.BASE_URL||'/';
 const publicAsset=path=>`${BASE}${String(path||'').replace(/^\/+/, '')}`;
 const SkinPreviewContext=createContext({skinId:'default'});
+const usePuck=createUsePuck();
 
 const assetOptions=puckApprovedAssets.map(item=>({label:item.label,value:publicAsset(item.path)}));
 const skinOptions=Object.values(SKIN_REGISTRY)
@@ -67,6 +68,20 @@ function resolvedRole(skinId,channel,role){
 function resolvedBackground(skinId,surface){
  const channel=surface==='game'?'gameRoomBg':'lobbyBg',selected=channelData(skinId,channel),fallback=channelData('default',channel);
  return selected.default||selected.mobile||selected.desktop||selected.landscape||fallback.default||fallback.mobile||fallback.desktop||fallback.landscape||'';
+}
+
+const resizableTypes=new Set(['SkinAsset','Asset','Text','ControlShell']);
+function SizeActionBar({children,label}){
+ const selected=usePuck(s=>s.selectedItem),data=usePuck(s=>s.appState.data),dispatch=usePuck(s=>s.dispatch),canResize=resizableTypes.has(selected?.type);
+ function nudge(prop,delta){
+  const id=selected?.props?.id;
+  if(!id)return;
+  const current=Math.max(1,Math.min(12,Number(selected?.props?.[prop])||1)),next=Math.max(1,Math.min(12,current+delta));
+  if(next===current)return;
+  const content=(data.content||[]).map(item=>item?.props?.id===id?{...item,props:{...item.props,[prop]:next}}:item);
+  dispatch({type:'setData',data:{...data,content}});
+ }
+ return <ActionBar label={label}><ActionBar.Group>{children}</ActionBar.Group>{canResize&&<><ActionBar.Separator/><ActionBar.Group><ActionBar.Action disabled={(Number(selected?.props?.columns)||1)<=1} onClick={()=>nudge('columns',-1)}>W−</ActionBar.Action><ActionBar.Action disabled={(Number(selected?.props?.columns)||1)>=12} onClick={()=>nudge('columns',1)}>W+</ActionBar.Action><ActionBar.Action disabled={(Number(selected?.props?.rows)||1)<=1} onClick={()=>nudge('rows',-1)}>H−</ActionBar.Action><ActionBar.Action disabled={(Number(selected?.props?.rows)||1)>=12} onClick={()=>nudge('rows',1)}>H+</ActionBar.Action></ActionBar.Group></>}</ActionBar>;
 }
 
 function SkinAssetRender({channel,role,columns,rows,fit,puck}){
@@ -219,6 +234,7 @@ export default function PuckDesignLab(){
    headerTitle="Crashout Poker — Skin-Aware Puck"
    viewports={viewports}
    dnd={{behavior:'fluid'}}
+   overrides={{actionBar:SizeActionBar}}
    height="calc(100dvh - 52px)"
   />
  </main>;
