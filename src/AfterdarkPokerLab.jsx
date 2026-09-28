@@ -50,7 +50,8 @@ function buildManifest(doc,bp,surfaceId,page){
   });
  }else if(surfaceId==='entry'){
   slots['poker.entry.logo']={label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1}},asset:brand.default||'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG'};
-  slots['poker.entry.panel']={label:'Access Panel',layout:{},style:{[bp]:{opacity:1}}};
+  slots['poker.entry.panel']={label:'Panel Artwork',layout:{},style:{[bp]:{opacity:1}},asset:menu['master-panel']||'assets/remaster/entry-gate/CRASHOUT_MASTER_FULL_SCREEN_PANEL.PNG'};
+  slots['poker.entry.content']={label:'Access Content',layout:{},style:{[bp]:{opacity:1}},asset:null};
  }else{
   for(const[id,label]of cfg.builtIns)slots[id]={label,layout:{},style:{[bp]:{opacity:1}}};
   if(slots['poker.table'])slots['poker.table'].asset=table.default||null;
