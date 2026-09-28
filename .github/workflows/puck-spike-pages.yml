@@ -1,4 +1,4 @@
-name: Puck Spike Pages
+name: Afterdark Editor Pages
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout spike branch
+      - name: Checkout canonical editor branch
         uses: actions/checkout@v4
 
       - name: Set up Node 22
@@ -33,7 +33,7 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Build Puck spike for GitHub Pages
+      - name: Build Afterdark editor for GitHub Pages
         run: npm run build -- --base=/Blackglass-Poker-Remaster/
 
       - name: Add SPA fallback
