@@ -2,12 +2,13 @@ import React,{useEffect,useState}from'react';
 import'./private-access.css';
 
 function cleanInvite(value=''){return String(value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6)}
+function afterdarkPreview(){try{return new URLSearchParams(location.search).get('afterdarkPreview')==='1'}catch{return false}}
 
 export default function AccessHome({account,authLoading,authError,telegram,name,discordLink,onRefresh,onCreate,onJoin,onShop}){
  const[choice,setChoice]=useState(''),[value,setValue]=useState(''),[pending,setPending]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[upgrade,setUpgrade]=useState(false);
  const access=account?.account?.access||{},canHost=!!access.canHost,invite=access.latestInvite||access.invites?.[0]||null,hasAccess=canHost||!!invite,hostCredits=Number(access.hostCredits||0),hostFlavor=access.permanentHost?'Permanent Host':hostCredits+' Host Credit'+(hostCredits===1?'':'s')+' Available';
 
- useEffect(()=>{if(!account)return;let alive=true;(async()=>{let changed=false;try{const r=await fetch('/api/access/key/redeem',{method:'POST'}),j=await r.json();if(r.ok&&j.redeemed)changed=true;else if(!r.ok&&j.error&&alive)setError(j.error)}catch{}try{const raw=sessionStorage.getItem('crashout_pending_invite');if(raw){sessionStorage.removeItem('crashout_pending_invite');const claim=JSON.parse(raw),r=await fetch('/api/access/invite/claim',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(claim)}),j=await r.json();if(r.ok)changed=true;else if(j.error&&alive)setError(j.error)}}catch{}if(changed&&alive)await onRefresh?.()})();return()=>{alive=false}},[account?.canonicalAccountId]);
+ useEffect(()=>{if(afterdarkPreview()||!account)return;let alive=true;(async()=>{let changed=false;try{const r=await fetch('/api/access/key/redeem',{method:'POST'}),j=await r.json();if(r.ok&&j.redeemed)changed=true;else if(!r.ok&&j.error&&alive)setError(j.error)}catch{}try{const raw=sessionStorage.getItem('crashout_pending_invite');if(raw){sessionStorage.removeItem('crashout_pending_invite');const claim=JSON.parse(raw),r=await fetch('/api/access/invite/claim',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(claim)}),j=await r.json();if(r.ok)changed=true;else if(j.error&&alive)setError(j.error)}}catch{}if(changed&&alive)await onRefresh?.()})();return()=>{alive=false}},[account?.canonicalAccountId]);
 
  async function submitKey(){
   if(!value.trim())return setError('Enter your host key.');setBusy(true);setError('');
