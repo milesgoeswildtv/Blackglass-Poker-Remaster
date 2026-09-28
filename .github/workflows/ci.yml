@@ -38,13 +38,13 @@ jobs:
       - name: Validate Cloudflare Worker package
         run: npm run check:worker
       - name: Stamp BLACKGLASS build provenance
-        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/visual-remaster' || github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request'
         run: |
           printf '%s\n' "$BLACKGLASS_SOURCE_SHA" > dist/BLACKGLASS_BUILD_SHA.txt
           printf '%s\n' "$BLACKGLASS_SOURCE_REF" > dist/BLACKGLASS_BUILD_REF.txt
           printf '%s\n' "$GITHUB_RUN_ID" > dist/BLACKGLASS_BUILD_RUN_ID.txt
       - name: Upload exact BLACKGLASS build artifact
-        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/visual-remaster' || github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: crashout-poker-dist-${{ env.BLACKGLASS_SOURCE_SHA }}
@@ -52,16 +52,16 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Install Chromium for BLACKGLASS browser QA
-        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/visual-remaster' || github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request'
         run: npx playwright install --with-deps chromium
       - name: Run BLACKGLASS Home/Lobby browser QA
-        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/visual-remaster' || github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request'
         run: npm run qa:home
       - name: Run Afterdark visual editor browser QA
-        if: github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request'
         run: npm run qa:afterdark
       - name: Run BLACKGLASS internal Home browser QA
-        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/visual-remaster' || github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request'
         run: npm run qa:home-internal
       - name: Resolve prior gameplay geometry baseline
         if: github.ref == 'refs/heads/visual-remaster' && github.event_name == 'push'
@@ -82,10 +82,10 @@ jobs:
             fi
           fi
       - name: Run BLACKGLASS gameplay browser QA
-        if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/visual-remaster' || github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request'
         run: npm run qa:gameplay
       - name: Upload BLACKGLASS gameplay browser evidence
-        if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
+        if: always() && (github.ref == 'refs/heads/visual-remaster' || github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request')
         uses: actions/upload-artifact@v4
         with:
           name: blackglass-gameplay-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
@@ -93,7 +93,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Upload BLACKGLASS internal browser evidence
-        if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
+        if: always() && (github.ref == 'refs/heads/visual-remaster' || github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request')
         uses: actions/upload-artifact@v4
         with:
           name: blackglass-home-internal-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
@@ -101,7 +101,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
       - name: Upload BLACKGLASS browser evidence
-        if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
+        if: always() && (github.ref == 'refs/heads/visual-remaster' || github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request')
         uses: actions/upload-artifact@v4
         with:
           name: blackglass-home-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
