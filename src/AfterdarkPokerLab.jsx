@@ -120,6 +120,7 @@ export default function AfterdarkPokerLab(){
  const customAssets=useMemo(()=>page.custom.map(x=>({id:x.id,kind:x.kind||'asset',asset:isTextItem(x)?'':resolveBoundAsset(x,doc.skinId,effectiveBreakpoint),text:x.text||'',textStyle:x.textStyle||{},layout:x.layout,binding:x.binding||null})),[page.custom,doc.skinId,effectiveBreakpoint]);
  const selectedCustom=isCustom(selected)?page.custom.find(x=>x.id===selected):null;
  const selectedLayer=selectedCustom?.layout||page.layout[selected];
+ const selectedLocked=selectedLayer?.locked===true;
  const selectedRect=rects[selected],frameWidth=breakpoint==='mobile'?390:breakpoint==='tablet'?760:820;
  const previewSrc=useMemo(()=>{const q=new URLSearchParams({afterdarkPreview:'1',labFrame:'1',afterdarkSurface:surfaceId,afterdarkSkin:doc.skinId});return location.pathname+'?'+q.toString()+'#/'},[surfaceId,doc.skinId]);
  const skins=useMemo(skinList,[]),groups=useMemo(()=>assetLibrary(doc.skinId),[doc.skinId]);
@@ -142,12 +143,12 @@ export default function AfterdarkPokerLab(){
  function changeSurface(id){if(id===surfaceId)return;closeSheets();setSelected('');setRects({});setConnected(false);setGuides({x:null,y:null});setHistory([]);setFuture([]);setSiteView(false);setZoom(1);setSurfaceId(id)}
  function addAsset(item){
   const next=clone(doc),target=pageOf(next),id='custom.'+Date.now().toString(36)+'.'+target.custom.length;
-  target.custom.push({id,label:item.label,kind:'asset',asset:item.path,binding:item.channel&&item.role?{channel:item.channel,role:item.role}:null,layout:{x:50+(target.custom.length%4)*12,y:120+(target.custom.length%5)*14,width:180,height:120,zIndex:20+target.custom.length}});
+  target.custom.push({id,label:item.label,kind:'asset',asset:item.path,binding:item.channel&&item.role?{channel:item.channel,role:item.role}:null,layout:{x:50+(target.custom.length%4)*12,y:120+(target.custom.length%5)*14,width:180,height:120,zIndex:20+target.custom.length,locked:false}});
   commit(next,true);setSelected(id);setAssetOpen(false)
  }
  function addText(){
   const next=clone(doc),target=pageOf(next),id='custom.text.'+Date.now().toString(36)+'.'+target.custom.length;
-  target.custom.push({id,label:'TEXT',kind:'text',text:'NEW TEXT',textStyle:{fontSize:24,fontWeight:800,color:'#ffffff',textAlign:'left'},layout:{x:48,y:120,width:220,height:60,zIndex:30+target.custom.length}});
+  target.custom.push({id,label:'TEXT',kind:'text',text:'NEW TEXT',textStyle:{fontSize:24,fontWeight:800,color:'#ffffff',textAlign:'left'},layout:{x:48,y:120,width:220,height:60,zIndex:30+target.custom.length,locked:false}});
   commit(next,true);setSelected(id);setAssetOpen(false);setTimeout(()=>setEditOpen(true),0)
  }
  function patchCustomMeta(id,values,record=true){
@@ -158,8 +159,9 @@ export default function AfterdarkPokerLab(){
  }
  function deleteSelected(){if(!selected)return;const next=clone(doc),target=pageOf(next);if(isCustom(selected))target.custom=target.custom.filter(x=>x.id!==selected);else target.layout[selected]={...(target.layout[selected]||{}),visible:false};commit(next,true);setSelected('');setEditOpen(false)}
  function showSelected(){if(!selected||isCustom(selected))return;patchLayer(selected,{visible:true},true)}
- function duplicateSelected(){if(!isCustom(selected))return;const source=page.custom.find(x=>x.id===selected);if(!source)return;const next=clone(doc),target=pageOf(next),id='custom.'+Date.now().toString(36)+'.'+target.custom.length,copy=clone(source);copy.id=id;copy.label=source.label+' COPY';copy.layout={...copy.layout,x:Number(copy.layout.x||0)+14,y:Number(copy.layout.y||0)+14,zIndex:Number(copy.layout.zIndex||20)+1};target.custom.push(copy);commit(next,true);setSelected(id)}
- function changeZ(delta){if(!selected)return;patchLayer(selected,{zIndex:Number(selectedLayer?.zIndex||5)+delta},true)}
+ function duplicateSelected(){if(!isCustom(selected))return;const source=page.custom.find(x=>x.id===selected);if(!source)return;const next=clone(doc),target=pageOf(next),id='custom.'+Date.now().toString(36)+'.'+target.custom.length,copy=clone(source);copy.id=id;copy.label=source.label+' COPY';copy.layout={...copy.layout,x:Number(copy.layout.x||0)+14,y:Number(copy.layout.y||0)+14,zIndex:Number(copy.layout.zIndex||20)+1,locked:false};target.custom.push(copy);commit(next,true);setSelected(id)}
+ function toggleLayerLock(){if(!selected)return;patchLayer(selected,{locked:!selectedLocked},true)}
+ function changeZ(delta){if(!selected||selectedLocked)return;patchLayer(selected,{zIndex:Number(selectedLayer?.zIndex||5)+delta},true)}
  function changeSkin(id){const next=clone(doc);next.skinId=id;commit(next,true);setSkinOpen(false)}
  function changeBackground(channel){const next=clone(doc);pageOf(next).backgroundChannel=channel;commit(next,true)}
  function patchBackgroundFraming(values,record=true){const next=clone(doc),target=pageOf(next);target.backgroundFraming={...freshSurface(surfaceId).backgroundFraming,...(target.backgroundFraming||{}),...values};commit(next,record)}
@@ -169,7 +171,7 @@ export default function AfterdarkPokerLab(){
  function changeZoom(delta){setZoom(z=>Math.max(.5,Math.min(2,Math.round((z+delta)*10)/10)))}
  function resetZoom(){setZoom(1);requestAnimationFrame(()=>document.querySelector('.adWorkspace')?.scrollTo({top:0,left:0}))}
  function startPointer(e,mode){
-  if(!selected||!selectedRect)return;e.preventDefault();e.stopPropagation();e.currentTarget?.setPointerCapture?.(e.pointerId);document.querySelector('.adLab')?.classList.add('adManipulating');document.documentElement.classList.add('adScrollLocked');document.body.classList.add('adScrollLocked');iframeRef.current?.contentWindow?.postMessage({type:'afterdark:interaction',locked:true},'*');
+  if(!selected||!selectedRect)return;if(selectedLocked){e.preventDefault();e.stopPropagation();return}e.preventDefault();e.stopPropagation();e.currentTarget?.setPointerCapture?.(e.pointerId);document.querySelector('.adLab')?.classList.add('adManipulating');document.documentElement.classList.add('adScrollLocked');document.body.classList.add('adScrollLocked');iframeRef.current?.contentWindow?.postMessage({type:'afterdark:interaction',locked:true},'*');
   const base=selectedLayer||{},r=selectedRect,q={mode,sx:e.clientX,sy:e.clientY,x:Number(base.x||0),y:Number(base.y||0),w:Number(base.width||r.width),h:Number(base.height||r.height),rx:Number(r.x),ry:Number(r.y),rw:Number(r.width),rh:Number(r.height)};dragRef.current=q;snapshot();
   const move=ev=>{
    const d=dragRef.current;if(!d)return;ev.preventDefault();
