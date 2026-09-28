@@ -2,6 +2,7 @@ import React,{useEffect,useMemo,useRef,useState}from'react';
 import'./afterdark-poker-lab.css';
 import{SKIN_REGISTRY}from'../skin-system.js';
 import{skinAssetUrl}from'./skin-client.js';
+import{buildSnapTargets,snapMoveRect,snapResizeRect,SNAP_GRID}from'./afterdark-snapping.js';
 
 const BUILT_INS=[
  ['poker.logo','Logo'],['poker.identity','Player Identity'],['poker.hostBar','Host Bar'],['poker.create','Create Game'],['poker.join','Join Game'],['poker.shop','Booster Shop'],['poker.utility','Engine + Fairness']
@@ -50,9 +51,9 @@ function layerName(id,doc){return BUILT_INS.find(x=>x[0]===id)?.[1]||doc.custom.
 function isCustom(id){return String(id||'').startsWith('custom.')}
 
 export default function AfterdarkPokerLab(){
- const iframeRef=useRef(null),dragRef=useRef(null);
+ const iframeRef=useRef(null),stageRef=useRef(null),dragRef=useRef(null);
  const[breakpoint,setBreakpoint]=useState('mobile'),[doc,setDoc]=useState(loadDoc);
- const[selected,setSelected]=useState(''),[rects,setRects]=useState({}),[connected,setConnected]=useState(false);
+ const[selected,setSelected]=useState(''),[rects,setRects]=useState({}),[connected,setConnected]=useState(false),[guides,setGuides]=useState({x:null,y:null});
  const[history,setHistory]=useState([]),[future,setFuture]=useState([]);
  const[layerOpen,setLayerOpen]=useState(false),[assetOpen,setAssetOpen]=useState(false),[skinOpen,setSkinOpen]=useState(false),[editOpen,setEditOpen]=useState(false);
  const manifest=useMemo(()=>buildManifest(doc,breakpoint),[doc,breakpoint]);
@@ -88,10 +89,26 @@ export default function AfterdarkPokerLab(){
  function changeBackground(channel){const next=clone(doc);next.backgroundChannel=channel;commit(next,true)}
  function startPointer(e,mode){
   if(!selected||!selectedRect)return;e.preventDefault();e.stopPropagation();e.currentTarget?.setPointerCapture?.(e.pointerId);document.querySelector('.adLab')?.classList.add('adManipulating');document.documentElement.classList.add('adScrollLocked');document.body.classList.add('adScrollLocked');iframeRef.current?.contentWindow?.postMessage({type:'afterdark:interaction',locked:true},'*');
-  const base=selectedLayer||{},r=selectedRect,q={mode,sx:e.clientX,sy:e.clientY,x:Number(base.x||0),y:Number(base.y||0),w:Number(base.width||r.width),h:Number(base.height||r.height)};dragRef.current=q;snapshot();
-  const move=ev=>{const d=dragRef.current;if(!d)return;ev.preventDefault();const dx=ev.clientX-d.sx,dy=ev.clientY-d.sy;let x=d.x,y=d.y,w=d.w,h=d.h;if(d.mode==='move'){x=d.x+dx;y=d.y+dy}else{if(d.mode.includes('e'))w=Math.max(24,d.w+dx);if(d.mode.includes('s'))h=Math.max(24,d.h+dy);if(d.mode.includes('w')){w=Math.max(24,d.w-dx);x=d.x+(d.w-w)}if(d.mode.includes('n')){h=Math.max(24,d.h-dy);y=d.y+(d.h-h)}}setDoc(current=>{const next=clone(current),values={x:Math.round(x),y:Math.round(y),width:Math.round(w),height:Math.round(h)};if(isCustom(selected)){const item=next.custom.find(a=>a.id===selected);if(item)item.layout={...item.layout,...values}}else next.layout[selected]={...next.layout[selected],...values};localStorage.setItem(STORAGE,JSON.stringify(next));return next})};
+  const base=selectedLayer||{},r=selectedRect,q={mode,sx:e.clientX,sy:e.clientY,x:Number(base.x||0),y:Number(base.y||0),w:Number(base.width||r.width),h:Number(base.height||r.height),rx:Number(r.x),ry:Number(r.y),rw:Number(r.width),rh:Number(r.height)};dragRef.current=q;snapshot();
+  const move=ev=>{
+   const d=dragRef.current;if(!d)return;ev.preventDefault();
+   const dx=ev.clientX-d.sx,dy=ev.clientY-d.sy,stage=stageRef.current;
+   const targets=buildSnapTargets(rects,selected,stage?.clientWidth||frameWidth,stage?.clientHeight||window.innerHeight);
+   let snapped;
+   if(d.mode==='move'){
+    snapped=snapMoveRect({left:d.rx+dx,top:d.ry+dy,right:d.rx+d.rw+dx,bottom:d.ry+d.rh+dy},targets);
+   }else{
+    let left=d.rx,top=d.ry,right=d.rx+d.rw,bottom=d.ry+d.rh;
+    if(d.mode.includes('e'))right+=dx;if(d.mode.includes('s'))bottom+=dy;if(d.mode.includes('w'))left+=dx;if(d.mode.includes('n'))top+=dy;
+    snapped=snapResizeRect({left,top,right,bottom},d.mode,targets);
+   }
+   const screenW=snapped.right-snapped.left,screenH=snapped.bottom-snapped.top;
+   const x=d.x+(snapped.left-d.rx),y=d.y+(snapped.top-d.ry),w=d.w+(screenW-d.rw),h=d.h+(screenH-d.rh);
+   setGuides({x:snapped.guideX,y:snapped.guideY});
+   setDoc(current=>{const next=clone(current),values={x:Math.round(x),y:Math.round(y),width:Math.round(w),height:Math.round(h)};if(isCustom(selected)){const item=next.custom.find(a=>a.id===selected);if(item)item.layout={...item.layout,...values}}else next.layout[selected]={...next.layout[selected],...values};localStorage.setItem(STORAGE,JSON.stringify(next));return next})
+  };
   const block=ev=>ev.preventDefault();document.addEventListener('touchmove',block,{passive:false,capture:true});
-  const up=()=>{dragRef.current=null;iframeRef.current?.contentWindow?.postMessage({type:'afterdark:interaction',locked:false},'*');document.querySelector('.adLab')?.classList.remove('adManipulating');document.documentElement.classList.remove('adScrollLocked');document.body.classList.remove('adScrollLocked');document.removeEventListener('touchmove',block,true);removeEventListener('pointermove',move);removeEventListener('pointerup',up);removeEventListener('pointercancel',up)};
+  const up=()=>{dragRef.current=null;setGuides({x:null,y:null});iframeRef.current?.contentWindow?.postMessage({type:'afterdark:interaction',locked:false},'*');document.querySelector('.adLab')?.classList.remove('adManipulating');document.documentElement.classList.remove('adScrollLocked');document.body.classList.remove('adScrollLocked');document.removeEventListener('touchmove',block,true);removeEventListener('pointermove',move);removeEventListener('pointerup',up);removeEventListener('pointercancel',up)};
   addEventListener('pointermove',move,{passive:false});addEventListener('pointerup',up,{once:true});addEventListener('pointercancel',up,{once:true})
  }
 
@@ -103,7 +120,7 @@ export default function AfterdarkPokerLab(){
  return <main className="adLab">
   <header className="adTop"><div><b>AFTERDARK</b><span>CRASHOUT POKER VISUAL EDITOR</span></div><select value={breakpoint} onChange={e=>setBreakpoint(e.target.value)}><option value="mobile">MOBILE</option><option value="tablet">TABLET</option><option value="desktop">DESKTOP</option></select></header>
   <div className="adStatus"><button onClick={()=>{closeSheets();setLayerOpen(true)}}>{selected?layerName(selected,doc):'SELECT A LAYER'}</button><em>{skin?.label||'DEFAULT'} · {doc.backgroundChannel==='gameRoomBg'?'GAME ROOM':'LOBBY'}</em><span className={connected?'live':''}>{connected?'LIVE':'CONNECTING'}</span></div>
-  <section className="adWorkspace"><div className="adStage" style={{width:stageWidth}}><iframe ref={iframeRef} src={previewSrc} title="Crashout Poker visual preview"/><div className="adOverlay">{selectedRect&&<div className="adSelection" style={{left:selectedRect.x,top:selectedRect.y,width:selectedRect.width,height:selectedRect.height}} onPointerDown={e=>startPointer(e,'move')}><span>{layerName(selected,doc)}</span>{['nw','ne','sw','se'].map(h=><i key={h} className={'adHandle '+h} onPointerDown={e=>startPointer(e,h)}/>)}</div>}</div></div></section>
+  <section className="adWorkspace"><div ref={stageRef} className="adStage" style={{width:stageWidth}}><iframe ref={iframeRef} src={previewSrc} title="Crashout Poker visual preview"/><div className="adOverlay">{guides.x!=null&&<i className="adSnapGuide x" style={{left:guides.x}}/>}{guides.y!=null&&<i className="adSnapGuide y" style={{top:guides.y}}/>}{selectedRect&&<div className="adSelection" style={{left:selectedRect.x,top:selectedRect.y,width:selectedRect.width,height:selectedRect.height}} onPointerDown={e=>startPointer(e,'move')}><span>{layerName(selected,doc)}</span>{['nw','ne','sw','se'].map(h=><i key={h} className={'adHandle '+h} onPointerDown={e=>startPointer(e,h)}/>)}</div>}</div></div></section>
 
   {layerOpen&&<aside className="adSheet"><header><b>LAYERS</b><button onClick={()=>setLayerOpen(false)}>×</button></header><div className="adLayerList">{BUILT_INS.map(([id,label])=><button key={id} className={selected===id?'active':''} onClick={()=>{setSelected(id);setLayerOpen(false)}}><span>{label}</span><small>BUILT IN</small></button>)}{doc.custom.map(item=><button key={item.id} className={selected===item.id?'active':''} onClick={()=>{setSelected(item.id);setLayerOpen(false)}}><span>{item.label}</span><small>FREE ASSET</small></button>)}</div><button className="adDanger" onClick={resetAll}>RESET ENTIRE LAYOUT</button></aside>}
 
@@ -114,6 +131,6 @@ export default function AfterdarkPokerLab(){
   {editOpen&&selectedLayer&&<aside className="adSheet"><header><div><b>{layerName(selected,doc)}</b><small>{isCustom(selected)?'FREE ASSET':'BUILT IN'}</small></div><button onClick={()=>setEditOpen(false)}>×</button></header><div className="adFields">{[['x','X'],['y','Y'],['width','WIDTH'],['height','HEIGHT']].map(([key,label])=><label key={key}><span>{label}</span><input type="number" value={selectedLayer[key]??(key==='width'?Math.round(selectedRect?.width||0):key==='height'?Math.round(selectedRect?.height||0):0)} onChange={e=>patchLayer(selected,{[key]:Number(e.target.value)},true)}/></label>)}</div><div className="adActions"><button onClick={()=>changeZ(1)}>BRING FORWARD</button><button onClick={()=>changeZ(-1)}>SEND BACK</button>{isCustom(selected)&&<button onClick={duplicateSelected}>DUPLICATE</button>}{isCustom(selected)&&<button className="danger" onClick={deleteSelected}>DELETE</button>}</div><button className="adResetOne" onClick={()=>patchLayer(selected,{x:0,y:0,width:null,height:null,zIndex:isCustom(selected)?20:5},true)}>RESET THIS LAYER</button></aside>}
 
   <nav className="adDock six"><button onClick={()=>{closeSheets();setLayerOpen(true)}}><b>☰</b><small>LAYERS</small></button><button onClick={()=>{closeSheets();setAssetOpen(true)}}><b>＋</b><small>ASSETS</small></button><button onClick={()=>{closeSheets();setSkinOpen(true)}}><b>◈</b><small>SKIN</small></button><button disabled={!history.length} onClick={undo}><b>↶</b><small>UNDO</small></button><button disabled={!future.length} onClick={redo}><b>↷</b><small>REDO</small></button><button disabled={!selected} onClick={()=>{closeSheets();setEditOpen(true)}}><b>▦</b><small>EDIT</small></button></nav>
-  <div className="adHint">{selected?'Drag to move · corners resize · Edit for layer tools':'Tap an existing element or use ASSETS to add something.'}</div>
+  <div className="adHint">{selected?`SNAP ${SNAP_GRID}px · edges + centers align · corners resize · Edit for layer tools`:'Tap an existing element or use ASSETS to add something.'}</div>
  </main>
 }
