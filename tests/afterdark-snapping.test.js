@@ -4,10 +4,10 @@ import{buildSnapTargets,snapMoveRect,snapResizeRect,SNAP_GRID}from'../src/afterd
 
 test('Afterdark move snapping prefers nearby centers and edges',()=>{
  const targets=buildSnapTargets({'other':{x:40,y:80,width:120,height:60}},'selected',390,800);
- const out=snapMoveRect({left:147,top:103,right:247,bottom:153},targets);
+ const out=snapMoveRect({left:147,top:106,right:247,bottom:156},targets);
  assert.equal(out.left,145);
  assert.equal(out.guideX,195);
- assert.equal(out.top,100);
+ assert.equal(out.top,110);
  assert.equal(out.guideY,110);
 });
 
