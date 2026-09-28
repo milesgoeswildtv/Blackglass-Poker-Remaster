@@ -75,11 +75,13 @@ function setInteractionLock(locked){
 }
 
 function ensureCustomRoot(){
- const shell=document.querySelector('.homeShell');if(!shell)return null;
+ const shell=document.querySelector('.homeShell'),frame=document.querySelector('.homeFrame');if(!shell||!frame)return null;
  let root=document.getElementById('afterdark-custom-root');
- if(!root){root=document.createElement('div');root.id='afterdark-custom-root';shell.appendChild(root)}
- else if(root.parentElement!==shell)shell.appendChild(root);
- Object.assign(root.style,{position:'absolute',left:'0',top:'0',width:'100%',height:Math.max(shell.scrollHeight,shell.offsetHeight,innerHeight)+'px',zIndex:'5000',pointerEvents:'none',overflow:'visible'});
+ if(!root){root=document.createElement('div');root.id='afterdark-custom-root';frame.appendChild(root)}
+ else if(root.parentElement!==frame)frame.appendChild(root);
+ const frameRect=frame.getBoundingClientRect(),shellRect=shell.getBoundingClientRect();
+ const offsetX=shellRect.left-frameRect.left,offsetY=shellRect.top-frameRect.top;
+ Object.assign(root.style,{position:'absolute',left:offsetX+'px',top:offsetY+'px',width:Math.max(shell.scrollWidth,shell.offsetWidth,innerWidth)+'px',height:Math.max(shell.scrollHeight,shell.offsetHeight,innerHeight)+'px',zIndex:'5000',pointerEvents:'none',overflow:'visible'});
  return root;
 }
 function renderCustomAssets(){
@@ -141,6 +143,7 @@ export function installAfterdarkPreview(){
   });
   addEventListener('resize',reportRects);
   addEventListener('scroll',reportRects,{passive:true});
+  document.addEventListener('scroll',reportRects,{passive:true,capture:true});
   new MutationObserver(()=>{apply();reportRects()}).observe(document.body,{childList:true,subtree:true});
   parent.postMessage({type:'afterdark:ready'},'*');
   reportRects();
