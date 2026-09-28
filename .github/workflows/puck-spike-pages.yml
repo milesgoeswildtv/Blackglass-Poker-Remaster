@@ -1,9 +1,9 @@
-name: Puck Spike Pages
+name: Afterdark Poker Preview Pages
 
 on:
   push:
     branches:
-      - puck-visual-editor-spike
+      - afterdark-poker-preview
   workflow_dispatch:
 
 permissions:
@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: puck-spike-pages
+  group: afterdark-poker-preview-pages
   cancel-in-progress: true
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Build Puck spike for GitHub Pages
+      - name: Build Afterdark poker preview for GitHub Pages
         run: npm run build -- --base=/Blackglass-Poker-Remaster/
 
       - name: Add SPA fallback
