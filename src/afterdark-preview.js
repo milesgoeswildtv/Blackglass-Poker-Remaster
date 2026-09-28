@@ -24,18 +24,6 @@ function layoutFor(slot,bp){return slot?.layout?.[bp]||slot?.layout?.desktop||{}
 function styleFor(slot,bp){return slot?.style?.[bp]||slot?.style?.desktop||{}}
 function px(v){return Number.isFinite(Number(v))?`${Number(v)}px`:''}
 
-
-function ensureBackgroundLayer(){
- const shell=document.querySelector('.homeShell');if(!shell)return null;
- let layer=shell.querySelector(':scope > #afterdark-preview-bg-layer');
- if(!layer){
-  layer=document.createElement('div');layer.id='afterdark-preview-bg-layer';
-  Object.assign(layer.style,{position:'fixed',inset:'0',zIndex:'0',pointerEvents:'none',backgroundRepeat:'no-repeat',backgroundPosition:'center top',backgroundSize:'cover'});
-  shell.appendChild(layer);
- }
- return layer;
-}
-
 function applySlot(def,slot,bp){
  const el=elementFor(def);if(!el||!slot)return;
  const layout=layoutFor(slot,bp),style=styleFor(slot,bp);
@@ -52,10 +40,8 @@ function applySlot(def,slot,bp){
  }
  if(slot.asset&&def.asset){
   const asset=resolveAsset(slot.asset);
-  if(def.asset==='home-bg'){
-   const layer=ensureBackgroundLayer();
-   if(layer)layer.style.backgroundImage=`url("${asset}")`;
-  }else el.style.setProperty('background-image',`url("${asset}")`,'important');
+  if(def.asset==='home-bg')el.style.setProperty('--home-bg',`url("${asset}")`);
+  else el.style.setProperty('background-image',`url("${asset}")`,'important');
  }
 }
 
