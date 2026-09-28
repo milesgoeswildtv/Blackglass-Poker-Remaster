@@ -17,9 +17,9 @@ const skinOptions=Object.values(SKIN_REGISTRY)
  .map(skin=>({label:`${skin.label}${skin.tier==='premium'?' — PREMIUM':skin.tier==='normal'?' — NORMAL':''}`,value:skin.id}));
 
 const channelOptions=[
- {label:'Menu / Panel Theme',value:'menuTheme'},
- {label:'In-Game Theme',value:'gameplayTheme'},
- {label:'Table Skin',value:'tableSkin'}
+ {label:'Panels / Menu',value:'menuTheme'},
+ {label:'Gameplay',value:'gameplayTheme'},
+ {label:'Poker Table',value:'tableSkin'}
 ];
 const roleOptions=[
  {label:'Identity Panel',value:'identity-panel'},
@@ -93,12 +93,13 @@ const config={
  },
  components:{
   SkinAsset:{
-   label:'Skinnable Asset Slot',
+   label:'SKIN ASSET — Auto Swaps',
+   inline:true,
    fields:{
     channel:{type:'select',label:'Skin Channel',options:channelOptions},
     role:{type:'select',label:'Asset Role',options:roleOptions},
-    columns:{type:'select',label:'Width (Grid Columns)',options:spanOptions},
-    rows:{type:'select',label:'Height (Grid Rows)',options:rowOptions},
+    columns:{type:'select',label:'Width',options:spanOptions},
+    rows:{type:'select',label:'Height',options:rowOptions},
     fit:{type:'select',label:'Image Fit',options:[{label:'Contain',value:'contain'},{label:'Cover',value:'cover'},{label:'Fill',value:'fill'}]}
    },
    defaultProps:{
@@ -111,11 +112,12 @@ const config={
    render:SkinAssetRender
   },
   Asset:{
-   label:'Static / Approved Asset',
+   label:'FIXED ASSET — No Skin Swap',
+   inline:true,
    fields:{
     asset:{type:'select',label:'Allowed Asset',options:assetOptions},
-    columns:{type:'select',label:'Width (Grid Columns)',options:spanOptions},
-    rows:{type:'select',label:'Height (Grid Rows)',options:rowOptions},
+    columns:{type:'select',label:'Width',options:spanOptions},
+    rows:{type:'select',label:'Height',options:rowOptions},
     fit:{type:'select',label:'Image Fit',options:[{label:'Contain',value:'contain'},{label:'Cover',value:'cover'},{label:'Fill',value:'fill'}]}
    },
    defaultProps:{
@@ -127,11 +129,12 @@ const config={
    render:({asset,columns,rows,fit,puck})=><div ref={puck?.dragRef} className="puckSpikeAsset" style={gridStyle(columns,rows)}><img src={asset} alt="" draggable="false" style={{objectFit:fit||'contain'}}/></div>
   },
   Text:{
-   label:'Safe Text',
+   label:'TEXT',
+   inline:true,
    fields:{
     text:{type:'text',label:'Text',contentEditable:true},
-    columns:{type:'select',label:'Width (Grid Columns)',options:spanOptions},
-    rows:{type:'select',label:'Height (Grid Rows)',options:rowOptions},
+    columns:{type:'select',label:'Width',options:spanOptions},
+    rows:{type:'select',label:'Height',options:rowOptions},
     fontSize:{type:'number',label:'Font Size',min:10,max:48},
     align:{type:'select',label:'Alignment',options:[{label:'Left',value:'left'},{label:'Center',value:'center'},{label:'Right',value:'right'}]}
    },
@@ -145,15 +148,16 @@ const config={
    render:({text,columns,rows,fontSize,align,puck})=><div ref={puck?.dragRef} className="puckSpikeText" style={{...gridStyle(columns,rows),fontSize:Number(fontSize)||24,textAlign:align||'left'}}>{text}</div>
   },
   ControlShell:{
-   label:'Safe Control Shell',
+   label:'CONTROL BUTTON',
+   inline:true,
    fields:{
     asset:{type:'select',label:'Allowed Control Asset',options:[
      {label:'Primary Action',value:primaryAction},
      {label:'Utility Badge',value:utilityBadge}
     ]},
     label:{type:'text',label:'Control Label',contentEditable:true},
-    columns:{type:'select',label:'Width (Grid Columns)',options:spanOptions},
-    rows:{type:'select',label:'Height (Grid Rows)',options:rowOptions}
+    columns:{type:'select',label:'Width',options:spanOptions},
+    rows:{type:'select',label:'Height',options:rowOptions}
    },
    defaultProps:{
     asset:primaryAction,
