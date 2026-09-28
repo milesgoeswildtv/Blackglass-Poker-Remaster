@@ -2,7 +2,7 @@ name: Poker CI
 
 on:
   push:
-    branches: [main, visual-remaster]
+    branches: [main, visual-remaster, puck-visual-editor-spike]
   pull_request:
     branches: [main]
   workflow_dispatch:
