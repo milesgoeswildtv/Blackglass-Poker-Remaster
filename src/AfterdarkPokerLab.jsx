@@ -17,9 +17,10 @@ function loadDoc(){
  return freshDoc();
 }
 function mergedChannel(skinId,channel){return{...(SKIN_REGISTRY.default?.channels?.[channel]||{}),...(SKIN_REGISTRY[skinId]?.channels?.[channel]||{})}}
+function backgroundChannel(skinId,channel){const selected=SKIN_REGISTRY[skinId]?.channels?.[channel];return selected&&Object.keys(selected).length?selected:(SKIN_REGISTRY.default?.channels?.[channel]||{})}
 function pickBg(data,bp){return bp==='mobile'?(data.mobile||data.default||data.desktop||data.landscape||''):bp==='desktop'?(data.desktop||data.default||data.mobile||data.landscape||''):(data.default||data.mobile||data.desktop||data.landscape||'')}
 function buildManifest(doc,bp){
- const menu=mergedChannel(doc.skinId,'menuTheme'),bg=mergedChannel(doc.skinId,doc.backgroundChannel);
+ const menu=mergedChannel(doc.skinId,'menuTheme'),bg=backgroundChannel(doc.skinId,doc.backgroundChannel);
  const slots={
   'poker.logo':{label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1}},asset:'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG'},
   'poker.identity':{label:'Player Identity',layout:{},style:{[bp]:{opacity:1}},asset:menu['identity-panel']||null},
@@ -39,7 +40,7 @@ function skinThumb(skin){const bg=skin?.channels?.lobbyBg||{},menu=skin?.channel
 function assetLibrary(skinId){
  const groups=[],seen=new Set(),channels=[['menuTheme','MENU / PANELS'],['gameplayTheme','GAMEPLAY'],['tableSkin','TABLE'],['lobbyBg','LOBBY BACKGROUNDS'],['gameRoomBg','GAME ROOM BACKGROUNDS']];
  for(const[channel,label]of channels){
-  const data=mergedChannel(skinId,channel),items=[];
+  const data=(channel==='lobbyBg'||channel==='gameRoomBg')?backgroundChannel(skinId,channel):mergedChannel(skinId,channel),items=[];
   for(const[role,path]of Object.entries(data)){if(!path||seen.has(path))continue;seen.add(path);items.push({role,label:role.replaceAll('-',' ').toUpperCase(),path,channel})}
   if(items.length)groups.push({channel,label,items});
  }
