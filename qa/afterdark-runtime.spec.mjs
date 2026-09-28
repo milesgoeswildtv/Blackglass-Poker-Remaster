@@ -6,9 +6,10 @@ const evidenceDir='artifacts/browser-qa-afterdark';
 test.beforeEach(async()=>{await fs.mkdir(evidenceDir,{recursive:true})});
 
 test('Afterdark editor renders controls, Poker preview, and swaps skin background',async({page})=>{
-  const pageErrors=[],consoleErrors=[];
+  const pageErrors=[],consoleErrors=[],badResponses=[];
   page.on('pageerror',e=>pageErrors.push(String(e?.stack||e)));
   page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
+  page.on('response',r=>{if(r.status()>=400)badResponses.push({status:r.status(),url:r.url()})});
 
   await page.setViewportSize({width:390,height:844});
   await page.goto('/?qa=afterdark#/design-lab/afterdark');
@@ -40,8 +41,12 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   expect(after).not.toBe(before);
   expect(after.toLowerCase()).toContain('magenta');
 
+  console.log('AFTERDARK_BAD_RESPONSES',JSON.stringify(badResponses));
   expect(pageErrors,'page errors: '+pageErrors.join('\n')).toEqual([]);
-  expect(consoleErrors.filter(x=>!/favicon|source map/i.test(x)),'console errors: '+consoleErrors.join('\n')).toEqual([]);
+  const meaningful=badResponses.filter(x=>!/favicon\.ico(?:$|\?)/i.test(x.url));
+  expect(meaningful,'bad responses: '+JSON.stringify(meaningful)).toEqual([]);
+  const meaningfulConsole=consoleErrors.filter(x=>!/favicon|source map|Failed to load resource/i.test(x));
+  expect(meaningfulConsole,'console errors: '+consoleErrors.join('\n')).toEqual([]);
 
   await page.screenshot({path:evidenceDir+'/afterdark-editor.png',animations:'disabled',fullPage:false});
 });
