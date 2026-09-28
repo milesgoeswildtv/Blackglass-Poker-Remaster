@@ -15,8 +15,8 @@ const SURFACE_SLOT_DEFS={
  ],
  entry:[
   {id:'poker.entry.logo',selector:'.homeBrand h1',asset:'background'},
-  {id:'poker.entry.panel',selector:'.homeEntry',asset:'background',hideMode:'background'},
   {id:'poker.entry.content',selector:'.privateGate'},
+  {id:'poker.entry.panel',selector:'.homeEntry',asset:'background',hideMode:'background'},
   {id:'poker.background',selector:'.homeShell',asset:'home-bg'}
  ],
  invite:[
