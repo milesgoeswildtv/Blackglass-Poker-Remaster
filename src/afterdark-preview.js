@@ -99,6 +99,7 @@ function applySlot(def,slot,bp){
  if(Number.isFinite(Number(layout.zIndex)))el.style.setProperty('z-index',String(layout.zIndex),'important');
  if(layout.visible===false){if(def.hideMode==='background')el.style.setProperty('background-image','none','important');else el.style.setProperty('visibility','hidden','important')}else{if(def.hideMode!=='background')el.style.removeProperty('visibility')}
  if(Number.isFinite(Number(style.opacity)))el.style.setProperty('opacity',String(style.opacity),'important');
+ if(Object.prototype.hasOwnProperty.call(style,'filter'))el.style.setProperty('filter',String(style.filter||'none'),'important');
  if(def.id==='poker.background'){
   const frame=backgroundPresentation(style);
   if(def.asset==='home-bg'){

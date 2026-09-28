@@ -55,6 +55,7 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
 
   const defaultBg=await frame.locator('.homeShell').evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
   const defaultLogo=await frame.locator('.homeBrand h1').evaluate(el=>getComputedStyle(el).backgroundImage);
+  const defaultLogoFilter=await frame.locator('.homeBrand h1').evaluate(el=>getComputedStyle(el).filter);
   const defaultCreate=await frame.locator('.homeActionPrimary').first().evaluate(el=>getComputedStyle(el).backgroundImage);
   const defaultJoin=await frame.locator('.homeActionPrimary').nth(1).evaluate(el=>getComputedStyle(el).backgroundImage);
   const defaultHost=await frame.locator('.homeHostIdentity').evaluate(el=>getComputedStyle(el).backgroundImage);
@@ -90,6 +91,9 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   const after=await frame.locator('.homeShell').evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
   expect(after).not.toBe(before);
   expect(after.toLowerCase()).toContain('magenta');
+  const skinnedLogo=await frame.locator('.homeBrand h1').evaluate(el=>({image:getComputedStyle(el).backgroundImage,filter:getComputedStyle(el).filter}));
+  expect(skinnedLogo.image.toLowerCase().includes('magenta')||skinnedLogo.filter!==defaultLogoFilter).toBe(true);
+  expect(skinnedLogo.filter==='none'&&skinnedLogo.image===defaultLogo).toBe(false);
 
   await page.getByText('ASSETS',{exact:true}).click();
   const tableGroup=page.locator('.adAssetGroup').filter({has:page.getByRole('heading',{name:'TABLE'})});
@@ -114,9 +118,11 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   expect(Math.abs(linkedAfter.width-linkedBefore.width)).toBeLessThan(1);
   expect(Math.abs(linkedAfter.height-linkedBefore.height)).toBeLessThan(1);
 
+  await expect(page.getByRole('button',{name:'Lock selected layer'})).toBeVisible();
+  await page.getByRole('button',{name:'Lock selected layer'}).click();
+  await expect(page.getByRole('button',{name:'Unlock selected layer'})).toBeVisible();
   await page.getByText('EDIT',{exact:true}).click();
-  await expect(page.getByRole('button',{name:'Lock layer position'})).toBeVisible();
-  await page.getByRole('button',{name:'Lock layer position'}).click();
+  await expect(page.getByRole('button',{name:'Unlock layer position'})).toBeVisible();
   await expect(page.locator('.adSelection')).toHaveClass(/locked/);
   await expect(page.locator('.adHandle')).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Delete selected asset'})).toHaveCount(0);
@@ -134,9 +140,7 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   const lockedAfter=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
   expect(Math.abs(lockedAfter.x-lockedBefore.x)).toBeLessThan(1);
   expect(Math.abs(lockedAfter.y-lockedBefore.y)).toBeLessThan(1);
-  await page.getByText('EDIT',{exact:true}).click();
-  await page.getByRole('button',{name:'Unlock layer position'}).click();
-  await page.locator('.adSheet>header button').click();
+  await page.getByRole('button',{name:'Unlock selected layer'}).click();
   await expect(page.locator('.adSelection')).not.toHaveClass(/locked/);
   await expect(page.locator('.adHandle')).toHaveCount(4);
 
