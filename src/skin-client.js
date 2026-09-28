@@ -1,12 +1,30 @@
 import{SKIN_REGISTRY,backgroundVariant,normalizeSkinLoadout,skinChannelData,themeAsset}from'../skin-system.js';
 
+const LOGO_FILTERS=Object.freeze({
+ default:'none',
+ magenta:'saturate(1.75) hue-rotate(275deg) brightness(1.03)',
+ sapphire:'saturate(1.8) hue-rotate(170deg) brightness(.98)',
+ envy:'saturate(1.65) hue-rotate(80deg) brightness(.98)',
+ crimson:'saturate(1.9) hue-rotate(320deg) brightness(.96)',
+ 'full-tilt':'saturate(1.45) brightness(1.04)',
+ dwallet:'saturate(1.7) hue-rotate(125deg) brightness(1.02)'
+});
+function logoPresentation(loadout={}){
+ const normalized=normalizeSkinLoadout(loadout),id=normalized.menuTheme||'default';
+ const selected=SKIN_REGISTRY[id]?.channels?.brandTheme?.default;
+ const fallback=SKIN_REGISTRY.default?.channels?.brandTheme?.default||'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG';
+ return{asset:selected||fallback,filter:selected?'none':(LOGO_FILTERS[id]||'none')};
+}
+
 const BASE=import.meta.env.BASE_URL||'/';
 export function skinAssetUrl(value){const path=String(value||'');if(!path)return'';if(/^(?:https?:|data:|blob:)/i.test(path))return path;return`${BASE}${path.replace(/^\/+/, '')}`}
 const bg=value=>value?`url("${skinAssetUrl(value)}")`:'';
 
 export function lobbySkinStyle(loadout={}){
- const menu=skinChannelData(loadout,'menuTheme');
+ const menu=skinChannelData(loadout,'menuTheme'),logo=logoPresentation(loadout);
  return{
+  '--skin-brand-logo':bg(logo.asset),
+  '--skin-brand-filter':logo.filter,
   '--skin-lobby-bg-mobile':bg(backgroundVariant(loadout,'lobbyBg','mobile')),
   '--skin-lobby-bg-desktop':bg(backgroundVariant(loadout,'lobbyBg','desktop')),
   '--skin-lobby-bg-landscape':bg(backgroundVariant(loadout,'lobbyBg','landscape')),
