@@ -75,12 +75,15 @@ function setInteractionLock(locked){
 }
 
 function ensureCustomRoot(){
+ const shell=document.querySelector('.homeShell');if(!shell)return null;
  let root=document.getElementById('afterdark-custom-root');
- if(!root){root=document.createElement('div');root.id='afterdark-custom-root';Object.assign(root.style,{position:'fixed',inset:'0',zIndex:'5000',pointerEvents:'none',overflow:'visible'});document.body.appendChild(root)}
+ if(!root){root=document.createElement('div');root.id='afterdark-custom-root';shell.appendChild(root)}
+ else if(root.parentElement!==shell)shell.appendChild(root);
+ Object.assign(root.style,{position:'absolute',left:'0',top:'0',width:'100%',height:Math.max(shell.scrollHeight,shell.offsetHeight,innerHeight)+'px',zIndex:'5000',pointerEvents:'none',overflow:'visible'});
  return root;
 }
 function renderCustomAssets(){
- const root=ensureCustomRoot(),seen=new Set();
+ const root=ensureCustomRoot(),seen=new Set();if(!root)return;
  for(const item of customAssets){
   if(!item?.id||!item?.asset)continue;seen.add(item.id);
   let el=root.querySelector('[data-afterdark-id="'+CSS.escape(item.id)+'"]');
@@ -137,6 +140,7 @@ export function installAfterdarkPreview(){
    }
   });
   addEventListener('resize',reportRects);
+  addEventListener('scroll',reportRects,{passive:true});
   new MutationObserver(()=>{apply();reportRects()}).observe(document.body,{childList:true,subtree:true});
   parent.postMessage({type:'afterdark:ready'},'*');
   reportRects();
