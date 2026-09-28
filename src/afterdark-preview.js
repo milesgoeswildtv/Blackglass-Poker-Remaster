@@ -45,7 +45,22 @@ function applySlot(def,slot,bp){
  }
 }
 
-let manifest=null,breakpoint='mobile';
+let manifest=null,breakpoint='mobile',interactionLocked=false,lockedScrollY=0;
+function blockTouchScroll(e){if(interactionLocked)e.preventDefault()}
+function setInteractionLock(locked){
+ locked=!!locked;if(locked===interactionLocked)return;interactionLocked=locked;
+ const root=document.documentElement,body=document.body;
+ if(locked){
+  lockedScrollY=window.scrollY||document.documentElement.scrollTop||0;
+  root.style.setProperty('overflow','hidden','important');root.style.setProperty('overscroll-behavior','none','important');root.style.setProperty('touch-action','none','important');
+  body.style.setProperty('position','fixed','important');body.style.setProperty('top',`-${lockedScrollY}px`,'important');body.style.setProperty('left','0','important');body.style.setProperty('right','0','important');body.style.setProperty('width','100%','important');body.style.setProperty('overflow','hidden','important');body.style.setProperty('touch-action','none','important');
+  document.addEventListener('touchmove',blockTouchScroll,{passive:false,capture:true});
+ }else{
+  document.removeEventListener('touchmove',blockTouchScroll,true);
+  for(const el of[root,body])for(const prop of['overflow','overscroll-behavior','touch-action','position','top','left','right','width'])el.style.removeProperty(prop);
+  requestAnimationFrame(()=>window.scrollTo(0,lockedScrollY));
+ }
+}
 function apply(){
  if(!manifest)return;
  for(const def of SLOT_DEFS)applySlot(def,manifest.slots?.[def.id],breakpoint);
@@ -79,6 +94,7 @@ export function installAfterdarkPreview(){
   document.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation()},true);
   addEventListener('message',e=>{
    const d=e.data||{};
+   if(d.type==='afterdark:interaction'){setInteractionLock(d.locked);return}
    if(d.type==='afterdark:manifest'&&d.manifest){
     manifest=d.manifest;
     breakpoint=['mobile','tablet','desktop'].includes(d.breakpoint)?d.breakpoint:'mobile';
