@@ -70,6 +70,16 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
 
   await page.getByText('SKIN',{exact:true}).click();
   await expect(page.getByText('SKIN + BACKGROUND')).toBeVisible();
+  await expect(page.getByText('BACKGROUND FRAMING',{exact:true})).toBeVisible();
+  await page.getByLabel('Background zoom').fill('150');
+  await page.getByLabel('Background position X').fill('25');
+  await page.getByLabel('Background position Y').fill('70');
+  await expect.poll(()=>frame.locator('.homeShell').evaluate(el=>getComputedStyle(el,'::before').backgroundSize)).toBe('150% auto');
+  await expect.poll(()=>frame.locator('.homeShell').evaluate(el=>getComputedStyle(el,'::before').backgroundPosition)).toBe('25% 70%');
+  await page.getByRole('button',{name:'COVER',exact:true}).click();
+  await expect.poll(()=>frame.locator('.homeShell').evaluate(el=>getComputedStyle(el,'::before').backgroundSize)).toBe('cover');
+  await page.getByRole('button',{name:'RESET FRAMING',exact:true}).click();
+  await expect.poll(()=>frame.locator('.homeShell').evaluate(el=>getComputedStyle(el,'::before').backgroundPosition)).toBe('50% 50%');
   const magenta=page.getByRole('button',{name:/Magenta/i});
   await expect(magenta).toBeVisible();
   await magenta.click();
