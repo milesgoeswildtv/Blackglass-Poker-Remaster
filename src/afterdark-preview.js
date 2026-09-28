@@ -45,7 +45,7 @@ function applySlot(def,slot,bp){
  }
 }
 
-let manifest=null,breakpoint='mobile',interactionLocked=false,lockedScrollY=0;
+let manifest=null,breakpoint='mobile',customAssets=[],interactionLocked=false,lockedScrollY=0;
 function blockTouchScroll(e){if(interactionLocked)e.preventDefault()}
 function setInteractionLock(locked){
  locked=!!locked;if(locked===interactionLocked)return;interactionLocked=locked;
@@ -61,9 +61,29 @@ function setInteractionLock(locked){
   requestAnimationFrame(()=>window.scrollTo(0,lockedScrollY));
  }
 }
+
+function ensureCustomRoot(){
+ let root=document.getElementById('afterdark-custom-root');
+ if(!root){root=document.createElement('div');root.id='afterdark-custom-root';Object.assign(root.style,{position:'fixed',inset:'0',zIndex:'5000',pointerEvents:'none',overflow:'visible'});document.body.appendChild(root)}
+ return root;
+}
+function renderCustomAssets(){
+ const root=ensureCustomRoot(),seen=new Set();
+ for(const item of customAssets){
+  if(!item?.id||!item?.asset)continue;seen.add(item.id);
+  let el=root.querySelector('[data-afterdark-id="'+CSS.escape(item.id)+'"]');
+  if(!el){el=document.createElement('div');el.dataset.afterdarkId=item.id;el.style.position='absolute';el.style.pointerEvents='auto';el.style.touchAction='none';const img=document.createElement('img');img.draggable=false;img.alt='';Object.assign(img.style,{display:'block',width:'100%',height:'100%',objectFit:'contain',pointerEvents:'none',userSelect:'none'});el.appendChild(img);root.appendChild(el)}
+  const img=el.querySelector('img'),l=item.layout||{};
+  el.style.left=px(l.x||0);el.style.top=px(l.y||0);el.style.width=px(l.width||180);el.style.height=px(l.height||120);el.style.zIndex=String(Number(l.zIndex||20));
+  img.src=resolveAsset(item.asset);
+ }
+ for(const el of [...root.children])if(!seen.has(el.dataset.afterdarkId))el.remove();
+}
+
 function apply(){
  if(!manifest)return;
  for(const def of SLOT_DEFS)applySlot(def,manifest.slots?.[def.id],breakpoint);
+ renderCustomAssets();
  requestAnimationFrame(reportRects);
 }
 function reportRects(){
@@ -73,9 +93,11 @@ function reportRects(){
   const r=el.getBoundingClientRect();
   rects.push({id:def.id,x:r.left,y:r.top,width:r.width,height:r.height});
  }
+ for(const el of document.querySelectorAll('#afterdark-custom-root [data-afterdark-id]')){const r=el.getBoundingClientRect();rects.push({id:el.dataset.afterdarkId,x:r.left,y:r.top,width:r.width,height:r.height})}
  parent.postMessage({type:'afterdark:rects',rects},'*');
 }
 function selectFromTarget(target){
+ const custom=target?.closest?.('#afterdark-custom-root [data-afterdark-id]');if(custom){parent.postMessage({type:'afterdark:select',id:custom.dataset.afterdarkId},'*');return true}
  for(const def of SLOT_DEFS){
   if(def.id==='poker.background')continue;
   const el=elementFor(def);
@@ -97,6 +119,7 @@ export function installAfterdarkPreview(){
    if(d.type==='afterdark:interaction'){setInteractionLock(d.locked);return}
    if(d.type==='afterdark:manifest'&&d.manifest){
     manifest=d.manifest;
+    customAssets=Array.isArray(d.customAssets)?d.customAssets:[];
     breakpoint=['mobile','tablet','desktop'].includes(d.breakpoint)?d.breakpoint:'mobile';
     apply();
    }
