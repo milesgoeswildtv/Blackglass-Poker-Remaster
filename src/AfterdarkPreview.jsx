@@ -205,10 +205,10 @@ export default function AfterdarkPreview(){
  useEffect(()=>{
   document.documentElement.classList.add('afterdarkPreviewMode');
   const post=payload=>parent.postMessage({...payload,surface},'*');
-  let raf=0;
+  let raf=0,selectable=null;
   const emit=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>post({type:'afterdark:rects',rects:rectPayload(surface)}))};
-  const onMessage=e=>{const d=e.data||{};if(d.type!=='afterdark:manifest'||(d.surface&&d.surface!==surface))return;setManifest(d.manifest||null);setBreakpoint(d.breakpoint||'mobile')};
-  const onPointer=e=>{const defs=SLOT_DEFS[surface]||{},candidates=Object.entries(defs).map(([id,def])=>({id,el:document.querySelector(def.selector)})).filter(x=>x.el&&x.el.contains(e.target)).sort((a,b)=>depth(b.el)-depth(a.el));if(!candidates.length)return;e.preventDefault();e.stopPropagation();post({type:'afterdark:select',id:candidates[0].id})};
+  const onMessage=e=>{const d=e.data||{};if(d.type!=='afterdark:manifest'||(d.surface&&d.surface!==surface))return;selectable=Array.isArray(d.selectableSlots)?new Set(d.selectableSlots):null;setManifest(d.manifest||null);setBreakpoint(d.breakpoint||'mobile')};
+  const onPointer=e=>{const defs=SLOT_DEFS[surface]||{},candidates=Object.entries(defs).filter(([id])=>!selectable||selectable.has(id)).map(([id,def])=>({id,el:document.querySelector(def.selector)})).filter(x=>x.el&&x.el.contains(e.target)).sort((a,b)=>depth(b.el)-depth(a.el));if(!candidates.length)return;e.preventDefault();e.stopPropagation();post({type:'afterdark:select',id:candidates[0].id})};
   addEventListener('message',onMessage);addEventListener('resize',emit);addEventListener('scroll',emit,true);document.addEventListener('pointerdown',onPointer,true);
   post({type:'afterdark:ready'});emit();
   return()=>{document.documentElement.classList.remove('afterdarkPreviewMode');cancelAnimationFrame(raf);removeEventListener('message',onMessage);removeEventListener('resize',emit);removeEventListener('scroll',emit,true);document.removeEventListener('pointerdown',onPointer,true)};
