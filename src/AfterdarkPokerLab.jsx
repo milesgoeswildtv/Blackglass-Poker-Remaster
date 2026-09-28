@@ -6,6 +6,20 @@ import{buildSnapTargets,snapMoveRect,snapResizeRect,SNAP_GRID}from'./afterdark-s
 import{AFTERDARK_SURFACES,surfaceConfig,freshSurface,freshSurfaceDocument}from'./afterdark-surfaces.js';
 
 const SKIN_ORDER=['default','magenta','sapphire','envy','crimson','full-tilt','dwallet'];
+const LOGO_FILTERS=Object.freeze({
+ default:'none',
+ magenta:'saturate(1.75) hue-rotate(275deg) brightness(1.03)',
+ sapphire:'saturate(1.8) hue-rotate(170deg) brightness(.98)',
+ envy:'saturate(1.65) hue-rotate(80deg) brightness(.98)',
+ crimson:'saturate(1.9) hue-rotate(320deg) brightness(.96)',
+ 'full-tilt':'saturate(1.45) brightness(1.04)',
+ dwallet:'saturate(1.7) hue-rotate(125deg) brightness(1.02)'
+});
+function logoVisual(skinId){
+ const selected=SKIN_REGISTRY[skinId]?.channels?.brandTheme?.default;
+ const fallback=SKIN_REGISTRY.default?.channels?.brandTheme?.default||'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG';
+ return{asset:selected||fallback,filter:selected?'none':(LOGO_FILTERS[skinId]||'none')};
+}
 const STORAGE='crashout.afterdark.document.v3';
 const LEGACY_STORAGE='crashout.afterdark.document.v2';
 const clone=v=>structuredClone(v);
@@ -37,11 +51,11 @@ function mergedChannel(skinId,channel){return{...(SKIN_REGISTRY.default?.channel
 function backgroundChannel(skinId,channel){const selected=SKIN_REGISTRY[skinId]?.channels?.[channel];return selected&&Object.keys(selected).length?selected:(SKIN_REGISTRY.default?.channels?.[channel]||{})}
 function pickBg(data,bp){return bp==='mobile'?(data.mobile||data.default||data.desktop||data.landscape||''):bp==='desktop'?(data.desktop||data.default||data.mobile||data.landscape||''):(data.default||data.mobile||data.desktop||data.landscape||'')}
 function buildManifest(doc,bp,surfaceId,page){
- const cfg=surfaceConfig(surfaceId),menu=mergedChannel(doc.skinId,'menuTheme'),brand=mergedChannel(doc.skinId,'brandTheme'),table=mergedChannel(doc.skinId,'tableSkin'),bg=backgroundChannel(doc.skinId,page.backgroundChannel),frame=page.backgroundFraming||freshSurface(surfaceId).backgroundFraming;
+ const cfg=surfaceConfig(surfaceId),menu=mergedChannel(doc.skinId,'menuTheme'),table=mergedChannel(doc.skinId,'tableSkin'),bg=backgroundChannel(doc.skinId,page.backgroundChannel),frame=page.backgroundFraming||freshSurface(surfaceId).backgroundFraming,logo=logoVisual(doc.skinId);
  const slots={'poker.background':{label:page.backgroundChannel==='gameRoomBg'?'Game Room Background':'Lobby Background',layout:{[bp]:{}},style:{[bp]:{opacity:1,backgroundFit:frame.mode||'cover',backgroundScale:Number(frame.scale??100),backgroundPositionX:Number(frame.x??50),backgroundPositionY:Number(frame.y??50)}},asset:pickBg(bg,bp)}};
  if(surfaceId==='home'){
   Object.assign(slots,{
-   'poker.logo':{label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1}},asset:brand.default||'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG'},
+   'poker.logo':{label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1,filter:logo.filter}},asset:logo.asset},
    'poker.identity':{label:'Player Identity',layout:{},style:{[bp]:{opacity:1}},asset:menu['identity-panel']||null},
    'poker.hostBar':{label:'Host Bar',layout:{},style:{[bp]:{opacity:1}},asset:menu['host-bar']||null},
    'poker.create':{label:'Create Game',layout:{},style:{[bp]:{opacity:1}},asset:menu['create-panel']||null},
@@ -50,7 +64,7 @@ function buildManifest(doc,bp,surfaceId,page){
    'poker.utility':{label:'Engine + Fairness',layout:{},style:{[bp]:{opacity:1}},asset:menu['utility-badge']||null}
   });
  }else if(surfaceId==='entry'){
-  slots['poker.entry.logo']={label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1}},asset:brand.default||'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG'};
+  slots['poker.entry.logo']={label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1,filter:logo.filter}},asset:logo.asset};
   slots['poker.entry.panel']={label:'Panel Artwork',layout:{},style:{[bp]:{opacity:1}},asset:menu['master-panel']||'assets/remaster/entry-gate/CRASHOUT_MASTER_FULL_SCREEN_PANEL.PNG'};
   slots['poker.entry.content']={label:'Access Content',layout:{},style:{[bp]:{opacity:1}},asset:null};
  }else{
@@ -206,7 +220,7 @@ export default function AfterdarkPokerLab(){
  const siteWrapStyle=siteView?{width:Math.round(viewport.width*zoom),height:Math.round(viewport.height*zoom)}:undefined;
  return <main className={'adLab'+(siteView?' adSiteView':'')}>
   <header className="adTop"><div><b>AFTERDARK</b><span>CRASHOUT POKER VISUAL EDITOR</span></div><button className="adViewButton" type="button" onClick={enterSiteView}>SITE VIEW</button><select value={breakpoint} onChange={e=>setBreakpoint(e.target.value)}><option value="mobile">MOBILE</option><option value="tablet">TABLET</option><option value="desktop">DESKTOP</option></select></header>
-  <div className="adStatus"><button onClick={()=>{closeSheets();setLayerOpen(true)}}>{selected?layerName(selected,page,builtIns):'SELECT A LAYER'}</button><em>{surface.label} · {skin?.label||'DEFAULT'} · {page.backgroundChannel==='gameRoomBg'?'GAME ROOM':'LOBBY'}</em><span className={connected?'live':''}>{connected?'LIVE':'CONNECTING'}</span></div>
+  <div className="adStatus"><button className="adStatusLayer" onClick={()=>{closeSheets();setLayerOpen(true)}}>{selected?layerName(selected,page,builtIns):'SELECT A LAYER'}</button>{selected&&<button className={'adQuickLock'+(selectedLocked?' active':'')} type="button" aria-label={selectedLocked?'Unlock selected layer':'Lock selected layer'} onClick={toggleLayerLock}>{selectedLocked?'🔓 UNLOCK':'🔒 LOCK'}</button>}<em>{surface.label} · {skin?.label||'DEFAULT'} · {page.backgroundChannel==='gameRoomBg'?'GAME ROOM':'LOBBY'}</em><span className={connected?'live':''}>{connected?'LIVE':'CONNECTING'}</span></div>
   <nav className="adSurfaceTabs" aria-label="Page loadouts">{AFTERDARK_SURFACES.map(s=><button key={s.id} type="button" className={surfaceId===s.id?'active':''} onClick={()=>changeSurface(s.id)}><b>{s.short}</b><small>{s.scroll==='fixed'?'LOCKED':'SCROLL'}</small></button>)}</nav>
   <section className="adWorkspace">{siteView?<div className="adSiteStageWrap" style={siteWrapStyle}><div ref={stageRef} className="adStage" style={siteStageStyle}><iframe ref={iframeRef} src={previewSrc} title="Crashout Poker visual preview"/></div></div>:<div ref={stageRef} className="adStage" style={siteStageStyle}><iframe ref={iframeRef} src={previewSrc} title="Crashout Poker visual preview"/><div className="adOverlay">{guides.x!=null&&<i className="adSnapGuide x" style={{left:guides.x}}/>}{guides.y!=null&&<i className="adSnapGuide y" style={{top:guides.y}}/>}{selectedRect&&<div className={'adSelection'+(selectedLocked?' locked':'')} style={{left:selectedRect.x,top:selectedRect.y,width:selectedRect.width,height:selectedRect.height}} onPointerDown={e=>startPointer(e,'move')}><span>{selectedLocked?'🔒 ':''}{layerName(selected,page,builtIns)}</span>{!selectedLocked&&<button className="adSelectionDelete" type="button" aria-label={isCustom(selected)?'Delete selected asset':'Hide selected element'} onPointerDown={e=>{e.preventDefault();e.stopPropagation()}} onClick={e=>{e.preventDefault();e.stopPropagation();deleteSelected()}}>🗑</button>}{!selectedLocked&&['nw','ne','sw','se'].map(h=><i key={h} className={'adHandle '+h} onPointerDown={e=>startPointer(e,h)}/>)}</div>}</div></div>}</section>
 
