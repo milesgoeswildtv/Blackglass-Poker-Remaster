@@ -96,8 +96,8 @@ function renderCustomAssets(){
    el.dataset.afterdarkKind='text';
    let text=el.querySelector('[data-afterdark-text]');
    if(!text){el.replaceChildren();text=document.createElement('div');text.dataset.afterdarkText='1';Object.assign(text.style,{width:'100%',height:'100%',display:'flex',alignItems:'center',whiteSpace:'pre-wrap',overflow:'hidden',wordBreak:'break-word',pointerEvents:'none',userSelect:'none'});el.appendChild(text)}
-   const s=item.textStyle||{};
-   text.textContent=String(item.text||'');
+   const s=item.textStyle||{},nextText=String(item.text||'');
+   if(text.textContent!==nextText)text.textContent=nextText;
    text.style.fontSize=px(Number(s.fontSize||24));
    text.style.fontWeight=String(Number(s.fontWeight||800));
    text.style.color=String(s.color||'#ffffff');
