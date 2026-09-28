@@ -129,10 +129,10 @@ export default function AfterdarkPokerLab(){
  function changeZ(delta){if(!selected)return;patchLayer(selected,{zIndex:Number(selectedLayer?.zIndex||5)+delta},true)}
  function changeSkin(id){const next=clone(doc);next.skinId=id;commit(next,true);setSkinOpen(false)}
  function changeBackground(channel){const next=clone(doc);next.backgroundChannel=channel;commit(next,true)}
- function enterSiteView(){closeSheets();setSelected('');setGuides({x:null,y:null});setViewport(realViewport());setZoom(1);setSiteView(true)}
+ function enterSiteView(){closeSheets();setSelected('');setGuides({x:null,y:null});setViewport(realViewport());setZoom(1);setSiteView(true);requestAnimationFrame(()=>document.querySelector('.adWorkspace')?.scrollTo({top:0,left:0}))}
  function exitSiteView(){setSiteView(false);setZoom(1)}
  function changeZoom(delta){setZoom(z=>Math.max(.5,Math.min(2,Math.round((z+delta)*10)/10)))}
- function resetZoom(){setZoom(1)}
+ function resetZoom(){setZoom(1);requestAnimationFrame(()=>document.querySelector('.adWorkspace')?.scrollTo({top:0,left:0}))}
  function startPointer(e,mode){
   if(!selected||!selectedRect)return;e.preventDefault();e.stopPropagation();e.currentTarget?.setPointerCapture?.(e.pointerId);document.querySelector('.adLab')?.classList.add('adManipulating');document.documentElement.classList.add('adScrollLocked');document.body.classList.add('adScrollLocked');iframeRef.current?.contentWindow?.postMessage({type:'afterdark:interaction',locked:true},'*');
   const base=selectedLayer||{},r=selectedRect,q={mode,sx:e.clientX,sy:e.clientY,x:Number(base.x||0),y:Number(base.y||0),w:Number(base.width||r.width),h:Number(base.height||r.height),rx:Number(r.x),ry:Number(r.y),rw:Number(r.width),rh:Number(r.height)};dragRef.current=q;snapshot();
