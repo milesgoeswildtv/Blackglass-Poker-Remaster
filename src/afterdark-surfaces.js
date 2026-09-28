@@ -1,5 +1,5 @@
 export const AFTERDARK_SURFACES=[
- {id:'entry',label:'ENTRY',short:'ENTRY',backgroundChannel:'lobbyBg',scroll:'page',builtIns:[['poker.entry.logo','Logo'],['poker.entry.panel','Access Panel']]},
+ {id:'entry',label:'ENTRY',short:'ENTRY',backgroundChannel:'lobbyBg',scroll:'page',builtIns:[['poker.entry.logo','Logo'],['poker.entry.panel','Panel Artwork'],['poker.entry.content','Access Content']]},
  {id:'home',label:'HOME',short:'HOME',backgroundChannel:'lobbyBg',scroll:'page',builtIns:[['poker.logo','Logo'],['poker.identity','Player Identity'],['poker.hostBar','Host Bar'],['poker.create','Create Game'],['poker.join','Join Game'],['poker.shop','Booster Shop'],['poker.utility','Engine + Fairness']]},
  {id:'invite',label:'INVITE',short:'INVITE',backgroundChannel:'gameRoomBg',scroll:'fixed',builtIns:[['poker.invite.panel','Invite Panel']]},
  {id:'pregame',label:'PRE-GAME',short:'PRE',backgroundChannel:'gameRoomBg',scroll:'fixed',builtIns:[['poker.pregame.panel','Staging Panel'],['poker.table','Table'],['poker.hero','Player Plaque'],['poker.actions','Pregame Controls']]},
