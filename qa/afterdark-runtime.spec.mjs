@@ -11,6 +11,12 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
   page.on('response',r=>{if(r.status()>=400)badResponses.push({status:r.status(),url:r.url()})});
 
+  await page.route('**/api/**',async route=>{
+    const req=route.request(),p=new URL(req.url()).pathname;
+    if(p==='/api/auth/me')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({canonicalAccountId:'afterdark-qa',identity:{provider:'discord',displayName:'Afterdark QA',username:'afterdarkqa',avatarUrl:''},account:{equipped:'default',inventory:['default'],notifications:{},links:{},access:{canHost:true,permanentHost:false,hostCredits:3,invites:[]}}})});
+    if(p==='/api/access/key/redeem')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({redeemed:false})});
+    return route.fulfill({status:200,contentType:'application/json',body:'{}'});
+  });
   await page.setViewportSize({width:390,height:844});
   await page.goto('/?qa=afterdark#/design-lab/afterdark');
 
