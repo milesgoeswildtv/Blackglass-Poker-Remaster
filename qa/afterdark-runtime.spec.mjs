@@ -28,15 +28,11 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await expect(page.getByText('SKIN + BACKGROUND')).toBeVisible();
   const magenta=page.getByRole('button',{name:/Magenta/i});
   await expect(magenta).toBeVisible();
-  console.log('AFTERDARK_MAGENTA_THUMB',await magenta.locator('img').getAttribute('src'));
   await magenta.click();
 
   await expect(page.locator('.adStatus')).toContainText(/Magenta/i);
   await page.waitForTimeout(250);
 
-  const debug=await frame.locator('.homeShell').evaluate(el=>({inlineHome:el.style.getPropertyValue('--home-bg'),inlinePreview:el.style.getPropertyValue('--afterdark-preview-bg'),inlineMobile:el.style.getPropertyValue('--skin-lobby-bg-mobile'),computedHome:getComputedStyle(el).getPropertyValue('--home-bg'),computedPreview:getComputedStyle(el).getPropertyValue('--afterdark-preview-bg'),computedMobile:getComputedStyle(el).getPropertyValue('--skin-lobby-bg-mobile'),pseudo:getComputedStyle(el,'::before').backgroundImage}));
-  console.log('AFTERDARK_BG_DEBUG',JSON.stringify(debug));
-  console.log('AFTERDARK_DOC_DEBUG',await page.evaluate(()=>localStorage.getItem('crashout.afterdark.document.v2')));
   const after=await frame.locator('.homeShell').evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
   expect(after).not.toBe(before);
   expect(after.toLowerCase()).toContain('magenta');
