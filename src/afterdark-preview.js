@@ -95,7 +95,7 @@ function applySlot(def,slot,bp){
   const img=el.matches('img')?el:el.querySelector('img');
   if(img)img.style.setProperty('object-fit',style.objectFit,'important');
  }
- if(slot.asset&&def.asset){
+ if(slot.asset&&def.asset&&!(layout.visible===false&&def.hideMode==='background')){
   const asset=resolveAsset(slot.asset);
   if(def.asset==='home-bg'){
    ensurePreviewStyles();
