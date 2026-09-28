@@ -5,7 +5,7 @@ const root=process.cwd();
 const inbox=path.join(root,'public','skin-uploads');
 const out=path.join(root,'skin-registry.generated.js');
 const imageExts=new Set(['.png','.jpg','.jpeg','.webp','.svg']);
-const channels=new Set(['lobby-bg','game-room-bg','gameplay','table','menu']);
+const channels=new Set(['lobby-bg','game-room-bg','gameplay','table','menu','logo']);
 const bgVariants=new Set(['default','mobile','desktop','landscape']);
 
 fs.mkdirSync(inbox,{recursive:true});
@@ -125,7 +125,7 @@ function ensureSkin(id){
  return seed[id];
 }
 function channelKey(raw){
- return raw==='lobby-bg'?'lobbyBg':raw==='game-room-bg'?'gameRoomBg':raw==='gameplay'?'gameplayTheme':raw==='table'?'tableSkin':'menuTheme';
+ return raw==='lobby-bg'?'lobbyBg':raw==='game-room-bg'?'gameRoomBg':raw==='gameplay'?'gameplayTheme':raw==='table'?'tableSkin':raw==='logo'?'brandTheme':'menuTheme';
 }
 const chosen=new Map();
 const cleanToken=value=>String(value||'').trim().toLowerCase().replace(/[\s_]+/g,'-').replace(/\.+$/g,'').replace(/-+/g,'-').replace(/^-|-$/g,'');
@@ -163,8 +163,8 @@ for(const entry of fs.readdirSync(inbox,{withFileTypes:true}).filter(x=>x.isFile
   if(!bgVariants.has(variant))throw new Error(`Invalid background variant "${variant}" in "${originalName}". Use mobile, desktop, landscape, or omit it.`);
   skin.channels[key]??={};
   put(skin.channels[key],variant,assetPath,originalName,`${id}:${key}:${variant}`);
- }else if(rawChannel==='table'){
-  if(roleRaw)throw new Error(`Table skin "${originalName}" should not include a role. Use skin-id__table.ext`);
+ }else if(rawChannel==='table'||rawChannel==='logo'){
+  if(roleRaw)throw new Error(`${rawChannel==='table'?'Table skin':'Logo'} "${originalName}" should not include a role. Use skin-id__${rawChannel}.ext`);
   skin.channels[key]??={};
   put(skin.channels[key],'default',assetPath,originalName,`${id}:${key}:default`);
  }else{
