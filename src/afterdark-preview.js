@@ -15,7 +15,8 @@ const SURFACE_SLOT_DEFS={
  ],
  entry:[
   {id:'poker.entry.logo',selector:'.homeBrand h1',asset:'background'},
-  {id:'poker.entry.panel',selector:'.privateGate'},
+  {id:'poker.entry.panel',selector:'.homeEntry',asset:'background',hideMode:'background'},
+  {id:'poker.entry.content',selector:'.privateGate'},
   {id:'poker.background',selector:'.homeShell',asset:'home-bg'}
  ],
  invite:[
@@ -88,7 +89,7 @@ function applySlot(def,slot,bp){
  if(Number.isFinite(Number(layout.width)))el.style.setProperty('width',px(layout.width),'important');
  if(Number.isFinite(Number(layout.height)))el.style.setProperty('height',px(layout.height),'important');
  if(Number.isFinite(Number(layout.zIndex)))el.style.setProperty('z-index',String(layout.zIndex),'important');
- if(layout.visible===false)el.style.setProperty('visibility','hidden','important');else el.style.removeProperty('visibility');
+ if(layout.visible===false){if(def.hideMode==='background')el.style.setProperty('background-image','none','important');else el.style.setProperty('visibility','hidden','important')}else{if(def.hideMode!=='background')el.style.removeProperty('visibility')}
  if(Number.isFinite(Number(style.opacity)))el.style.setProperty('opacity',String(style.opacity),'important');
  if(style.objectFit){
   const img=el.matches('img')?el:el.querySelector('img');
