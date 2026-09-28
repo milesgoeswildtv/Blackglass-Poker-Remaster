@@ -132,6 +132,37 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await page.getByRole('button',{name:'Delete selected asset'}).click();
   await expect(frame.locator('#afterdark-custom-root [data-afterdark-kind="text"]')).toHaveCount(0);
 
+  const surfaceTabs=page.locator('.adSurfaceTabs');
+  await expect(surfaceTabs).toBeVisible();
+  for(const label of ['ENTRY','HOME','INVITE','PRE','PLAY','MTT','BREAK','MOVE','RESULT'])await expect(surfaceTabs.getByText(label,{exact:true})).toBeVisible();
+
+  await surfaceTabs.getByText('PRE',{exact:true}).click();
+  await expect(frame.locator('.pregameTablePage')).toBeVisible();
+  expect(await frame.locator('body').evaluate(el=>getComputedStyle(el).overflow)).toBe('hidden');
+  await page.getByText('ASSETS',{exact:true}).click();
+  await page.getByRole('button',{name:/ADD TEXT/i}).click();
+  await page.locator('.adTextEditor textarea').fill('PRE ONLY');
+  await expect(frame.locator('[data-afterdark-text]')).toHaveText('PRE ONLY');
+
+  await surfaceTabs.getByText('PLAY',{exact:true}).click();
+  await expect(frame.locator('.gameplayV3Page')).toBeVisible();
+  expect(await frame.locator('body').evaluate(el=>getComputedStyle(el).overflow)).toBe('hidden');
+  await expect(frame.locator('[data-afterdark-text]')).toHaveCount(0);
+
+  await surfaceTabs.getByText('HOME',{exact:true}).click();
+  await expect(frame.locator('.homeShell')).toBeVisible();
+  expect(await frame.locator('body').evaluate(el=>getComputedStyle(el).overflow)).not.toBe('hidden');
+  await expect(frame.locator('[data-afterdark-text]')).toHaveCount(0);
+
+  await surfaceTabs.getByText('PRE',{exact:true}).click();
+  await expect(frame.locator('.pregameTablePage')).toBeVisible();
+  await expect(frame.locator('[data-afterdark-text]')).toHaveText('PRE ONLY');
+
+  for(const [tab,selector] of [['ENTRY','.homeShell'],['INVITE','.inviteJoin'],['MTT','.mttLobbyShell'],['BREAK','.mttBreakScreen'],['MOVE','.mttMoveScreen'],['RESULT','.mttResultHero']]){
+    await surfaceTabs.getByText(tab,{exact:true}).click();
+    await expect(frame.locator(selector)).toBeVisible();
+  }
+
   console.log('AFTERDARK_BAD_RESPONSES',JSON.stringify(badResponses));
   expect(pageErrors,'page errors: '+pageErrors.join('\n')).toEqual([]);
   const meaningful=badResponses.filter(x=>!/favicon\.ico(?:$|\?)/i.test(x.url));
