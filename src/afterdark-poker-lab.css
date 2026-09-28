@@ -30,3 +30,14 @@
 .adSurfaceTabs button.active{border-color:#9e58bd;background:#26152e;color:#f0dcf7;box-shadow:inset 0 0 0 1px #a95cca24}
 .adSurfaceTabs button.active small{color:#c9a9d6}
 @media(max-width:430px){.adSurfaceTabs button{min-width:62px;padding-inline:7px}.adSurfaceTabs button b{font-size:7px}}
+
+.adBackgroundFraming{margin:10px 0 12px;padding:10px;border:1px solid #3b2d43;border-radius:12px;background:#0d0a10}
+.adBackgroundFraming h3{margin:0 0 9px;color:#a994b1;font:900 8px/1 ui-monospace,monospace;letter-spacing:.08em}
+.adBackgroundFit{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px}
+.adBackgroundFit button{height:34px;border:1px solid #3e3045;border-radius:8px;background:#151019;color:#8f8296;font:900 7px/1 ui-monospace,monospace}
+.adBackgroundFit button.active{border-color:#a760c8;background:#2a1733;color:#f0dff6}
+.adBackgroundFraming label{display:grid;gap:5px;margin-top:9px}
+.adBackgroundFraming label>span{display:flex;align-items:center;justify-content:space-between;color:#95889d;font:900 7px/1 ui-monospace,monospace;letter-spacing:.04em}
+.adBackgroundFraming label>span b{color:#ead8f2;font-size:8px}
+.adBackgroundFraming input[type="range"]{width:100%;accent-color:#b85cff}
+.adResetBackground{width:100%;height:38px;margin-top:11px;border:1px solid #543961;border-radius:9px;background:#1b1120;color:#d9c7df;font:900 7px/1 ui-monospace,monospace;letter-spacing:.05em}
