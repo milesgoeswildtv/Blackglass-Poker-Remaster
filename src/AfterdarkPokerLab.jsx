@@ -107,56 +107,59 @@ function resolveBoundAsset(item,skinId,bp){
 
 export default function AfterdarkPokerLab(){
  const iframeRef=useRef(null),stageRef=useRef(null),dragRef=useRef(null);
- const[breakpoint,setBreakpoint]=useState('mobile'),[doc,setDoc]=useState(loadDoc);
+ const[breakpoint,setBreakpoint]=useState('mobile'),[doc,setDoc]=useState(loadDoc),[surfaceId,setSurfaceId]=useState('home');
  const[selected,setSelected]=useState(''),[rects,setRects]=useState({}),[connected,setConnected]=useState(false),[guides,setGuides]=useState({x:null,y:null});
  const[history,setHistory]=useState([]),[future,setFuture]=useState([]);
  const[layerOpen,setLayerOpen]=useState(false),[assetOpen,setAssetOpen]=useState(false),[skinOpen,setSkinOpen]=useState(false),[editOpen,setEditOpen]=useState(false);
  const[siteView,setSiteView]=useState(false),[zoom,setZoom]=useState(1),[viewport,setViewport]=useState(realViewport);
+ const surface=surfaceConfig(surfaceId),builtIns=surface.builtIns,page=doc.surfaces?.[surfaceId]||freshSurface(surfaceId);
  const effectiveBreakpoint=siteView?breakpointForWidth(viewport.width):breakpoint;
- const manifest=useMemo(()=>buildManifest(doc,effectiveBreakpoint),[doc,effectiveBreakpoint]);
- const customAssets=useMemo(()=>doc.custom.map(x=>({id:x.id,kind:x.kind||'asset',asset:isTextItem(x)?'':resolveBoundAsset(x,doc.skinId,effectiveBreakpoint),text:x.text||'',textStyle:x.textStyle||{},layout:x.layout,binding:x.binding||null})),[doc.custom,doc.skinId,effectiveBreakpoint]);
- const selectedCustom=isCustom(selected)?doc.custom.find(x=>x.id===selected):null;
- const selectedLayer=selectedCustom?.layout||doc.layout[selected];
+ const manifest=useMemo(()=>buildManifest(doc,effectiveBreakpoint,surfaceId,page),[doc,effectiveBreakpoint,surfaceId,page]);
+ const customAssets=useMemo(()=>page.custom.map(x=>({id:x.id,kind:x.kind||'asset',asset:isTextItem(x)?'':resolveBoundAsset(x,doc.skinId,effectiveBreakpoint),text:x.text||'',textStyle:x.textStyle||{},layout:x.layout,binding:x.binding||null})),[page.custom,doc.skinId,effectiveBreakpoint]);
+ const selectedCustom=isCustom(selected)?page.custom.find(x=>x.id===selected):null;
+ const selectedLayer=selectedCustom?.layout||page.layout[selected];
  const selectedRect=rects[selected],frameWidth=breakpoint==='mobile'?390:breakpoint==='tablet'?760:820;
- const previewSrc=location.pathname+'?afterdarkPreview=1&labFrame=1#/';
+ const previewSrc=useMemo(()=>{const q=new URLSearchParams({afterdarkPreview:'1',labFrame:'1',afterdarkSurface:surfaceId,afterdarkSkin:doc.skinId});return location.pathname+'?'+q.toString()+'#/'},[surfaceId,doc.skinId]);
  const skins=useMemo(skinList,[]),groups=useMemo(()=>assetLibrary(doc.skinId),[doc.skinId]);
 
  function persist(next){setDoc(next);localStorage.setItem(STORAGE,JSON.stringify(next))}
  function snapshot(){setHistory(h=>[...h.slice(-59),JSON.stringify(doc)]);setFuture([])}
  function commit(next,record=true){if(record)snapshot();persist(next)}
+ function pageOf(next){return next.surfaces[surfaceId]||(next.surfaces[surfaceId]=freshSurface(surfaceId))}
  function patchLayer(id,values,record=true){
-  if(!id)return;const next=clone(doc);
-  if(isCustom(id)){const item=next.custom.find(x=>x.id===id);if(!item)return;item.layout={...item.layout,...values}}
-  else next.layout[id]={...(next.layout[id]||{}),...values};
+  if(!id)return;const next=clone(doc),target=pageOf(next);
+  if(isCustom(id)){const item=target.custom.find(x=>x.id===id);if(!item)return;item.layout={...item.layout,...values}}
+  else target.layout[id]={...(target.layout[id]||{}),...values};
   commit(next,record)
  }
  function send(){iframeRef.current?.contentWindow?.postMessage({type:'afterdark:manifest',manifest,customAssets,breakpoint:effectiveBreakpoint},'*')}
  function closeSheets(){setLayerOpen(false);setAssetOpen(false);setSkinOpen(false);setEditOpen(false)}
  function undo(){if(!history.length)return;const prev=JSON.parse(history[history.length-1]);setFuture(f=>[JSON.stringify(doc),...f].slice(0,60));setHistory(h=>h.slice(0,-1));persist(prev);setSelected('')}
  function redo(){if(!future.length)return;const next=JSON.parse(future[0]);setHistory(h=>[...h,JSON.stringify(doc)].slice(-60));setFuture(f=>f.slice(1));persist(next);setSelected('')}
- function resetAll(){commit(freshDoc(),true);setSelected('');closeSheets()}
+ function resetPage(){const next=clone(doc);next.surfaces[surfaceId]=freshSurface(surfaceId);commit(next,true);setSelected('');closeSheets()}
+ function changeSurface(id){if(id===surfaceId)return;closeSheets();setSelected('');setRects({});setConnected(false);setGuides({x:null,y:null});setSurfaceId(id)}
  function addAsset(item){
-  const next=clone(doc),id='custom.'+Date.now().toString(36)+'.'+next.custom.length;
-  next.custom.push({id,label:item.label,kind:'asset',asset:item.path,binding:item.channel&&item.role?{channel:item.channel,role:item.role}:null,layout:{x:50+(next.custom.length%4)*12,y:120+(next.custom.length%5)*14,width:180,height:120,zIndex:20+next.custom.length}});
+  const next=clone(doc),target=pageOf(next),id='custom.'+Date.now().toString(36)+'.'+target.custom.length;
+  target.custom.push({id,label:item.label,kind:'asset',asset:item.path,binding:item.channel&&item.role?{channel:item.channel,role:item.role}:null,layout:{x:50+(target.custom.length%4)*12,y:120+(target.custom.length%5)*14,width:180,height:120,zIndex:20+target.custom.length}});
   commit(next,true);setSelected(id);setAssetOpen(false)
  }
  function addText(){
-  const next=clone(doc),id='custom.text.'+Date.now().toString(36)+'.'+next.custom.length;
-  next.custom.push({id,label:'TEXT',kind:'text',text:'NEW TEXT',textStyle:{fontSize:24,fontWeight:800,color:'#ffffff',textAlign:'left'},layout:{x:48,y:120,width:220,height:60,zIndex:30+next.custom.length}});
+  const next=clone(doc),target=pageOf(next),id='custom.text.'+Date.now().toString(36)+'.'+target.custom.length;
+  target.custom.push({id,label:'TEXT',kind:'text',text:'NEW TEXT',textStyle:{fontSize:24,fontWeight:800,color:'#ffffff',textAlign:'left'},layout:{x:48,y:120,width:220,height:60,zIndex:30+target.custom.length}});
   commit(next,true);setSelected(id);setAssetOpen(false);setTimeout(()=>setEditOpen(true),0)
  }
  function patchCustomMeta(id,values,record=true){
-  if(!id||!isCustom(id))return;const next=clone(doc),item=next.custom.find(x=>x.id===id);if(!item)return;Object.assign(item,values);commit(next,record)
+  if(!id||!isCustom(id))return;const next=clone(doc),item=pageOf(next).custom.find(x=>x.id===id);if(!item)return;Object.assign(item,values);commit(next,record)
  }
  function patchTextStyle(id,values,record=true){
-  if(!id||!isCustom(id))return;const next=clone(doc),item=next.custom.find(x=>x.id===id);if(!item)return;item.textStyle={...(item.textStyle||{}),...values};commit(next,record)
+  if(!id||!isCustom(id))return;const next=clone(doc),item=pageOf(next).custom.find(x=>x.id===id);if(!item)return;item.textStyle={...(item.textStyle||{}),...values};commit(next,record)
  }
- function deleteSelected(){if(!selected)return;const next=clone(doc);if(isCustom(selected))next.custom=next.custom.filter(x=>x.id!==selected);else next.layout[selected]={...(next.layout[selected]||{}),visible:false};commit(next,true);setSelected('');setEditOpen(false)}
+ function deleteSelected(){if(!selected)return;const next=clone(doc),target=pageOf(next);if(isCustom(selected))target.custom=target.custom.filter(x=>x.id!==selected);else target.layout[selected]={...(target.layout[selected]||{}),visible:false};commit(next,true);setSelected('');setEditOpen(false)}
  function showSelected(){if(!selected||isCustom(selected))return;patchLayer(selected,{visible:true},true)}
- function duplicateSelected(){if(!isCustom(selected))return;const source=doc.custom.find(x=>x.id===selected);if(!source)return;const next=clone(doc),id='custom.'+Date.now().toString(36)+'.'+next.custom.length,copy=clone(source);copy.id=id;copy.label=source.label+' COPY';copy.layout={...copy.layout,x:Number(copy.layout.x||0)+14,y:Number(copy.layout.y||0)+14,zIndex:Number(copy.layout.zIndex||20)+1};next.custom.push(copy);commit(next,true);setSelected(id)}
+ function duplicateSelected(){if(!isCustom(selected))return;const source=page.custom.find(x=>x.id===selected);if(!source)return;const next=clone(doc),target=pageOf(next),id='custom.'+Date.now().toString(36)+'.'+target.custom.length,copy=clone(source);copy.id=id;copy.label=source.label+' COPY';copy.layout={...copy.layout,x:Number(copy.layout.x||0)+14,y:Number(copy.layout.y||0)+14,zIndex:Number(copy.layout.zIndex||20)+1};target.custom.push(copy);commit(next,true);setSelected(id)}
  function changeZ(delta){if(!selected)return;patchLayer(selected,{zIndex:Number(selectedLayer?.zIndex||5)+delta},true)}
  function changeSkin(id){const next=clone(doc);next.skinId=id;commit(next,true);setSkinOpen(false)}
- function changeBackground(channel){const next=clone(doc);next.backgroundChannel=channel;commit(next,true)}
+ function changeBackground(channel){const next=clone(doc);pageOf(next).backgroundChannel=channel;commit(next,true)}
  function enterSiteView(){closeSheets();setSelected('');setGuides({x:null,y:null});setViewport(realViewport());setZoom(1);setSiteView(true);requestAnimationFrame(()=>document.querySelector('.adWorkspace')?.scrollTo({top:0,left:0}))}
  function exitSiteView(){setSiteView(false);setZoom(1)}
  function changeZoom(delta){setZoom(z=>Math.max(.5,Math.min(2,Math.round((z+delta)*10)/10)))}
