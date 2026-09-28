@@ -114,6 +114,32 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   expect(Math.abs(linkedAfter.width-linkedBefore.width)).toBeLessThan(1);
   expect(Math.abs(linkedAfter.height-linkedBefore.height)).toBeLessThan(1);
 
+  await page.getByText('EDIT',{exact:true}).click();
+  await expect(page.getByRole('button',{name:'Lock layer position'})).toBeVisible();
+  await page.getByRole('button',{name:'Lock layer position'}).click();
+  await expect(page.locator('.adSelection')).toHaveClass(/locked/);
+  await expect(page.locator('.adHandle')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Delete selected asset'})).toHaveCount(0);
+  await expect(page.locator('.adFields input').first()).toBeDisabled();
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('crashout.afterdark.document.v3')).surfaces.home.custom[0].layout.locked)).toBe(true);
+  await page.locator('.adSheet>header button').click();
+  const lockedBefore=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
+  const lockedSelection=await page.locator('.adSelection').boundingBox();
+  expect(lockedBefore&&lockedSelection).toBeTruthy();
+  await page.mouse.move(lockedSelection.x+lockedSelection.width/2,lockedSelection.y+lockedSelection.height/2);
+  await page.mouse.down();
+  await page.mouse.move(lockedSelection.x+lockedSelection.width/2+36,lockedSelection.y+lockedSelection.height/2+28,{steps:4});
+  await page.mouse.up();
+  await page.waitForTimeout(80);
+  const lockedAfter=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
+  expect(Math.abs(lockedAfter.x-lockedBefore.x)).toBeLessThan(1);
+  expect(Math.abs(lockedAfter.y-lockedBefore.y)).toBeLessThan(1);
+  await page.getByText('EDIT',{exact:true}).click();
+  await page.getByRole('button',{name:'Unlock layer position'}).click();
+  await page.locator('.adSheet>header button').click();
+  await expect(page.locator('.adSelection')).not.toHaveClass(/locked/);
+  await expect(page.locator('.adHandle')).toHaveCount(4);
+
   const assetBefore=linkedAfter;
   await expect(page.locator('.adSelection')).toBeVisible();
   const selectionBefore=await page.locator('.adSelection').boundingBox();
