@@ -21,6 +21,13 @@ test('all editor surfaces have isolated preview renderers',()=>{
  assert.match(preview,/d\.surface&&d\.surface!==surface/);
 });
 
+
+test('granular gameplay controls are exposed without replacing gameplay components',()=>{
+ for(const id of['gameplay.tableArtwork','gameplay.seat1','gameplay.heroCard1','gameplay.fold','gameplay.call','gameplay.raise','gameplay.allIn','gameplay.betSlider','gameplay.chat','gameplay.handLog','pregame.start'])assert.ok(preview.includes(id),id);
+ assert.match(preview,/selectableSlots/);
+ assert.match(preview,/ftp3SeatUnit\[data-seat=/);
+});
+
 test('production pre-game and gameplay are viewport locked while Home is not',()=>{
  assert.match(gameplay,/html:has\(\.pregameTablePage\)/);
  assert.match(gameplay,/body:has\(\.pregameTablePage\)/);
