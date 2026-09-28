@@ -8,7 +8,8 @@ import{installPokerAudioUnlock}from'./poker-audio.js';
 import'./global-royal-grade.css';
 import'./telegram.css';
 
-installPokerAudioUnlock();
+const afterdarkPreview=new URLSearchParams(location.search).get('afterdarkPreview')==='1';
+if(!afterdarkPreview)installPokerAudioUnlock();
 
 const root=createRoot(document.getElementById('root'));
 
@@ -17,6 +18,7 @@ function render(){
 }
 
 async function boot(){
+ if(afterdarkPreview){render();return}
  root.render(<div className="telegramBoot">Opening Crashout Poker…</div>);
  await bootstrapPlatform();
  installSessionRouting();
