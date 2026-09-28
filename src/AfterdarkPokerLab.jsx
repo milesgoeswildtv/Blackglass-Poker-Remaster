@@ -13,7 +13,7 @@ const clone=v=>structuredClone(v);
 const freshLayout=()=>Object.fromEntries(BUILT_INS.map(([id])=>[id,{x:0,y:0,width:null,height:null,zIndex:5}]));
 const freshDoc=()=>({skinId:'default',backgroundChannel:'lobbyBg',layout:freshLayout(),custom:[]});
 function loadDoc(){
- try{const saved=JSON.parse(localStorage.getItem(STORAGE)||'null');if(saved?.layout&&Array.isArray(saved.custom))return saved}catch{}
+ try{const saved=JSON.parse(localStorage.getItem(STORAGE)||'null');if(saved?.layout&&Array.isArray(saved.custom))return{...saved,custom:saved.custom.map(bindCustomItem)}}catch{}
  try{const old=JSON.parse(localStorage.getItem('crashout.afterdark.layout')||'null');if(old)return{...freshDoc(),layout:{...freshLayout(),...old}}}catch{}
  return freshDoc();
 }
@@ -50,6 +50,27 @@ function assetLibrary(skinId){
 function layerName(id,doc){return BUILT_INS.find(x=>x[0]===id)?.[1]||doc.custom.find(x=>x.id===id)?.label||id}
 function isCustom(id){return String(id||'').startsWith('custom.')}
 function isTextItem(item){return item?.kind==='text'}
+function findSkinBinding(asset){
+ const wanted=String(asset||'');if(!wanted)return null;
+ for(const skin of Object.values(SKIN_REGISTRY))for(const[channel,data]of Object.entries(skin.channels||{}))for(const[role,path]of Object.entries(data||{}))if(String(path)===wanted)return{channel,role};
+ return null;
+}
+function bindCustomItem(item){
+ if(!item||isTextItem(item)||item.binding)return item;
+ const binding=findSkinBinding(item.asset);return binding?{...item,binding}:item;
+}
+function resolveBoundAsset(item,skinId,bp){
+ if(!item||isTextItem(item))return'';
+ const binding=item.binding||findSkinBinding(item.asset);
+ if(!binding)return item.asset||'';
+ const{channel,role}=binding;
+ if(channel==='lobbyBg'||channel==='gameRoomBg'){
+  const data=backgroundChannel(skinId,channel);
+  return data?.[role]||pickBg(data,bp)||item.asset||'';
+ }
+ const data=mergedChannel(skinId,channel);
+ return data?.[role]||item.asset||'';
+}
 
 export default function AfterdarkPokerLab(){
  const iframeRef=useRef(null),stageRef=useRef(null),dragRef=useRef(null);
@@ -58,7 +79,7 @@ export default function AfterdarkPokerLab(){
  const[history,setHistory]=useState([]),[future,setFuture]=useState([]);
  const[layerOpen,setLayerOpen]=useState(false),[assetOpen,setAssetOpen]=useState(false),[skinOpen,setSkinOpen]=useState(false),[editOpen,setEditOpen]=useState(false);
  const manifest=useMemo(()=>buildManifest(doc,breakpoint),[doc,breakpoint]);
- const customAssets=useMemo(()=>doc.custom.map(x=>({id:x.id,kind:x.kind||'asset',asset:x.asset||'',text:x.text||'',textStyle:x.textStyle||{},layout:x.layout})),[doc.custom]);
+ const customAssets=useMemo(()=>doc.custom.map(x=>({id:x.id,kind:x.kind||'asset',asset:isTextItem(x)?'':resolveBoundAsset(x,doc.skinId,breakpoint),text:x.text||'',textStyle:x.textStyle||{},layout:x.layout,binding:x.binding||null})),[doc.custom,doc.skinId,breakpoint]);
  const selectedCustom=isCustom(selected)?doc.custom.find(x=>x.id===selected):null;
  const selectedLayer=selectedCustom?.layout||doc.layout[selected];
  const selectedRect=rects[selected],frameWidth=breakpoint==='mobile'?390:breakpoint==='tablet'?760:820;
@@ -81,7 +102,7 @@ export default function AfterdarkPokerLab(){
  function resetAll(){commit(freshDoc(),true);setSelected('');closeSheets()}
  function addAsset(item){
   const next=clone(doc),id='custom.'+Date.now().toString(36)+'.'+next.custom.length;
-  next.custom.push({id,label:item.label,kind:'asset',asset:item.path,layout:{x:50+(next.custom.length%4)*12,y:120+(next.custom.length%5)*14,width:180,height:120,zIndex:20+next.custom.length}});
+  next.custom.push({id,label:item.label,kind:'asset',asset:item.path,binding:item.channel&&item.role?{channel:item.channel,role:item.role}:null,layout:{x:50+(next.custom.length%4)*12,y:120+(next.custom.length%5)*14,width:180,height:120,zIndex:20+next.custom.length}});
   commit(next,true);setSelected(id);setAssetOpen(false)
  }
  function addText(){
@@ -136,7 +157,7 @@ export default function AfterdarkPokerLab(){
   <div className="adStatus"><button onClick={()=>{closeSheets();setLayerOpen(true)}}>{selected?layerName(selected,doc):'SELECT A LAYER'}</button><em>{skin?.label||'DEFAULT'} · {doc.backgroundChannel==='gameRoomBg'?'GAME ROOM':'LOBBY'}</em><span className={connected?'live':''}>{connected?'LIVE':'CONNECTING'}</span></div>
   <section className="adWorkspace"><div ref={stageRef} className="adStage" style={{width:stageWidth}}><iframe ref={iframeRef} src={previewSrc} title="Crashout Poker visual preview"/><div className="adOverlay">{guides.x!=null&&<i className="adSnapGuide x" style={{left:guides.x}}/>}{guides.y!=null&&<i className="adSnapGuide y" style={{top:guides.y}}/>}{selectedRect&&<div className="adSelection" style={{left:selectedRect.x,top:selectedRect.y,width:selectedRect.width,height:selectedRect.height}} onPointerDown={e=>startPointer(e,'move')}><span>{layerName(selected,doc)}</span><button className="adSelectionDelete" type="button" aria-label={isCustom(selected)?'Delete selected asset':'Hide selected element'} onPointerDown={e=>{e.preventDefault();e.stopPropagation()}} onClick={e=>{e.preventDefault();e.stopPropagation();deleteSelected()}}>🗑</button>{['nw','ne','sw','se'].map(h=><i key={h} className={'adHandle '+h} onPointerDown={e=>startPointer(e,h)}/>)}</div>}</div></div></section>
 
-  {layerOpen&&<aside className="adSheet"><header><b>LAYERS</b><button onClick={()=>setLayerOpen(false)}>×</button></header><div className="adLayerList">{BUILT_INS.map(([id,label])=><button key={id} className={selected===id?'active':''} onClick={()=>{setSelected(id);setLayerOpen(false)}}><span>{label}</span><small>{doc.layout[id]?.visible===false?'HIDDEN':'BUILT IN'}</small></button>)}{doc.custom.map(item=><button key={item.id} className={selected===item.id?'active':''} onClick={()=>{setSelected(item.id);setLayerOpen(false)}}><span>{item.label}</span><small>{isTextItem(item)?'TEXT':'FREE ASSET'}</small></button>)}</div><button className="adDanger" onClick={resetAll}>RESET ENTIRE LAYOUT</button></aside>}
+  {layerOpen&&<aside className="adSheet"><header><b>LAYERS</b><button onClick={()=>setLayerOpen(false)}>×</button></header><div className="adLayerList">{BUILT_INS.map(([id,label])=><button key={id} className={selected===id?'active':''} onClick={()=>{setSelected(id);setLayerOpen(false)}}><span>{label}</span><small>{doc.layout[id]?.visible===false?'HIDDEN':'BUILT IN'}</small></button>)}{doc.custom.map(item=><button key={item.id} className={selected===item.id?'active':''} onClick={()=>{setSelected(item.id);setLayerOpen(false)}}><span>{item.label}</span><small>{isTextItem(item)?'TEXT':item.binding?'SKIN-LINKED':'FREE ASSET'}</small></button>)}</div><button className="adDanger" onClick={resetAll}>RESET ENTIRE LAYOUT</button></aside>}
 
   {assetOpen&&<aside className="adSheet adAssetSheet"><header><div><b>ADD ASSET</b><small>{skin?.label||'DEFAULT'} ASSETS + FREE TEXT</small></div><button onClick={()=>setAssetOpen(false)}>×</button></header><button className="adAddText" type="button" onClick={addText}><b>T</b><span>ADD TEXT</span><small>Editable live text layer</small></button>{groups.map(group=><section className="adAssetGroup" key={group.channel}><h3>{group.label}</h3><div className="adAssetGrid">{group.items.map(item=><button key={item.channel+item.role+item.path} onClick={()=>addAsset(item)}><span><img src={skinAssetUrl(item.path)} alt=""/></span><small>{item.label}</small></button>)}</div></section>)}</aside>}
 
