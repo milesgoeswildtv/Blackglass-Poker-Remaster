@@ -49,6 +49,16 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await firstAsset.click();
   await expect(page.getByRole('button',{name:'Delete selected asset'})).toBeVisible();
   await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(1);
+
+  const assetBefore=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
+  const selectionBefore=await page.locator('.adSelection').boundingBox();
+  await frame.locator('body').evaluate(()=>window.scrollBy(0,80));
+  await page.waitForTimeout(120);
+  const assetAfter=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
+  const selectionAfter=await page.locator('.adSelection').boundingBox();
+  expect(assetBefore&&assetAfter&&selectionBefore&&selectionAfter).toBeTruthy();
+  expect(assetAfter.y).toBeLessThan(assetBefore.y-40);
+  expect(Math.abs((selectionAfter.y-selectionBefore.y)-(assetAfter.y-assetBefore.y))).toBeLessThan(4);
   await page.getByRole('button',{name:'Delete selected asset'}).click();
   await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(0);
   await expect(page.getByRole('button',{name:/UNDO/i})).toBeEnabled();
