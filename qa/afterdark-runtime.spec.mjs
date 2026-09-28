@@ -105,6 +105,7 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   expect(Math.abs(linkedAfter.height-linkedBefore.height)).toBeLessThan(1);
 
   const assetBefore=linkedAfter;
+  await expect(page.locator('.adSelection')).toBeVisible();
   const selectionBefore=await page.locator('.adSelection').boundingBox();
   const iframeBox=await page.locator('iframe').boundingBox();
   expect(iframeBox).toBeTruthy();
@@ -133,6 +134,18 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await expect(frame.locator('#afterdark-custom-root [data-afterdark-kind="text"]')).toHaveCount(0);
 
   const surfaceTabs=page.locator('.adSurfaceTabs');
+  await surfaceTabs.getByText('ENTRY',{exact:true}).click();
+  await expect(frame.locator('.homeEntry')).toBeVisible();
+  await page.getByText('LAYERS',{exact:true}).click();
+  await expect(page.getByText('Panel Artwork',{exact:true})).toBeVisible();
+  await expect(page.getByText('Access Content',{exact:true})).toBeVisible();
+  await page.getByText('Panel Artwork',{exact:true}).click();
+  await page.getByText('EDIT',{exact:true}).click();
+  await page.getByText('HIDE',{exact:true}).click();
+  await expect(frame.locator('.homeEntry')).toHaveCSS('background-image','none');
+  await expect(frame.locator('.privateGate')).toBeVisible();
+  await page.getByText('HOME',{exact:true}).click();
+
   await expect(surfaceTabs).toBeVisible();
   for(const label of ['ENTRY','HOME','INVITE','PRE','PLAY','MTT','BREAK','MOVE','RESULT'])await expect(surfaceTabs.getByText(label,{exact:true})).toBeVisible();
 
