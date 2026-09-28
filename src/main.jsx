@@ -1,7 +1,8 @@
 import React from'react';
 import{createRoot}from'react-dom/client';
 import App from'./App.jsx';
-import PuckDesignLab from'./PuckDesignLab.jsx';\nimport{installAfterdarkPreview}from'./afterdark-preview.js';
+import PuckDesignLab from'./PuckDesignLab.jsx';
+import{installAfterdarkPreview}from'./afterdark-preview.js';
 import'./production-system.css';
 import{installSessionRouting}from'./session.js';
 import{bootstrapPlatform}from'./platform.js';
