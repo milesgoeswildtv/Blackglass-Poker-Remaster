@@ -28,7 +28,20 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await expect(frame.locator('.homeFrame')).toBeVisible();
   await expect(frame.getByRole('heading',{name:'CRASHOUT POKER'})).toBeVisible();
 
-  const before=await frame.locator('.homeShell').evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
+  const defaultBg=await frame.locator('.homeShell').evaluate(el=>getComputedStyle(el,'::before').backgroundImage);
+  const defaultLogo=await frame.locator('.homeBrand h1').evaluate(el=>getComputedStyle(el).backgroundImage);
+  const defaultCreate=await frame.locator('.homeActionPrimary').first().evaluate(el=>getComputedStyle(el).backgroundImage);
+  const defaultJoin=await frame.locator('.homeActionPrimary').nth(1).evaluate(el=>getComputedStyle(el).backgroundImage);
+  const defaultHost=await frame.locator('.homeHostIdentity').evaluate(el=>getComputedStyle(el).backgroundImage);
+  const defaultUtility=await frame.locator('.homeUtilityEntry button').evaluate(el=>getComputedStyle(el).backgroundImage);
+  expect(defaultBg.toLowerCase()).toContain('default__lobby-bg.png');
+  expect(defaultLogo.toLowerCase()).toContain('default__logo.png');
+  expect(defaultCreate.toLowerCase()).toContain('default__menu__create-panel.png');
+  expect(defaultJoin.toLowerCase()).toContain('default__menu__join-panel.png');
+  expect(defaultHost.toLowerCase()).toContain('default__menu__host-bar.png');
+  expect(defaultUtility.toLowerCase()).toContain('default__menu__utility-badge.png');
+
+  const before=defaultBg;
 
   await page.getByText('SKIN',{exact:true}).click();
   await expect(page.getByText('SKIN + BACKGROUND')).toBeVisible();
