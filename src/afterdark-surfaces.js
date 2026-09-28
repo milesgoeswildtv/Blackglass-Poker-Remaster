@@ -14,7 +14,7 @@ export const DEFAULT_BACKGROUND_FRAMING=Object.freeze({mode:'cover',scale:100,x:
 export function surfaceConfig(id='home'){return AFTERDARK_SURFACE_MAP[id]||AFTERDARK_SURFACE_MAP.home}
 export function freshSurface(id='home'){
  const cfg=surfaceConfig(id);
- return{backgroundChannel:cfg.backgroundChannel,backgroundFraming:{...DEFAULT_BACKGROUND_FRAMING},layout:Object.fromEntries(cfg.builtIns.map(([key])=>[key,{x:0,y:0,width:null,height:null,zIndex:5}])),custom:[]};
+ return{backgroundChannel:cfg.backgroundChannel,backgroundFraming:{...DEFAULT_BACKGROUND_FRAMING},layout:Object.fromEntries(cfg.builtIns.map(([key])=>[key,{x:0,y:0,width:null,height:null,zIndex:5,locked:false}])),custom:[]};
 }
 export function freshSurfaceDocument(){
  return{schemaVersion:3,skinId:'default',surfaces:Object.fromEntries(AFTERDARK_SURFACES.map(s=>[s.id,freshSurface(s.id)]))};
