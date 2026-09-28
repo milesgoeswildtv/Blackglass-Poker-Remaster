@@ -3,6 +3,7 @@ import'./afterdark-poker-lab.css';
 import{SKIN_REGISTRY}from'../skin-system.js';
 import{skinAssetUrl}from'./skin-client.js';
 import{buildSnapTargets,snapMoveRect,snapResizeRect,SNAP_GRID}from'./afterdark-snapping.js';
+import{puckUploadedAssets}from'./puck-uploaded-assets.generated.js';
 
 const BUILT_INS=[
  ['poker.logo','Logo'],['poker.identity','Player Identity'],['poker.hostBar','Host Bar'],['poker.create','Create Game'],['poker.join','Join Game'],['poker.shop','Booster Shop'],['poker.utility','Engine + Fairness']
@@ -40,6 +41,11 @@ function skinList(){return SKIN_ORDER.map(id=>SKIN_REGISTRY[id]).filter(Boolean)
 function skinThumb(skin){const bg=skin?.channels?.lobbyBg||{},menu=skin?.channels?.menuTheme||{};return skinAssetUrl(bg.mobile||bg.default||bg.desktop||menu['create-panel']||'')}
 function assetLibrary(skinId){
  const groups=[],seen=new Set(),channels=[['brandTheme','LOGO'],['menuTheme','MENU / PANELS'],['gameplayTheme','GAMEPLAY'],['tableSkin','TABLE'],['lobbyBg','LOBBY BACKGROUNDS'],['gameRoomBg','GAME ROOM BACKGROUNDS']];
+ if(skinId==='default'&&Array.isArray(puckUploadedAssets)&&puckUploadedAssets.length){
+  const items=puckUploadedAssets.filter(item=>item?.path).map(item=>({role:item.id,label:String(item.label||item.id).replace(/^Uploaded\s+—\s+/i,''),path:item.path,channel:'puckUploads'}));
+  for(const item of items)seen.add(item.path);
+  if(items.length)groups.push({channel:'puckUploads',label:'DEFAULT / PUCK UPLOADS',items});
+ }
  for(const[channel,label]of channels){
   const data=(channel==='lobbyBg'||channel==='gameRoomBg')?backgroundChannel(skinId,channel):mergedChannel(skinId,channel),items=[];
   for(const[role,path]of Object.entries(data)){if(!path||seen.has(path))continue;seen.add(path);items.push({role,label:role.replaceAll('-',' ').toUpperCase(),path,channel})}
