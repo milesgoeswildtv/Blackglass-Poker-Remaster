@@ -40,8 +40,12 @@ function applySlot(def,slot,bp){
  }
  if(slot.asset&&def.asset){
   const asset=resolveAsset(slot.asset);
-  if(def.asset==='home-bg')el.style.setProperty('--home-bg',`url("${asset}")`);
-  else el.style.setProperty('background-image',`url("${asset}")`,'important');
+  if(def.asset==='home-bg'){
+   const value=`url("${asset}")`;
+   el.style.setProperty('--skin-lobby-bg-mobile',value);
+   el.style.setProperty('--skin-lobby-bg-desktop',value);
+   el.style.setProperty('--skin-lobby-bg-landscape',value);
+  }else el.style.setProperty('background-image',`url("${asset}")`,'important');
  }
 }
 
