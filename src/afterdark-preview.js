@@ -77,9 +77,17 @@ function ensurePreviewStyles(){
  if(!style){
   style=document.createElement('style');
   style.id='afterdark-preview-styles';
-  style.textContent='html[data-afterdark-preview="1"] .homeShell:before{background-image:var(--afterdark-preview-bg,var(--home-bg))!important}';
+  style.textContent='html[data-afterdark-preview="1"] .homeShell:before{background-image:var(--afterdark-preview-bg,var(--home-bg))!important;background-size:var(--afterdark-preview-bg-size,cover)!important;background-position:var(--afterdark-preview-bg-position,50% 50%)!important;background-repeat:no-repeat!important}';
   document.head.appendChild(style);
  }
+}
+function backgroundPresentation(style={}){
+ const mode=['cover','contain','stretch','manual'].includes(style.backgroundFit)?style.backgroundFit:'cover';
+ const scale=Math.max(50,Math.min(300,Number(style.backgroundScale??100)));
+ const x=Math.max(0,Math.min(100,Number(style.backgroundPositionX??50)));
+ const y=Math.max(0,Math.min(100,Number(style.backgroundPositionY??50)));
+ const size=mode==='contain'?'contain':mode==='stretch'?'100% 100%':mode==='manual'?(scale+'% auto'):'cover';
+ return{size,position:x+'% '+y+'%'};
 }
 function applySlot(def,slot,bp){
  const el=elementFor(def);if(!el||!slot)return;
@@ -91,6 +99,18 @@ function applySlot(def,slot,bp){
  if(Number.isFinite(Number(layout.zIndex)))el.style.setProperty('z-index',String(layout.zIndex),'important');
  if(layout.visible===false){if(def.hideMode==='background')el.style.setProperty('background-image','none','important');else el.style.setProperty('visibility','hidden','important')}else{if(def.hideMode!=='background')el.style.removeProperty('visibility')}
  if(Number.isFinite(Number(style.opacity)))el.style.setProperty('opacity',String(style.opacity),'important');
+ if(def.id==='poker.background'){
+  const frame=backgroundPresentation(style);
+  if(def.asset==='home-bg'){
+   ensurePreviewStyles();
+   el.style.setProperty('--afterdark-preview-bg-size',frame.size);
+   el.style.setProperty('--afterdark-preview-bg-position',frame.position);
+  }else{
+   el.style.setProperty('background-size',frame.size,'important');
+   el.style.setProperty('background-position',frame.position,'important');
+   el.style.setProperty('background-repeat','no-repeat','important');
+  }
+ }
  if(style.objectFit){
   const img=el.matches('img')?el:el.querySelector('img');
   if(img)img.style.setProperty('object-fit',style.objectFit,'important');
