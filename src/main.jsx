@@ -3,6 +3,7 @@ import{createRoot}from'react-dom/client';
 import App from'./App.jsx';
 import PuckDesignLab from'./PuckDesignLab.jsx';
 import AfterdarkPokerLab from'./AfterdarkPokerLab.jsx';
+import AfterdarkSurfacePreview from'./AfterdarkSurfacePreview.jsx';
 import{installAfterdarkPreview}from'./afterdark-preview.js';
 import'./production-system.css';
 import{installSessionRouting}from'./session.js';
@@ -19,7 +20,7 @@ const isAfterdarkLab=()=>/^#\/design-lab\/afterdark(?:$|\?)/i.test(location.hash
 const isAfterdarkPreview=()=>{try{return new URLSearchParams(location.search).get('afterdarkPreview')==='1'}catch{return false}};
 
 function render(){
- root.render(isAfterdarkLab()?<AfterdarkPokerLab/>:isPuckDesignLab()?<PuckDesignLab/>:<App/>);
+ root.render(isAfterdarkPreview()?<AfterdarkSurfacePreview/>:isAfterdarkLab()?<AfterdarkPokerLab/>:isPuckDesignLab()?<PuckDesignLab/>:<App/>);
 }
 
 async function boot(){
