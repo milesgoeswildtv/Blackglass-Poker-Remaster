@@ -8,7 +8,7 @@ const SLOT_DEFS=[
  {id:'poker.create',selector:'.homeActionPrimary:first-child',asset:'background'},
  {id:'poker.join',selector:'.homeActionPrimary:nth-child(2)',asset:'background'},
  {id:'poker.shop',selector:'.homeActionShop',asset:'background'},
- {id:'poker.utility',selector:'.homeUtilityEntry',asset:null},
+ {id:'poker.utility',selector:'.homeUtilityEntry button',asset:'background'},
  {id:'poker.background',selector:'.homeShell',asset:'home-bg'}
 ];
 
