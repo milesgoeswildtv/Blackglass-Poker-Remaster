@@ -24,6 +24,15 @@ function layoutFor(slot,bp){return slot?.layout?.[bp]||slot?.layout?.desktop||{}
 function styleFor(slot,bp){return slot?.style?.[bp]||slot?.style?.desktop||{}}
 function px(v){return Number.isFinite(Number(v))?`${Number(v)}px`:''}
 
+function ensurePreviewStyles(){
+ let style=document.getElementById('afterdark-preview-styles');
+ if(!style){
+  style=document.createElement('style');
+  style.id='afterdark-preview-styles';
+  style.textContent='html[data-afterdark-preview="1"] .homeShell:before{background-image:var(--afterdark-preview-bg,var(--home-bg))!important}';
+  document.head.appendChild(style);
+ }
+}
 function applySlot(def,slot,bp){
  const el=elementFor(def);if(!el||!slot)return;
  const layout=layoutFor(slot,bp),style=styleFor(slot,bp);
@@ -41,10 +50,9 @@ function applySlot(def,slot,bp){
  if(slot.asset&&def.asset){
   const asset=resolveAsset(slot.asset);
   if(def.asset==='home-bg'){
+   ensurePreviewStyles();
    const value=`url("${asset}")`;
-   el.style.setProperty('--skin-lobby-bg-mobile',value);
-   el.style.setProperty('--skin-lobby-bg-desktop',value);
-   el.style.setProperty('--skin-lobby-bg-landscape',value);
+   el.style.setProperty('--afterdark-preview-bg',value);
   }else el.style.setProperty('background-image',`url("${asset}")`,'important');
  }
 }
