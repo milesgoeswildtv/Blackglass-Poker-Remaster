@@ -57,13 +57,29 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   expect(after.toLowerCase()).toContain('magenta');
 
   await page.getByText('ASSETS',{exact:true}).click();
-  const firstAsset=page.locator('.adAssetGrid button').first();
-  await expect(firstAsset).toBeVisible();
-  await firstAsset.click();
+  const tableGroup=page.locator('.adAssetGroup').filter({has:page.getByRole('heading',{name:'TABLE'})});
+  const tableAsset=tableGroup.locator('button').first();
+  await expect(tableAsset).toBeVisible();
+  await tableAsset.click();
   await expect(page.getByRole('button',{name:'Delete selected asset'})).toBeVisible();
   await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(1);
+  const customImg=frame.locator('#afterdark-custom-root [data-afterdark-id] img');
+  await expect(customImg).toHaveAttribute('src',/magenta__table/i);
+  const linkedBefore=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
 
-  const assetBefore=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
+  await page.getByText('SKIN',{exact:true}).click();
+  const crimson=page.getByRole('button',{name:/Crimson/i});
+  await expect(crimson).toBeVisible();
+  await crimson.click();
+  await expect(customImg).toHaveAttribute('src',/crimson__table/i);
+  const linkedAfter=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
+  expect(linkedBefore&&linkedAfter).toBeTruthy();
+  expect(Math.abs(linkedAfter.x-linkedBefore.x)).toBeLessThan(1);
+  expect(Math.abs(linkedAfter.y-linkedBefore.y)).toBeLessThan(1);
+  expect(Math.abs(linkedAfter.width-linkedBefore.width)).toBeLessThan(1);
+  expect(Math.abs(linkedAfter.height-linkedBefore.height)).toBeLessThan(1);
+
+  const assetBefore=linkedAfter;
   const selectionBefore=await page.locator('.adSelection').boundingBox();
   const iframeBox=await page.locator('iframe').boundingBox();
   expect(iframeBox).toBeTruthy();
