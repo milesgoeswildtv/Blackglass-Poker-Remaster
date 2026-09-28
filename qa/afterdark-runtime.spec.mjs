@@ -47,14 +47,22 @@ test('Home stays scroll-capable while seated Pre-game and Gameplay are viewport 
  }
 });
 
-test('active surface manifest updates only that surface',async({page})=>{
+test('active surface manifest updates groups and granular controls independently',async({page})=>{
  await page.goto('/?afterdarkPreview=1&afterdarkSurface=gameplay');
  await page.evaluate(()=>window.postMessage({
   type:'afterdark:manifest',
   surface:'gameplay',
   breakpoint:'mobile',
-  manifest:{slots:{'gameplay.table':{layout:{desktop:{x:0,y:0},mobile:{x:12,y:8}},style:{desktop:{opacity:1},mobile:{opacity:.75}},asset:null}}}
+  selectableSlots:['gameplay.fold','gameplay.raise'],
+  manifest:{slots:{
+   'gameplay.table':{layout:{desktop:{x:0,y:0},mobile:{x:12,y:8}},style:{desktop:{opacity:1},mobile:{opacity:.75}},asset:null},
+   'gameplay.fold':{layout:{desktop:{x:0,y:0},mobile:{x:18,y:-4}},style:{desktop:{opacity:1},mobile:{opacity:.9}},asset:null},
+   'gameplay.raise':{layout:{desktop:{},mobile:{}},style:{desktop:{opacity:1},mobile:{opacity:1}},asset:null}
+  }}
  },'*'));
  await expect.poll(()=>page.locator('.ftp3Stage').evaluate(el=>el.style.translate)).toBe('12px 8px');
  await expect.poll(()=>page.locator('.ftp3Stage').evaluate(el=>el.style.opacity)).toBe('0.75');
+ await expect.poll(()=>page.locator('.ftp3ActionRow .fold').evaluate(el=>el.style.translate)).toBe('18px -4px');
+ await expect.poll(()=>page.locator('.ftp3ActionRow .fold').evaluate(el=>el.style.opacity)).toBe('0.9');
+ await expect(page.locator('.ftp3ActionRow .raise')).toHaveCSS('opacity','1');
 });
