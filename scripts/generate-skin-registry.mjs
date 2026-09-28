@@ -162,7 +162,9 @@ for(const entry of fs.readdirSync(inbox,{withFileTypes:true}).filter(x=>x.isFile
   const variant=roleRaw||'default';
   if(!bgVariants.has(variant))throw new Error(`Invalid background variant "${variant}" in "${originalName}". Use mobile, desktop, landscape, or omit it.`);
   skin.channels[key]??={};
-  put(skin.channels[key],variant,assetPath,originalName,`${id}:${key}:${variant}`);
+  if(!roleRaw){
+   for(const target of['default','mobile','desktop','landscape'])put(skin.channels[key],target,assetPath,originalName,`${id}:${key}:${target}`);
+  }else put(skin.channels[key],variant,assetPath,originalName,`${id}:${key}:${variant}`);
  }else if(rawChannel==='table'||rawChannel==='logo'){
   if(roleRaw)throw new Error(`${rawChannel==='table'?'Table skin':'Logo'} "${originalName}" should not include a role. Use skin-id__${rawChannel}.ext`);
   skin.channels[key]??={};
