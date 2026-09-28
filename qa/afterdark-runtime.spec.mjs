@@ -43,6 +43,16 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   expect(after).not.toBe(before);
   expect(after.toLowerCase()).toContain('magenta');
 
+  await page.getByText('ASSETS',{exact:true}).click();
+  const firstAsset=page.locator('.adAssetGrid button').first();
+  await expect(firstAsset).toBeVisible();
+  await firstAsset.click();
+  await expect(page.getByRole('button',{name:'Delete selected asset'})).toBeVisible();
+  await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(1);
+  await page.getByRole('button',{name:'Delete selected asset'}).click();
+  await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:/UNDO/i})).toBeEnabled();
+
   console.log('AFTERDARK_BAD_RESPONSES',JSON.stringify(badResponses));
   expect(pageErrors,'page errors: '+pageErrors.join('\n')).toEqual([]);
   const meaningful=badResponses.filter(x=>!/favicon\.ico(?:$|\?)/i.test(x.url));
