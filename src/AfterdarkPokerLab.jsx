@@ -3,38 +3,66 @@ import'./afterdark-poker-lab.css';
 import{SKIN_REGISTRY}from'../skin-system.js';
 import{skinAssetUrl}from'./skin-client.js';
 import{buildSnapTargets,snapMoveRect,snapResizeRect,SNAP_GRID}from'./afterdark-snapping.js';
+import{AFTERDARK_SURFACES,surfaceConfig,freshSurface,freshSurfaceDocument}from'./afterdark-surfaces.js';
 
-const BUILT_INS=[
- ['poker.logo','Logo'],['poker.identity','Player Identity'],['poker.hostBar','Host Bar'],['poker.create','Create Game'],['poker.join','Join Game'],['poker.shop','Booster Shop'],['poker.utility','Engine + Fairness']
-];
 const SKIN_ORDER=['default','magenta','sapphire','envy','crimson','full-tilt','dwallet'];
-const STORAGE='crashout.afterdark.document.v2';
+const STORAGE='crashout.afterdark.document.v3';
+const LEGACY_STORAGE='crashout.afterdark.document.v2';
 const clone=v=>structuredClone(v);
-const freshLayout=()=>Object.fromEntries(BUILT_INS.map(([id])=>[id,{x:0,y:0,width:null,height:null,zIndex:5}]));
-const freshDoc=()=>({skinId:'default',backgroundChannel:'lobbyBg',layout:freshLayout(),custom:[]});
+function normalizeSurface(id,value={}){
+ const base=freshSurface(id),layout={...base.layout,...(value?.layout||{})},custom=Array.isArray(value?.custom)?value.custom.map(bindCustomItem):[];
+ return{...base,...value,backgroundChannel:value?.backgroundChannel||base.backgroundChannel,layout,custom};
+}
+function normalizeDocument(value){
+ const base=freshSurfaceDocument();
+ if(value?.surfaces){
+  const next={...base,...value,schemaVersion:3,surfaces:{...base.surfaces}};
+  for(const s of AFTERDARK_SURFACES)next.surfaces[s.id]=normalizeSurface(s.id,value.surfaces?.[s.id]);
+  return next;
+ }
+ if(value?.layout&&Array.isArray(value.custom)){
+  base.skinId=value.skinId||'default';
+  base.surfaces.home=normalizeSurface('home',{backgroundChannel:value.backgroundChannel||'lobbyBg',layout:value.layout,custom:value.custom});
+ }
+ return base;
+}
 function loadDoc(){
- try{const saved=JSON.parse(localStorage.getItem(STORAGE)||'null');if(saved?.layout&&Array.isArray(saved.custom))return{...saved,custom:saved.custom.map(bindCustomItem)}}catch{}
- try{const old=JSON.parse(localStorage.getItem('crashout.afterdark.layout')||'null');if(old)return{...freshDoc(),layout:{...freshLayout(),...old}}}catch{}
- return freshDoc();
+ try{const saved=JSON.parse(localStorage.getItem(STORAGE)||'null');if(saved)return normalizeDocument(saved)}catch{}
+ try{const legacy=JSON.parse(localStorage.getItem(LEGACY_STORAGE)||'null');if(legacy)return normalizeDocument(legacy)}catch{}
+ try{const old=JSON.parse(localStorage.getItem('crashout.afterdark.layout')||'null');if(old){const base=freshSurfaceDocument();base.surfaces.home.layout={...base.surfaces.home.layout,...old};return base}}catch{}
+ return freshSurfaceDocument();
 }
 function mergedChannel(skinId,channel){return{...(SKIN_REGISTRY.default?.channels?.[channel]||{}),...(SKIN_REGISTRY[skinId]?.channels?.[channel]||{})}}
 function backgroundChannel(skinId,channel){const selected=SKIN_REGISTRY[skinId]?.channels?.[channel];return selected&&Object.keys(selected).length?selected:(SKIN_REGISTRY.default?.channels?.[channel]||{})}
 function pickBg(data,bp){return bp==='mobile'?(data.mobile||data.default||data.desktop||data.landscape||''):bp==='desktop'?(data.desktop||data.default||data.mobile||data.landscape||''):(data.default||data.mobile||data.desktop||data.landscape||'')}
-function buildManifest(doc,bp){
- const menu=mergedChannel(doc.skinId,'menuTheme'),brand=mergedChannel(doc.skinId,'brandTheme'),bg=backgroundChannel(doc.skinId,doc.backgroundChannel);
- const slots={
-  'poker.logo':{label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1}},asset:brand.default||'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG'},
-  'poker.identity':{label:'Player Identity',layout:{},style:{[bp]:{opacity:1}},asset:menu['identity-panel']||null},
-  'poker.hostBar':{label:'Host Bar',layout:{},style:{[bp]:{opacity:1}},asset:menu['host-bar']||null},
-  'poker.create':{label:'Create Game',layout:{},style:{[bp]:{opacity:1}},asset:menu['create-panel']||null},
-  'poker.join':{label:'Join Game',layout:{},style:{[bp]:{opacity:1}},asset:menu['join-panel']||null},
-  'poker.shop':{label:'Booster Shop',layout:{},style:{[bp]:{opacity:1}},asset:menu['shop-panel']||null},
-  'poker.utility':{label:'Engine + Fairness',layout:{},style:{[bp]:{opacity:1}},asset:menu['utility-badge']||null},
-  'poker.background':{label:doc.backgroundChannel==='gameRoomBg'?'Game Room Background':'Lobby Background',layout:{},style:{[bp]:{opacity:1}},asset:pickBg(bg,bp)}
- };
- for(const[id]of BUILT_INS){const v=doc.layout[id]||{},out={x:Number(v.x||0),y:Number(v.y||0),zIndex:Number(v.zIndex||5),visible:v.visible!==false};if(Number.isFinite(v.width)&&v.width>0)out.width=v.width;if(Number.isFinite(v.height)&&v.height>0)out.height=v.height;slots[id].layout[bp]=out}
- slots['poker.background'].layout[bp]={};
- return{schemaVersion:1,projectId:'crashout-poker',name:'Crashout Poker',kind:'website',revision:0,breakpoints:{desktop:{width:820},tablet:{width:760},mobile:{width:390}},slots}
+function buildManifest(doc,bp,surfaceId,page){
+ const cfg=surfaceConfig(surfaceId),menu=mergedChannel(doc.skinId,'menuTheme'),brand=mergedChannel(doc.skinId,'brandTheme'),table=mergedChannel(doc.skinId,'tableSkin'),bg=backgroundChannel(doc.skinId,page.backgroundChannel);
+ const slots={'poker.background':{label:page.backgroundChannel==='gameRoomBg'?'Game Room Background':'Lobby Background',layout:{[bp]:{}},style:{[bp]:{opacity:1}},asset:pickBg(bg,bp)}};
+ if(surfaceId==='home'){
+  Object.assign(slots,{
+   'poker.logo':{label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1}},asset:brand.default||'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG'},
+   'poker.identity':{label:'Player Identity',layout:{},style:{[bp]:{opacity:1}},asset:menu['identity-panel']||null},
+   'poker.hostBar':{label:'Host Bar',layout:{},style:{[bp]:{opacity:1}},asset:menu['host-bar']||null},
+   'poker.create':{label:'Create Game',layout:{},style:{[bp]:{opacity:1}},asset:menu['create-panel']||null},
+   'poker.join':{label:'Join Game',layout:{},style:{[bp]:{opacity:1}},asset:menu['join-panel']||null},
+   'poker.shop':{label:'Booster Shop',layout:{},style:{[bp]:{opacity:1}},asset:menu['shop-panel']||null},
+   'poker.utility':{label:'Engine + Fairness',layout:{},style:{[bp]:{opacity:1}},asset:menu['utility-badge']||null}
+  });
+ }else if(surfaceId==='entry'){
+  slots['poker.entry.logo']={label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1}},asset:brand.default||'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG'};
+  slots['poker.entry.panel']={label:'Access Panel',layout:{},style:{[bp]:{opacity:1}}};
+ }else{
+  for(const[id,label]of cfg.builtIns)slots[id]={label,layout:{},style:{[bp]:{opacity:1}}};
+  if(slots['poker.table'])slots['poker.table'].asset=table.default||null;
+ }
+ for(const[id]of cfg.builtIns){
+  if(!slots[id])slots[id]={label:id,layout:{},style:{[bp]:{opacity:1}}};
+  const v=page.layout[id]||{},out={x:Number(v.x||0),y:Number(v.y||0),zIndex:Number(v.zIndex||5),visible:v.visible!==false};
+  if(Number.isFinite(v.width)&&v.width>0)out.width=v.width;
+  if(Number.isFinite(v.height)&&v.height>0)out.height=v.height;
+  slots[id].layout[bp]=out;
+ }
+ return{schemaVersion:1,projectId:'crashout-poker',name:'Crashout Poker',kind:'website',revision:0,breakpoints:{desktop:{width:820},tablet:{width:760},mobile:{width:390}},slots};
 }
 function skinList(){return SKIN_ORDER.map(id=>SKIN_REGISTRY[id]).filter(Boolean)}
 function skinThumb(skin){const bg=skin?.channels?.lobbyBg||{},menu=skin?.channels?.menuTheme||{};return skinAssetUrl(bg.mobile||bg.default||bg.desktop||menu['create-panel']||'')}
@@ -47,7 +75,7 @@ function assetLibrary(skinId){
  }
  return groups;
 }
-function layerName(id,doc){return BUILT_INS.find(x=>x[0]===id)?.[1]||doc.custom.find(x=>x.id===id)?.label||id}
+function layerName(id,page,builtIns){return builtIns.find(x=>x[0]===id)?.[1]||page.custom.find(x=>x.id===id)?.label||id}
 function isCustom(id){return String(id||'').startsWith('custom.')}
 function isTextItem(item){return item?.kind==='text'}
 function findSkinBinding(asset){
