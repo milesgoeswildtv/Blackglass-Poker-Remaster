@@ -6,6 +6,7 @@ const evidenceDir='artifacts/browser-qa-afterdark';
 test.beforeEach(async()=>{await fs.mkdir(evidenceDir,{recursive:true})});
 
 test('Afterdark editor renders controls, Poker preview, and swaps skin background',async({page})=>{
+  test.setTimeout(90000);
   const pageErrors=[],consoleErrors=[],badResponses=[];
   page.on('pageerror',e=>pageErrors.push(String(e?.stack||e)));
   page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
@@ -22,6 +23,30 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
 
   await expect(page.getByText('CRASHOUT POKER VISUAL EDITOR')).toBeVisible();
   for(const label of ['LAYERS','ASSETS','SKIN','UNDO','REDO','EDIT'])await expect(page.getByText(label,{exact:true})).toBeVisible();
+
+  await page.getByRole('button',{name:'SITE VIEW'}).click();
+  await expect(page.locator('.adTop')).toBeHidden();
+  await expect(page.locator('.adDock')).toBeHidden();
+  const realVp=await page.evaluate(()=>({width:Math.round(visualViewport?.width||innerWidth),height:Math.round(visualViewport?.height||innerHeight)}));
+  let liveBox=await page.locator('iframe').boundingBox();
+  expect(liveBox).toBeTruthy();
+  expect(Math.abs(liveBox.width-realVp.width)).toBeLessThan(2);
+  expect(Math.abs(liveBox.height-realVp.height)).toBeLessThan(2);
+  await expect(page.getByRole('button',{name:'Reset zoom to 100 percent'})).toHaveText('100%');
+  await page.getByRole('button',{name:'Zoom in'}).click();
+  await expect(page.getByRole('button',{name:'Reset zoom to 100 percent'})).toHaveText('110%');
+  liveBox=await page.locator('iframe').boundingBox();
+  expect(liveBox.width).toBeGreaterThan(realVp.width*1.09);
+  await page.locator('.adWorkspace').evaluate(el=>el.scrollTo({top:60,left:20}));
+  await page.getByText('RESET',{exact:true}).click();
+  await expect(page.getByRole('button',{name:'Reset zoom to 100 percent'})).toHaveText('100%');
+  await page.waitForTimeout(50);
+  expect(await page.locator('.adWorkspace').evaluate(el=>({top:el.scrollTop,left:el.scrollLeft}))).toEqual({top:0,left:0});
+  liveBox=await page.locator('iframe').boundingBox();
+  expect(Math.abs(liveBox.width-realVp.width)).toBeLessThan(2);
+  await page.getByText('EDIT',{exact:true}).click();
+  await expect(page.locator('.adTop')).toBeVisible();
+  await expect(page.locator('.adDock')).toBeVisible();
 
   const frame=page.frameLocator('iframe');
   await expect(frame.locator('.homeShell')).toBeVisible();
