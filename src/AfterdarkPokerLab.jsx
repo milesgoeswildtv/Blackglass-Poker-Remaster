@@ -21,9 +21,9 @@ function mergedChannel(skinId,channel){return{...(SKIN_REGISTRY.default?.channel
 function backgroundChannel(skinId,channel){const selected=SKIN_REGISTRY[skinId]?.channels?.[channel];return selected&&Object.keys(selected).length?selected:(SKIN_REGISTRY.default?.channels?.[channel]||{})}
 function pickBg(data,bp){return bp==='mobile'?(data.mobile||data.default||data.desktop||data.landscape||''):bp==='desktop'?(data.desktop||data.default||data.mobile||data.landscape||''):(data.default||data.mobile||data.desktop||data.landscape||'')}
 function buildManifest(doc,bp){
- const menu=mergedChannel(doc.skinId,'menuTheme'),bg=backgroundChannel(doc.skinId,doc.backgroundChannel);
+ const menu=mergedChannel(doc.skinId,'menuTheme'),brand=mergedChannel(doc.skinId,'brandTheme'),bg=backgroundChannel(doc.skinId,doc.backgroundChannel);
  const slots={
-  'poker.logo':{label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1}},asset:'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG'},
+  'poker.logo':{label:'Crashout Logo',layout:{},style:{[bp]:{opacity:1}},asset:brand.default||'assets/remaster/entry-gate/CRASHOUT_LOGO.PNG'},
   'poker.identity':{label:'Player Identity',layout:{},style:{[bp]:{opacity:1}},asset:menu['identity-panel']||null},
   'poker.hostBar':{label:'Host Bar',layout:{},style:{[bp]:{opacity:1}},asset:menu['host-bar']||null},
   'poker.create':{label:'Create Game',layout:{},style:{[bp]:{opacity:1}},asset:menu['create-panel']||null},
@@ -39,7 +39,7 @@ function buildManifest(doc,bp){
 function skinList(){return SKIN_ORDER.map(id=>SKIN_REGISTRY[id]).filter(Boolean)}
 function skinThumb(skin){const bg=skin?.channels?.lobbyBg||{},menu=skin?.channels?.menuTheme||{};return skinAssetUrl(bg.mobile||bg.default||bg.desktop||menu['create-panel']||'')}
 function assetLibrary(skinId){
- const groups=[],seen=new Set(),channels=[['menuTheme','MENU / PANELS'],['gameplayTheme','GAMEPLAY'],['tableSkin','TABLE'],['lobbyBg','LOBBY BACKGROUNDS'],['gameRoomBg','GAME ROOM BACKGROUNDS']];
+ const groups=[],seen=new Set(),channels=[['brandTheme','LOGO'],['menuTheme','MENU / PANELS'],['gameplayTheme','GAMEPLAY'],['tableSkin','TABLE'],['lobbyBg','LOBBY BACKGROUNDS'],['gameRoomBg','GAME ROOM BACKGROUNDS']];
  for(const[channel,label]of channels){
   const data=(channel==='lobbyBg'||channel==='gameRoomBg')?backgroundChannel(skinId,channel):mergedChannel(skinId,channel),items=[];
   for(const[role,path]of Object.entries(data)){if(!path||seen.has(path))continue;seen.add(path);items.push({role,label:role.replaceAll('-',' ').toUpperCase(),path,channel})}
