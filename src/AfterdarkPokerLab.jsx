@@ -115,6 +115,16 @@ function realViewport(){
  return{width:Math.max(1,Math.round(vv?.width||window.innerWidth||390)),height:Math.max(1,Math.round(vv?.height||window.innerHeight||844))}
 }
 function breakpointForWidth(width){return width<=600?'mobile':width<=900?'tablet':'desktop'}
+const AUTHORING_PRESETS=Object.freeze({
+ mobile:Object.freeze({width:390,height:844}),
+ tablet:Object.freeze({width:760,height:1024}),
+ desktop:Object.freeze({width:1280,height:800})
+});
+function authoringViewportFor(bp,physical){
+ const real=physical||realViewport();
+ if(breakpointForWidth(real.width)===bp)return real;
+ return AUTHORING_PRESETS[bp]||AUTHORING_PRESETS.mobile;
+}
 function resolveBoundAsset(item,skinId,bp){
  if(!item||isTextItem(item))return'';
  const binding=item.binding||findSkinBinding(item.asset);
@@ -136,13 +146,14 @@ export default function AfterdarkPokerLab(){
  const[layerOpen,setLayerOpen]=useState(false),[assetOpen,setAssetOpen]=useState(false),[skinOpen,setSkinOpen]=useState(false),[editOpen,setEditOpen]=useState(false);
  const[siteView,setSiteView]=useState(false),[zoom,setZoom]=useState(1),[viewport,setViewport]=useState(realViewport);
  const surface=surfaceConfig(surfaceId),builtIns=surface.builtIns,page=doc.surfaces?.[surfaceId]||freshSurface(surfaceId);
- const effectiveBreakpoint=siteView?breakpointForWidth(viewport.width):breakpoint;
+ const effectiveBreakpoint=breakpoint;
+ const authoringViewport=authoringViewportFor(breakpoint,viewport);
  const manifest=useMemo(()=>buildManifest(doc,effectiveBreakpoint,surfaceId,page),[doc,effectiveBreakpoint,surfaceId,page]);
  const customAssets=useMemo(()=>page.custom.map(x=>({id:x.id,kind:x.kind||'asset',asset:isTextItem(x)?'':resolveBoundAsset(x,doc.skinId,effectiveBreakpoint),text:x.text||'',textStyle:x.textStyle||{},layout:x.layout,binding:x.binding||null})),[page.custom,doc.skinId,effectiveBreakpoint]);
  const selectedCustom=isCustom(selected)?page.custom.find(x=>x.id===selected):null;
  const selectedLayer=selectedCustom?.layout||page.layout[selected];
  const selectedLocked=selectedLayer?.locked===true;
- const selectedRect=rects[selected],frameWidth=breakpoint==='mobile'?390:breakpoint==='tablet'?760:820;
+ const selectedRect=rects[selected],frameWidth=authoringViewport.width;
  const previewSrc=useMemo(()=>{const q=new URLSearchParams({afterdarkPreview:'1',labFrame:'1',afterdarkSurface:surfaceId,afterdarkSkin:doc.skinId});return location.pathname+'?'+q.toString()+'#/'},[surfaceId,doc.skinId]);
  const skins=useMemo(skinList,[]),groups=useMemo(()=>assetLibrary(doc.skinId),[doc.skinId]);
 
@@ -195,7 +206,7 @@ export default function AfterdarkPokerLab(){
  function changeBackground(channel){const next=clone(doc);pageOf(next).backgroundChannel=channel;commit(next,true)}
  function patchBackgroundFraming(values,record=true){const next=clone(doc),target=pageOf(next);target.backgroundFraming={...freshSurface(surfaceId).backgroundFraming,...(target.backgroundFraming||{}),...values};commit(next,record)}
  function resetBackgroundFraming(){patchBackgroundFraming({...freshSurface(surfaceId).backgroundFraming},true)}
- function enterSiteView(){closeSheets();setSelected('');setGuides({x:null,y:null});setViewport(realViewport());setZoom(1);setSiteView(true);requestAnimationFrame(()=>document.querySelector('.adWorkspace')?.scrollTo({top:0,left:0}))}
+ function enterSiteView(){closeSheets();setSelected('');setGuides({x:null,y:null});setZoom(1);setSiteView(true);requestAnimationFrame(()=>document.querySelector('.adWorkspace')?.scrollTo({top:0,left:0}))}
  function exitSiteView(){setSiteView(false);setZoom(1)}
  function changeZoom(delta){setZoom(z=>Math.max(.5,Math.min(2,Math.round((z+delta)*10)/10)))}
  function resetZoom(){setZoom(1);requestAnimationFrame(()=>document.querySelector('.adWorkspace')?.scrollTo({top:0,left:0}))}
@@ -230,16 +241,17 @@ export default function AfterdarkPokerLab(){
  useEffect(()=>{setConnected(false)},[doc.skinId]);
  useEffect(()=>{const update=()=>setViewport(realViewport());addEventListener('resize',update);window.visualViewport?.addEventListener('resize',update);return()=>{removeEventListener('resize',update);window.visualViewport?.removeEventListener('resize',update)}},[]);
 
- const stageWidth=breakpoint==='mobile'?'min(100%,'+frameWidth+'px)':frameWidth+'px',skin=SKIN_REGISTRY[doc.skinId]||SKIN_REGISTRY.default;
- const siteStageStyle=siteView?{width:viewport.width,height:viewport.height,transform:`scale(${zoom})`,transformOrigin:'top left'}:{width:stageWidth};
- const siteWrapStyle=siteView?{width:Math.round(viewport.width*zoom),height:Math.round(viewport.height*zoom)}:undefined;
+ const skin=SKIN_REGISTRY[doc.skinId]||SKIN_REGISTRY.default;
+ const baseStageStyle={width:authoringViewport.width,height:authoringViewport.height};
+ const siteStageStyle=siteView?{...baseStageStyle,transform:`scale(${zoom})`,transformOrigin:'top left'}:baseStageStyle;
+ const siteWrapStyle=siteView?{width:Math.round(authoringViewport.width*zoom),height:Math.round(authoringViewport.height*zoom)}:undefined;
  return <main className={'adLab'+(siteView?' adSiteView':'')}>
   <header className="adTop"><div><b>AFTERDARK</b><span>CRASHOUT POKER VISUAL EDITOR</span></div><button className="adViewButton" type="button" onClick={enterSiteView}>SITE VIEW</button><select value={breakpoint} onChange={e=>setBreakpoint(e.target.value)}><option value="mobile">MOBILE</option><option value="tablet">TABLET</option><option value="desktop">DESKTOP</option></select></header>
   <div className="adStatus"><button className="adStatusLayer" onClick={()=>{closeSheets();setLayerOpen(true)}}>{selected?layerName(selected,page,builtIns):'SELECT A LAYER'}</button>{selected&&<button className={'adQuickLock'+(selectedLocked?' active':'')} type="button" aria-label={selectedLocked?'Unlock selected layer':'Lock selected layer'} onClick={toggleLayerLock}>{selectedLocked?'🔓 UNLOCK':'🔒 LOCK'}</button>}<em>{surface.label} · {skin?.label||'DEFAULT'} · {page.backgroundChannel==='gameRoomBg'?'GAME ROOM':'LOBBY'}</em><span className={connected?'live':''}>{connected?'LIVE':'CONNECTING'}</span></div>
   <nav className="adSurfaceTabs" aria-label="Page loadouts">{AFTERDARK_SURFACES.map(s=><button key={s.id} type="button" className={surfaceId===s.id?'active':''} onClick={()=>changeSurface(s.id)}><b>{s.short}</b><small>{s.scroll==='fixed'?'LOCKED':'SCROLL'}</small></button>)}</nav>
   <section className="adWorkspace">{siteView?<div className="adSiteStageWrap" style={siteWrapStyle}><div ref={stageRef} className="adStage" style={siteStageStyle}><iframe ref={iframeRef} src={previewSrc} title="Crashout Poker visual preview"/></div></div>:<div ref={stageRef} className="adStage" style={siteStageStyle}><iframe ref={iframeRef} src={previewSrc} title="Crashout Poker visual preview"/><div className="adOverlay">{guides.x!=null&&<i className="adSnapGuide x" style={{left:guides.x}}/>}{guides.y!=null&&<i className="adSnapGuide y" style={{top:guides.y}}/>}{selectedRect&&<div className={'adSelection'+(selectedLocked?' locked':'')} style={{left:selectedRect.x,top:selectedRect.y,width:selectedRect.width,height:selectedRect.height}} onPointerDown={e=>startPointer(e,'move')}><span>{selectedLocked?'🔒 ':''}{layerName(selected,page,builtIns)}</span>{!selectedLocked&&<button className="adSelectionDelete" type="button" aria-label={isCustom(selected)?'Delete selected asset':'Remove selected built-in'} onPointerDown={e=>{e.preventDefault();e.stopPropagation()}} onClick={e=>{e.preventDefault();e.stopPropagation();deleteSelected()}}>🗑</button>}{!selectedLocked&&['nw','ne','sw','se'].map(h=><i key={h} className={'adHandle '+h} onPointerDown={e=>startPointer(e,h)}/>)}</div>}</div></div>}</section>
 
-  {siteView&&<div className="adViewControls" role="toolbar" aria-label="Site view zoom controls"><button type="button" aria-label="Zoom out" onClick={()=>changeZoom(-.1)}>−</button><button type="button" className="adZoomReadout" aria-label="Reset zoom to 100 percent" onClick={resetZoom}>{Math.round(zoom*100)}%</button><button type="button" aria-label="Zoom in" onClick={()=>changeZoom(.1)}>＋</button><button type="button" className="adResetZoom" onClick={resetZoom}>RESET</button><button type="button" className="adExitView" onClick={exitSiteView}>EDIT</button><small>{surface.label} · {viewport.width}×{viewport.height} · 1:1 = REAL SITE</small></div>}
+  {siteView&&<div className="adViewControls" role="toolbar" aria-label="Site view zoom controls"><button type="button" aria-label="Zoom out" onClick={()=>changeZoom(-.1)}>−</button><button type="button" className="adZoomReadout" aria-label="Reset zoom to 100 percent" onClick={resetZoom}>{Math.round(zoom*100)}%</button><button type="button" aria-label="Zoom in" onClick={()=>changeZoom(.1)}>＋</button><button type="button" className="adResetZoom" onClick={resetZoom}>RESET</button><button type="button" className="adExitView" onClick={exitSiteView}>EDIT</button><small>{surface.label} · {authoringViewport.width}×{authoringViewport.height} · EDIT = SITE VIEW</small></div>}
 
   {layerOpen&&<aside className="adSheet"><header><div><b>LAYERS</b><small>{surface.label} LOADOUT</small></div><button onClick={()=>setLayerOpen(false)}>×</button></header><div className="adLayerList">{builtIns.map(([id,label])=><div key={id} className={'adLayerRow'+(selected===id?' active':'')}><button className="adLayerPick" onClick={()=>{setSelected(id);setLayerOpen(false)}}><span>{page.layout[id]?.locked?'🔒 ':''}{label}</span><small>{page.layout[id]?.locked?'POSITION LOCKED':page.layout[id]?.visible===false?'HIDDEN':'BUILT IN'}</small></button><button className={'adLayerAction'+(page.layout[id]?.visible===false?'':' danger')} type="button" aria-label={(page.layout[id]?.visible===false?'Restore ':'Remove ')+label} onClick={e=>{e.stopPropagation();page.layout[id]?.visible===false?showLayer(id):removeLayer(id)}}>{page.layout[id]?.visible===false?'◉':'🗑'}</button></div>)}{page.custom.map(item=><div key={item.id} className={'adLayerRow'+(selected===item.id?' active':'')}><button className="adLayerPick" onClick={()=>{setSelected(item.id);setLayerOpen(false)}}><span>{item.layout?.locked?'🔒 ':''}{item.label}</span><small>{item.layout?.locked?'POSITION LOCKED':isTextItem(item)?'TEXT':item.binding?'SKIN-LINKED':'FREE ASSET'}</small></button><button className="adLayerAction danger" type="button" aria-label={'Delete '+item.label} onClick={e=>{e.stopPropagation();removeLayer(item.id)}}>🗑</button></div>)}</div><button className="adDanger" onClick={resetPage}>RESET THIS PAGE</button></aside>}
 
