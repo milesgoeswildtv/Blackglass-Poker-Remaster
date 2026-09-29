@@ -140,9 +140,9 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   expect(Math.abs(lockedAfter.y-lockedBefore.y)).toBeLessThan(1);
   await expect(page.locator('.adStatusLayer')).not.toHaveText(lockedLabel||'');
   await page.getByText('LAYERS',{exact:true}).click();
-  const lockedCustom=page.locator('.adLayerList>button').filter({hasText:'POSITION LOCKED'}).last();
+  const lockedCustom=page.locator('.adLayerRow').filter({hasText:'POSITION LOCKED'}).last();
   await expect(lockedCustom).toBeVisible();
-  await lockedCustom.click();
+  await lockedCustom.locator('.adLayerPick').click();
   await expect(page.getByRole('button',{name:'Unlock selected layer'})).toBeVisible();
   await page.getByRole('button',{name:'Unlock selected layer'}).click();
   await expect(page.locator('.adSelection')).not.toHaveClass(/locked/);
@@ -176,6 +176,18 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await expect(frame.locator('[data-afterdark-text]')).toHaveText('TABLE LIMIT');
   await page.getByRole('button',{name:'Delete selected asset'}).click();
   await expect(frame.locator('#afterdark-custom-root [data-afterdark-kind="text"]')).toHaveCount(0);
+
+  await page.getByText('ASSETS',{exact:true}).click();
+  await tableAsset.click();
+  await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(1);
+  await page.getByRole('button',{name:'Lock selected layer'}).click();
+  await page.getByText('LAYERS',{exact:true}).click();
+  const lockedDeleteRow=page.locator('.adLayerRow').filter({hasText:'POSITION LOCKED'}).last();
+  await expect(lockedDeleteRow).toBeVisible();
+  const lockedDelete=lockedDeleteRow.locator('.adLayerAction.danger');
+  await expect(lockedDelete).toBeVisible();
+  await lockedDelete.click();
+  await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(0);
 
   const surfaceTabs=page.locator('.adSurfaceTabs');
   await surfaceTabs.getByText('ENTRY',{exact:true}).click();
