@@ -154,7 +154,12 @@ for(const entry of fs.readdirSync(inbox,{withFileTypes:true}).filter(x=>x.isFile
   if(legacy)parts=[legacy[1],legacy[2]];
  }
  if(parts.length<2)throw new Error(`Invalid skin filename "${originalName}". Expected skin-id__channel[__role].ext`);
- const id=cleanToken(parts[0]),rawChannel=cleanToken(parts[1]),roleRaw=parts[2]?cleanToken(parts[2]):'';
+ const id=cleanToken(parts[0]);
+ let rawChannel=cleanToken(parts[1]),roleRaw=parts.length>2?cleanToken(parts.slice(2).join('-')):'';
+ if(parts.length===2&&['large-square-panel','small-button'].includes(rawChannel)){
+  roleRaw=rawChannel;
+  rawChannel='menu';
+ }
  if(!/^[a-z0-9-]+$/.test(id))throw new Error(`Invalid skin id in "${originalName}".`);
  if(!channels.has(rawChannel))throw new Error(`Unknown skin channel "${rawChannel}" in "${originalName}".`);
  const skin=ensureSkin(id),key=channelKey(rawChannel),assetPath=`skin-uploads/${originalName}`;
