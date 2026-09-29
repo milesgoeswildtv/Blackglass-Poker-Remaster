@@ -73,8 +73,6 @@ function buildManifest(doc,bp,surfaceId,page){
    'poker.entry.copy':{label:'Entry Copy',layout:{},style:{[bp]:{opacity:1}},asset:null},
    'poker.entry.key':{label:'Enter Key Button',layout:{},style:{[bp]:{opacity:1}},asset:null},
    'poker.entry.invite':{label:'Enter Invite Button',layout:{},style:{[bp]:{opacity:1}},asset:null},
-   'poker.entry.utility':{label:'Engine + Fairness',layout:{},style:{[bp]:{opacity:1}},asset:null},
-   'poker.entry.footer':{label:'Footer',layout:{},style:{[bp]:{opacity:1}},asset:null}
   });
  }else{
   for(const[id,label]of cfg.builtIns)slots[id]={label,layout:{},style:{[bp]:{opacity:1}}};
