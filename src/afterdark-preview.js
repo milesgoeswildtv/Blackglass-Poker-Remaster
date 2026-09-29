@@ -15,8 +15,13 @@ const SURFACE_SLOT_DEFS={
  ],
  entry:[
   {id:'poker.entry.logo',selector:'.homeBrand h1',asset:'background'},
-  {id:'poker.entry.content',selector:'.privateGate'},
+  {id:'poker.entry.tagline',selector:'.homeBrand p'},
   {id:'poker.entry.panel',selector:'.homeEntry',asset:'background',hideMode:'background'},
+  {id:'poker.entry.eyebrow',selector:'.privateGate>.entryEyebrow'},
+  {id:'poker.entry.title',selector:'.privateGate>h2'},
+  {id:'poker.entry.copy',selector:'.privateGate>p'},
+  {id:'poker.entry.key',selector:'.privateGateChoices>button:first-child'},
+  {id:'poker.entry.invite',selector:'.privateGateChoices>button:nth-child(2)'},
   {id:'poker.background',selector:'.homeShell',asset:'home-bg'}
  ],
  invite:[
