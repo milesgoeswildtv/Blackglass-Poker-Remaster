@@ -8,8 +8,6 @@ export const AFTERDARK_SURFACES=[
   ['poker.entry.copy','Entry Copy'],
   ['poker.entry.key','Enter Key Button'],
   ['poker.entry.invite','Enter Invite Button'],
-  ['poker.entry.utility','Engine + Fairness'],
-  ['poker.entry.footer','Footer']
  ]},
  {id:'home',label:'HOME',short:'HOME',backgroundChannel:'lobbyBg',scroll:'page',builtIns:[['poker.logo','Logo'],['poker.identity','Player Identity'],['poker.hostBar','Host Bar'],['poker.create','Create Game'],['poker.join','Join Game'],['poker.shop','Booster Shop'],['poker.utility','Engine + Fairness']]},
  {id:'invite',label:'INVITE',short:'INVITE',backgroundChannel:'gameRoomBg',scroll:'fixed',builtIns:[['poker.invite.panel','Invite Panel']]},
