@@ -295,3 +295,67 @@ test('Entry baked-ins can be removed individually and custom assets stay anchore
   expect(Math.abs(siteRelative.x-editRelative.x)).toBeLessThan(1);
   expect(Math.abs(siteRelative.y-editRelative.y)).toBeLessThan(1);
 });
+
+
+test('Edit and Site View keep identical viewport geometry on every Afterdark surface',async({page})=>{
+  test.setTimeout(120000);
+  await page.route('**/api/**',async route=>{
+    const p=new URL(route.request().url()).pathname;
+    if(p==='/api/auth/me')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({canonicalAccountId:'afterdark-viewport-qa',identity:{provider:'discord',displayName:'Viewport QA',username:'viewportqa',avatarUrl:''},account:{equipped:'default',inventory:['default'],notifications:{},links:{},access:{canHost:true,permanentHost:true,hostCredits:99,invites:[]}}})});
+    return route.fulfill({status:200,contentType:'application/json',body:'{}'});
+  });
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/?qa=afterdark-viewport#/design-lab/afterdark');
+  const frame=page.frameLocator('iframe');
+  const tabs=page.locator('.adSurfaceTabs');
+  const surfaces=[
+    ['ENTRY','.homeBrand h1'],
+    ['HOME','.homeBrand h1'],
+    ['INVITE','.inviteJoin'],
+    ['PRE','.ftp3Stage'],
+    ['PLAY','.ftp3Stage'],
+    ['MTT','.mttLobbyHeader'],
+    ['BREAK','.mttBreakScreen'],
+    ['MOVE','.mttMoveScreen'],
+    ['RESULT','.mttResultHero']
+  ];
+  for(const [tab,anchorSelector] of surfaces){
+    await tabs.getByText(tab,{exact:true}).click();
+    await expect(frame.locator(anchorSelector)).toBeVisible();
+
+    await page.getByText('ASSETS',{exact:true}).click();
+    await page.getByRole('button',{name:/ADD TEXT/i}).click();
+    await expect(frame.locator('#afterdark-custom-root [data-afterdark-kind="text"]')).toHaveCount(1);
+    if(await page.locator('.adSheet').isVisible())await page.locator('.adSheet>header button').click();
+
+    const editIframe=await page.locator('iframe').boundingBox();
+    const editCanvas=await frame.locator('[data-afterdark-canvas]').boundingBox();
+    const editAsset=await frame.locator('#afterdark-custom-root [data-afterdark-kind="text"]').boundingBox();
+    const editAnchor=await frame.locator(anchorSelector).boundingBox();
+    expect(editIframe&&editCanvas&&editAsset&&editAnchor,tab+' edit geometry').toBeTruthy();
+    const editRelative={
+      assetX:editAsset.x-editCanvas.x,assetY:editAsset.y-editCanvas.y,
+      anchorX:editAnchor.x,anchorY:editAnchor.y
+    };
+
+    await page.getByRole('button',{name:'SITE VIEW'}).click();
+    await expect(page.locator('.adTop')).toBeHidden();
+    await page.waitForTimeout(80);
+
+    const siteIframe=await page.locator('iframe').boundingBox();
+    const siteCanvas=await frame.locator('[data-afterdark-canvas]').boundingBox();
+    const siteAsset=await frame.locator('#afterdark-custom-root [data-afterdark-kind="text"]').boundingBox();
+    const siteAnchor=await frame.locator(anchorSelector).boundingBox();
+    expect(siteIframe&&siteCanvas&&siteAsset&&siteAnchor,tab+' site geometry').toBeTruthy();
+
+    expect(Math.abs(siteIframe.width-editIframe.width),tab+' iframe width changed').toBeLessThan(1);
+    expect(Math.abs(siteIframe.height-editIframe.height),tab+' iframe height changed').toBeLessThan(1);
+    expect(Math.abs((siteAsset.x-siteCanvas.x)-editRelative.assetX),tab+' custom X shifted').toBeLessThan(1);
+    expect(Math.abs((siteAsset.y-siteCanvas.y)-editRelative.assetY),tab+' custom Y shifted').toBeLessThan(1);
+    expect(Math.abs(siteAnchor.x-editRelative.anchorX),tab+' baked-in X shifted').toBeLessThan(1);
+    expect(Math.abs(siteAnchor.y-editRelative.anchorY),tab+' baked-in Y shifted').toBeLessThan(1);
+
+    await page.getByRole('button',{name:'EDIT',exact:true}).click();
+    await expect(page.locator('.adTop')).toBeVisible();
+  }
+});
