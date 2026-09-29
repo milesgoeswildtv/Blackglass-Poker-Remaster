@@ -73,7 +73,7 @@ function buildManifest(doc,bp,surfaceId,page){
  }
  for(const[id]of cfg.builtIns){
   if(!slots[id])slots[id]={label:id,layout:{},style:{[bp]:{opacity:1}}};
-  const v=page.layout[id]||{},out={x:Number(v.x||0),y:Number(v.y||0),zIndex:Number(v.zIndex||5),visible:v.visible!==false};
+  const v=page.layout[id]||{},out={x:Number(v.x||0),y:Number(v.y||0),zIndex:Number(v.zIndex||5),visible:v.visible!==false,locked:v.locked===true};
   if(Number.isFinite(v.width)&&v.width>0)out.width=v.width;
   if(Number.isFinite(v.height)&&v.height>0)out.height=v.height;
   slots[id].layout[bp]=out;
