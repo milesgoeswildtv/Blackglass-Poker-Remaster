@@ -335,7 +335,7 @@ test('Edit and Site View keep identical viewport geometry on every Afterdark sur
     expect(editIframe&&editCanvas&&editAsset&&editAnchor,tab+' edit geometry').toBeTruthy();
     const editRelative={
       assetX:editAsset.x-editCanvas.x,assetY:editAsset.y-editCanvas.y,
-      anchorX:editAnchor.x,anchorY:editAnchor.y
+      anchorX:editAnchor.x-editIframe.x,anchorY:editAnchor.y-editIframe.y
     };
 
     await page.getByRole('button',{name:'SITE VIEW'}).click();
@@ -352,8 +352,8 @@ test('Edit and Site View keep identical viewport geometry on every Afterdark sur
     expect(Math.abs(siteIframe.height-editIframe.height),tab+' iframe height changed').toBeLessThan(1);
     expect(Math.abs((siteAsset.x-siteCanvas.x)-editRelative.assetX),tab+' custom X shifted').toBeLessThan(1);
     expect(Math.abs((siteAsset.y-siteCanvas.y)-editRelative.assetY),tab+' custom Y shifted').toBeLessThan(1);
-    expect(Math.abs(siteAnchor.x-editRelative.anchorX),tab+' baked-in X shifted').toBeLessThan(1);
-    expect(Math.abs(siteAnchor.y-editRelative.anchorY),tab+' baked-in Y shifted').toBeLessThan(1);
+    expect(Math.abs((siteAnchor.x-siteIframe.x)-editRelative.anchorX),tab+' baked-in X shifted').toBeLessThan(1);
+    expect(Math.abs((siteAnchor.y-siteIframe.y)-editRelative.anchorY),tab+' baked-in Y shifted').toBeLessThan(1);
 
     await page.getByRole('button',{name:'EDIT',exact:true}).click();
     await expect(page.locator('.adTop')).toBeVisible();
