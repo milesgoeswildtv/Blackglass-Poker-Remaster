@@ -212,15 +212,36 @@ function reportRects(){
  for(const el of document.querySelectorAll('#afterdark-custom-root [data-afterdark-id]')){const r=el.getBoundingClientRect();rects.push({id:el.dataset.afterdarkId,x:r.left,y:r.top,width:r.width,height:r.height})}
  parent.postMessage({type:'afterdark:rects',rects},'*');
 }
-function selectFromTarget(target){
- const custom=target?.closest?.('#afterdark-custom-root [data-afterdark-id]');if(custom){parent.postMessage({type:'afterdark:select',id:custom.dataset.afterdarkId},'*');return true}
- for(const def of SLOT_DEFS){
-  if(def.id==='poker.background')continue;
-  const el=elementFor(def);
-  if(el&&(target===el||el.contains(target))){parent.postMessage({type:'afterdark:select',id:def.id},'*');return true}
+function layerLocked(id){
+ const custom=customAssets.find(item=>item?.id===id);
+ if(custom)return custom.layout?.locked===true;
+ return layoutFor(manifest?.slots?.[id],breakpoint).locked===true;
+}
+function postSelect(id){parent.postMessage({type:'afterdark:select',id},'*');return true}
+function selectFromPoint(x,y,target){
+ const stack=document.elementsFromPoint?.(x,y)||[target].filter(Boolean);
+ for(const node of stack){
+  const custom=node?.closest?.('#afterdark-custom-root [data-afterdark-id]');
+  if(custom&&custom===node&&!layerLocked(custom.dataset.afterdarkId))return postSelect(custom.dataset.afterdarkId);
+  for(const def of SLOT_DEFS){
+   if(def.id==='poker.background'||layerLocked(def.id))continue;
+   const el=elementFor(def);
+   if(el===node)return postSelect(def.id);
+  }
  }
- const bg=elementFor(SLOT_DEFS[SLOT_DEFS.length-1]);
- if(bg&&(target===bg||bg.contains(target))){parent.postMessage({type:'afterdark:select',id:'poker.background'},'*');return true}
+ for(const node of stack){
+  const custom=node?.closest?.('#afterdark-custom-root [data-afterdark-id]');
+  if(custom&&!layerLocked(custom.dataset.afterdarkId))return postSelect(custom.dataset.afterdarkId);
+  for(const def of SLOT_DEFS){
+   if(def.id==='poker.background'||layerLocked(def.id))continue;
+   const el=elementFor(def);
+   if(el&&(node===el||el.contains(node)))return postSelect(def.id);
+  }
+ }
+ if(!layerLocked('poker.background')){
+  const bg=elementFor(SLOT_DEFS[SLOT_DEFS.length-1]);
+  if(bg&&(target===bg||bg.contains(target)))return postSelect('poker.background');
+ }
  return false;
 }
 
@@ -228,7 +249,7 @@ export function installAfterdarkPreview(){
  if(!previewEnabled())return false;
  document.documentElement.dataset.afterdarkPreview='1';
  const ready=()=>{
-  document.addEventListener('pointerdown',e=>{selectFromTarget(e.target)},true);
+  document.addEventListener('pointerdown',e=>{selectFromPoint(e.clientX,e.clientY,e.target)},true);
   document.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation()},true);
   addEventListener('message',e=>{
    const d=e.data||{};
