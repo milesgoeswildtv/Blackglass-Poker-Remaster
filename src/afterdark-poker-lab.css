@@ -52,3 +52,11 @@
 .adQuickLock{flex:0 0 auto!important;max-width:none!important;padding:6px 8px!important;border-color:#654475!important;background:#25142d!important;color:#ead5f3!important}
 .adQuickLock.active{border-color:#b76bd7!important;background:#3a1d46!important;color:#fff!important}
 @media(max-width:430px){.adStatus .adStatusLayer{max-width:38%}.adStatus em{max-width:24%}.adQuickLock{padding:6px 7px!important;font-size:7px!important}}
+
+.adLayerRow{display:grid;grid-template-columns:minmax(0,1fr) 42px;gap:6px;align-items:stretch}
+.adLayerRow.active .adLayerPick{border-color:#9b56bf;background:#24142d}
+.adLayerPick{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid #34283b;border-radius:12px;background:#151019;color:#ddd2e1;text-align:left}
+.adLayerPick span{font-size:11px;font-weight:800}
+.adLayerPick small{color:#7d7184;font:800 7px/1 ui-monospace,monospace}
+.adLayerAction{width:42px;border:1px solid #3d3045;border-radius:12px;background:#151019;color:#b8aabd;font-size:15px}
+.adLayerAction.danger{border-color:#643442;background:#261016;color:#f0b0bc}
