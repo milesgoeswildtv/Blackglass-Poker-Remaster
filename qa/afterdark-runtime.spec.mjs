@@ -241,3 +241,55 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
 
   await page.screenshot({path:evidenceDir+'/afterdark-editor.png',animations:'disabled',fullPage:false});
 });
+
+
+test('Entry baked-ins can be removed individually and custom assets stay anchored in Site View',async({page})=>{
+  test.setTimeout(90000);
+  await page.route('**/api/**',async route=>{
+    const p=new URL(route.request().url()).pathname;
+    if(p==='/api/auth/me')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({canonicalAccountId:'afterdark-entry-qa',identity:{provider:'discord',displayName:'Entry QA',username:'entryqa',avatarUrl:''},account:{equipped:'default',inventory:['default'],notifications:{},links:{},access:{canHost:true,permanentHost:false,hostCredits:3,invites:[]}}})});
+    return route.fulfill({status:200,contentType:'application/json',body:'{}'});
+  });
+  await page.setViewportSize({width:1024,height:800});
+  await page.goto('/?qa=afterdark-entry#/design-lab/afterdark');
+
+  const frame=page.frameLocator('iframe');
+  await page.locator('.adSurfaceTabs').getByText('ENTRY',{exact:true}).click();
+  await expect(frame.locator('.privateGate')).toBeVisible();
+
+  await page.getByText('LAYERS',{exact:true}).click();
+  for(const label of ['Logo','Brand Tagline','Panel Artwork','Private Access Label','Entry Title','Entry Copy','Enter Key Button','Enter Invite Button']){
+    await expect(page.getByText(label,{exact:true})).toBeVisible();
+  }
+  const titleRow=page.locator('.adLayerRow').filter({hasText:'Entry Title'});
+  await expect(titleRow).toBeVisible();
+  await titleRow.getByRole('button',{name:'Remove Entry Title'}).click();
+  await expect(frame.locator('.privateGate>h2')).toBeHidden();
+  await expect(titleRow.getByRole('button',{name:'Restore Entry Title'})).toBeVisible();
+  await titleRow.getByRole('button',{name:'Restore Entry Title'}).click();
+  await expect(frame.locator('.privateGate>h2')).toBeVisible();
+
+  await page.locator('.adSheet>header button').click();
+  await page.getByText('ASSETS',{exact:true}).click();
+  const asset=page.locator('.adAssetGrid button').first();
+  await expect(asset).toBeVisible();
+  await asset.click();
+  await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(1);
+
+  const editFrame=await frame.locator('.homeFrame').boundingBox();
+  const editAsset=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
+  expect(editFrame&&editAsset).toBeTruthy();
+  const editRelative={x:editAsset.x-editFrame.x,y:editAsset.y-editFrame.y};
+
+  await page.getByRole('button',{name:'SITE VIEW'}).click();
+  await expect(page.locator('.adTop')).toBeHidden();
+  await page.waitForTimeout(100);
+
+  const siteFrame=await frame.locator('.homeFrame').boundingBox();
+  const siteAsset=await frame.locator('#afterdark-custom-root [data-afterdark-id]').boundingBox();
+  expect(siteFrame&&siteAsset).toBeTruthy();
+  const siteRelative={x:siteAsset.x-siteFrame.x,y:siteAsset.y-siteFrame.y};
+
+  expect(Math.abs(siteRelative.x-editRelative.x)).toBeLessThan(1);
+  expect(Math.abs(siteRelative.y-editRelative.y)).toBeLessThan(1);
+});
