@@ -51,7 +51,17 @@ export function gameSkinStyle(loadout={}){
   '--skin-gameplay-call':bg(gameplay['action-call']),
   '--skin-gameplay-raise':bg(gameplay['action-raise']),
   '--skin-gameplay-all-in':bg(gameplay['action-all-in']),
-  '--skin-gameplay-utility':bg(gameplay['utility-button'])
+  '--skin-gameplay-utility':bg(gameplay['utility-button']),
+  '--skin-gameplay-action-primary':bg(gameplay['action-button-primary']),
+  '--skin-gameplay-action-secondary':bg(gameplay['action-button-secondary']),
+  '--skin-gameplay-bet-amount':bg(gameplay['bet-amount-pill']),
+  '--skin-gameplay-bet-slider-track':bg(gameplay['bet-slider-track']),
+  '--skin-gameplay-chip-tray':bg(gameplay['chip-tray-panel']),
+  '--skin-gameplay-community-cards':bg(gameplay['community-cards-panel']),
+  '--skin-gameplay-dealer-button':bg(gameplay['dealer-button']),
+  '--skin-gameplay-player-seat':bg(gameplay['player-seat-panel']),
+  '--skin-gameplay-pot-panel':bg(gameplay['pot-panel']),
+  '--skin-gameplay-turn-timer':bg(gameplay['turn-timer-ring'])
  };
 }
 export function tableSkinAsset(loadout={}){return skinAssetUrl(backgroundVariant(loadout,'tableSkin','default'))}
