@@ -194,10 +194,12 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await expect(frame.locator('.homeEntry')).toBeVisible();
   await page.getByText('LAYERS',{exact:true}).click();
   await expect(page.getByText('Panel Artwork',{exact:true})).toBeVisible();
-  await expect(page.getByText('Access Content',{exact:true})).toBeVisible();
+  await expect(page.getByText('Private Access Label',{exact:true})).toBeVisible();
+  await expect(page.getByText('Entry Title',{exact:true})).toBeVisible();
+  await expect(page.getByText('Entry Copy',{exact:true})).toBeVisible();
   await page.getByText('Panel Artwork',{exact:true}).click();
   await page.getByText('EDIT',{exact:true}).click();
-  await page.getByText('HIDE',{exact:true}).click();
+  await page.getByText('REMOVE',{exact:true}).click();
   await expect(frame.locator('.homeEntry')).toHaveCSS('background-image','none');
   await expect(frame.locator('.privateGate')).toBeVisible();
   await page.getByText('HOME',{exact:true}).click();
