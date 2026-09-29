@@ -140,9 +140,9 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   expect(Math.abs(lockedAfter.y-lockedBefore.y)).toBeLessThan(1);
   await expect(page.locator('.adStatusLayer')).not.toHaveText(lockedLabel||'');
   await page.getByText('LAYERS',{exact:true}).click();
-  const lockedCustom=page.locator('.adLayerList>button').filter({hasText:'POSITION LOCKED'}).last();
+  const lockedCustom=page.locator('.adLayerRow').filter({hasText:'POSITION LOCKED'}).last();
   await expect(lockedCustom).toBeVisible();
-  await lockedCustom.click();
+  await lockedCustom.locator('.adLayerPick').click();
   await expect(page.getByRole('button',{name:'Unlock selected layer'})).toBeVisible();
   await page.getByRole('button',{name:'Unlock selected layer'}).click();
   await expect(page.locator('.adSelection')).not.toHaveClass(/locked/);
