@@ -44,7 +44,7 @@ function TableFixture({pregame=false,skins}){
  </main>
 }
 function EntryFixture({skins}){
- return <main data-afterdark-canvas className="homeShell" style={lobbySkinStyle(skins)}><div className="homeFrame">
+ return <main className="homeShell" style={lobbySkinStyle(skins)}><div data-afterdark-canvas data-afterdark-canvas-kind="entry-frame" className="homeFrame">
   <header className="homeTopline"><div className="homeBrand"><h1>CRASHOUT POKER</h1><p>Private tables • Tournaments • Invite only.</p></div></header>
   <section className="homeHero"><div className="homeEntry"><AccessHome account={null} authLoading={false} authError="" telegram={false} name="LAYOUT PREVIEW" discordLink={null} onRefresh={noop} onCreate={noop} onJoin={noop} onShop={noop}/></div></section>
  </div></main>
