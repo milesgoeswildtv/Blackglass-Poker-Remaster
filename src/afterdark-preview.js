@@ -158,7 +158,7 @@ function ensureCustomRoot(){
   let root=document.getElementById('afterdark-custom-root');
   if(!root){root=document.createElement('div');root.id='afterdark-custom-root';canvas.appendChild(root)}
   else if(root.parentElement!==canvas)canvas.appendChild(root);
-  Object.assign(root.style,{position:'absolute',left:'0',top:'0',width:Math.max(canvas.scrollWidth,canvas.clientWidth,innerWidth)+'px',height:Math.max(canvas.scrollHeight,canvas.clientHeight,innerHeight)+'px',zIndex:'5000',pointerEvents:'none',overflow:'visible'});
+  Object.assign(root.style,{position:'absolute',left:'0',top:'0',width:Math.max(canvas.scrollWidth,canvas.clientWidth,1)+'px',height:Math.max(canvas.scrollHeight,canvas.clientHeight,1)+'px',zIndex:'5000',pointerEvents:'none',overflow:'visible'});
   return root;
  }
  const shell=document.querySelector('.homeShell'),frame=document.querySelector('.homeFrame');if(!shell||!frame)return null;
