@@ -182,7 +182,9 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(1);
   await page.getByRole('button',{name:'Lock selected layer'}).click();
   await page.getByText('LAYERS',{exact:true}).click();
-  const lockedDelete=page.getByRole('button',{name:/Delete .*Table/i});
+  const lockedDeleteRow=page.locator('.adLayerRow').filter({hasText:'POSITION LOCKED'}).last();
+  await expect(lockedDeleteRow).toBeVisible();
+  const lockedDelete=lockedDeleteRow.locator('.adLayerAction.danger');
   await expect(lockedDelete).toBeVisible();
   await lockedDelete.click();
   await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(0);
