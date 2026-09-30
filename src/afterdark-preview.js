@@ -191,6 +191,17 @@ function renderCustomAssets(){
    text.style.justifyContent=text.style.textAlign==='center'?'center':text.style.textAlign==='right'?'flex-end':'flex-start';
    text.style.fontFamily='Inter,system-ui,sans-serif';
    text.style.lineHeight='1.05';
+  }else if(item.kind==='shape'){
+   el.dataset.afterdarkKind='shape';
+   let shape=el.querySelector('[data-afterdark-shape]');
+   if(!shape){el.replaceChildren();shape=document.createElement('div');shape.dataset.afterdarkShape='1';Object.assign(shape.style,{width:'100%',height:'100%',boxSizing:'border-box',pointerEvents:'none',userSelect:'none'});el.appendChild(shape)}
+   const s=item.shapeStyle||{};
+   shape.style.background=String(s.fill||'#5f2878');
+   shape.style.borderColor=String(s.borderColor||'#d77cff');
+   shape.style.borderWidth=px(Math.max(0,Number(s.borderWidth??2)));
+   shape.style.borderStyle=['solid','dashed','dotted'].includes(s.borderStyle)?s.borderStyle:'dashed';
+   shape.style.borderRadius=px(Math.max(0,Number(s.radius??10)));
+   shape.style.opacity=String(Math.max(.05,Math.min(1,Number(s.opacity??.35))));
   }else{
    el.dataset.afterdarkKind='asset';
    let img=el.querySelector('img');
