@@ -178,6 +178,23 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await expect(frame.locator('#afterdark-custom-root [data-afterdark-kind="text"]')).toHaveCount(0);
 
   await page.getByText('ASSETS',{exact:true}).click();
+  await page.getByRole('button',{name:'Add CIRCLE placeholder'}).click();
+  const shape=frame.locator('#afterdark-custom-root [data-afterdark-kind="shape"]');
+  await expect(shape).toHaveCount(1);
+  await expect(page.locator('.adShapeEditor')).toBeVisible();
+  await page.getByLabel('Shape fill').fill('#224466');
+  await page.getByLabel('Shape border width').fill('4');
+  await page.getByLabel('Shape radius').fill('24');
+  await page.getByLabel('Shape opacity').fill('0.6');
+  const shapeVisual=frame.locator('[data-afterdark-shape]');
+  await expect(shapeVisual).toHaveCSS('background-color','rgb(34, 68, 102)');
+  await expect(shapeVisual).toHaveCSS('border-top-width','4px');
+  await expect(shapeVisual).toHaveCSS('border-radius','24px');
+  await expect(shapeVisual).toHaveCSS('opacity','0.6');
+  await page.getByRole('button',{name:'Delete selected asset'}).click();
+  await expect(shape).toHaveCount(0);
+
+  await page.getByText('ASSETS',{exact:true}).click();
   await tableAsset.click();
   await expect(frame.locator('#afterdark-custom-root [data-afterdark-id]')).toHaveCount(1);
   await page.getByRole('button',{name:'Lock selected layer'}).click();
