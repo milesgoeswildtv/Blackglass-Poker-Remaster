@@ -21,3 +21,9 @@ test('selector registry is the complete single source for every built-in',()=>{
   for(const id of ids(surface))assert.ok(defs.find(def=>def.id===id)?.selector,`${surface}:${id} needs a stable selector`);
  }
 });
+
+
+test('pre-game utility selector has one stable owner contract',()=>{
+ const def=AFTERDARK_SLOT_DEFS.pregame.find(def=>def.id==='poker.pregame.utility');
+ assert.equal(def?.selector,'[data-afterdark-slot="pregame-utility"]');
+});
