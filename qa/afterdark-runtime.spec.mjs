@@ -66,3 +66,22 @@ test('active surface manifest updates groups and granular controls independently
  await expect.poll(()=>page.locator('.ftp3ActionRow .fold').evaluate(el=>el.style.opacity)).toBe('0.9');
  await expect(page.locator('.ftp3ActionRow .raise')).toHaveCSS('opacity','1');
 });
+
+test('pre-game granular controls update production elements without duplicating them',async({page})=>{
+ await page.goto('/?afterdarkPreview=1&afterdarkSurface=pregame');
+ await page.evaluate(()=>window.postMessage({
+  type:'afterdark:manifest',
+  surface:'pregame',
+  breakpoint:'desktop',
+  selectableSlots:['pregame.start'],
+  manifest:{slots:{
+   'pregame.start':{layout:{desktop:{x:-9,y:6}},style:{desktop:{opacity:.8}},asset:null},
+   'pregame.tableArtwork':{layout:{desktop:{}},style:{desktop:{opacity:.95}},asset:null}
+  }}
+ },'*'));
+ await expect.poll(()=>page.locator('.ftp3Start').evaluate(el=>el.style.translate)).toBe('-9px 6px');
+ await expect.poll(()=>page.locator('.ftp3Start').evaluate(el=>el.style.opacity)).toBe('0.8');
+ await expect(page.locator('.ftp3TableShell')).toHaveCount(1);
+ await expect(page.locator('.ftp3Start')).toHaveCount(1);
+ await expect(page.locator('.ftp3TableShell')).toHaveCSS('opacity','0.95');
+});
