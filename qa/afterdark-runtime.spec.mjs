@@ -268,8 +268,21 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await page.getByRole('button',{name:'Lock layer position'}).click();
   await expect(page.locator('.adFields input').first()).toBeDisabled();
   await page.locator('.adSheet>header button').click();
-  await fold.click({force:true});
+  await expect(page.locator('.adSelection.locked')).toHaveCSS('pointer-events','none');
+  // The authoring iframe is taller than the mobile editor workspace. Bring the
+  // actual control into that outer viewport before testing pointer hit-testing.
+  // A forced iframe click can land on the editor dock while Fold is clipped.
+  const lockedFoldBox=await fold.boundingBox();
+  expect(lockedFoldBox).toBeTruthy();
+  await page.locator('.adWorkspace').evaluate((workspace,centerY)=>{
+    const bounds=workspace.getBoundingClientRect();
+    workspace.scrollBy(0,centerY-bounds.top-bounds.height/2);
+  },lockedFoldBox.y+lockedFoldBox.height/2);
+  await fold.click();
   await expect(page.locator('.adStatusLayer')).not.toHaveText('Fold');
+  const lockedFoldAfter=await fold.boundingBox();
+  expect(lockedFoldAfter.width).toBeCloseTo(lockedFoldBox.width,0);
+  expect(lockedFoldAfter.height).toBeCloseTo(lockedFoldBox.height,0);
 
   await surfaceTabs.getByText('HOME',{exact:true}).click();
   await expect(frame.locator('.homeShell')).toBeVisible();
