@@ -262,7 +262,7 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await expect(removedFoldRow).toBeVisible();
   await removedFoldRow.getByRole('button',{name:'Restore Fold'}).click();
   await expect(fold).toBeVisible();
-  await page.getByText('LAYERS',{exact:true}).click();
+  await page.getByRole('button',{name:'Layers'}).click();
   await page.getByText('Fold',{exact:true}).click();
   await page.getByText('EDIT',{exact:true}).click();
   await page.getByRole('button',{name:'Lock layer position'}).click();
