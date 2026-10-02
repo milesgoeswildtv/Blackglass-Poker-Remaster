@@ -21,14 +21,19 @@ const players=[
  {id:'p1',name:'YOU',chips:8420,host:true,turn:true,bet:200,cards:['A♠','K♠'],folded:false,eliminated:false,sittingOut:false,timeBankMs:30000},
  {id:'p2',name:'RUBY',chips:6110,host:false,turn:false,bet:200,cards:['',''],folded:false,eliminated:false,sittingOut:false},
  {id:'p3',name:'ZERO',chips:9320,host:false,turn:false,bet:0,cards:['',''],folded:false,eliminated:false,sittingOut:false},
- {id:'p4',name:'PSYCHEE',chips:4770,host:false,turn:false,bet:0,cards:['',''],folded:false,eliminated:false,sittingOut:false}
+ {id:'p4',name:'PSYCHEE',chips:4770,host:false,turn:false,bet:0,cards:['',''],folded:false,eliminated:false,sittingOut:false},
+ {id:'p5',name:'MIKA',chips:7200,host:false,turn:false,bet:0,cards:['',''],folded:false,eliminated:false,sittingOut:false},
+ {id:'p6',name:'DROOPY',chips:5380,host:false,turn:false,bet:0,cards:['',''],folded:false,eliminated:false,sittingOut:false},
+ {id:'p7',name:'ACE',chips:10400,host:false,turn:false,bet:0,cards:['',''],folded:false,eliminated:false,sittingOut:false},
+ {id:'p8',name:'NOVA',chips:6840,host:false,turn:false,bet:0,cards:['',''],folded:false,eliminated:false,sittingOut:false},
+ {id:'p9',name:'BONES',chips:3900,host:false,turn:false,bet:0,cards:['',''],folded:false,eliminated:false,sittingOut:false}
 ];
 const me=players[0];
 function stateFor(started){
  return{
   started,paused:false,street:started?'flop':'waiting',handNumber:17,smallBlind:100,bigBlind:200,
-  players:started?players:players.slice(0,3),viewer:{type:'player',name:'YOU'},board:started?['A♥','7♣','2♦']:[],
-  pot:started?1250:0,livePots:[],toCall:200,raiseTo:600,currentBet:200,canRaise:true,canAllIn:true,
+  players,viewer:{type:'player',name:'YOU'},board:started?['A♥','7♣','2♦','J♠','4♥']:[],
+  pot:started?1250:0,livePots:started?[{amount:900},{amount:350}]:[],toCall:200,raiseTo:600,currentBet:200,canRaise:true,canAllIn:true,
   handHistory:[],chat:[],lastResult:null,endedByHost:false
  };
 }
@@ -37,8 +42,8 @@ function posFor(state){return Object.fromEntries(state.players.map((p,i)=>[i,i==
 function TableFixture({pregame=false,skins}){
  const[raise,setRaise]=useState('600'),state=stateFor(!pregame),gameplaySkin=gameplayThemeAssets(skins),tableAsset=tableSkinAsset(skins),pos=posFor(state);
  return <main data-afterdark-canvas className={`tablePage ${pregame?'pregameTablePage':'gameplayV3Page'}`} style={gamePageStyle(skins)}>
-  {pregame?<><button className="pregameBack" type="button">Back</button><button className="pregameSkins" type="button">Skins</button></>:<TableTopbar code="C0DE42" state={state} onExit={noop} me={me} onAction={noop}/>}
-  {pregame&&<section className="pregameRoom" aria-label="Crashout staging room"><div className="pregameHeaderLeft"><span>CRASHOUT STAGING ROOM</span><h2>THE TABLE IS READY.</h2><p>Everyone seated? Start when you’re ready to deal.</p></div><div className="pregameHeaderRight"><div className="pregameCount"><b>{state.players.length}<small>/9</small></b><span>SEATED</span></div><div className="pregameInviteCluster"><button className="pregameInviteButton" type="button">INVITE</button><strong className="pregameCode">C0DE42</strong></div></div><div className="pregameBlindBadge">100 / 200 NLH</div></section>}
+  {pregame?<><button data-afterdark-slot="pregame-back" className="pregameBack" type="button">Back</button><button data-afterdark-slot="pregame-utility" className="pregameSkins" type="button">Skins</button></>:<TableTopbar code="C0DE42" state={state} onExit={noop} me={me} onAction={noop}/>}
+  {pregame&&<section data-afterdark-slot="pregame-header" className="pregameRoom" aria-label="Crashout staging room"><div className="pregameHeaderLeft"><span>CRASHOUT STAGING ROOM</span><h2>THE TABLE IS READY.</h2><p>Everyone seated? Start when you’re ready to deal.</p></div><div className="pregameHeaderRight"><div className="pregameCount"><b>{state.players.length}<small>/9</small></b><span>SEATED</span></div><div className="pregameInviteCluster"><button className="pregameInviteButton" type="button">INVITE</button><strong className="pregameCode">C0DE42</strong></div></div><div data-afterdark-slot="pregame-blinds" className="pregameBlindBadge">100 / 200 NLH</div></section>}
   <PokerFelt state={state} finished={false} pos={pos} turnLeft={22} me={me} onKick={noop} onThrowTarget={noop} throwingEnabled={!pregame} tableAsset={tableAsset} gameplaySkin={gameplaySkin}/>
   <TableHUD state={state} me={me} isSpectator={false} strength={pregame?'':'TOP PAIR'} turnLeft={22} raise={raise} setRaise={setRaise} showHistory={false} setShowHistory={noop} showChat={false} unreadChat={0} onToggleChat={noop} preAction="" onPreAction={noop} showTestBot={pregame} onAction={noop} gameplaySkin={gameplaySkin}/>
  </main>

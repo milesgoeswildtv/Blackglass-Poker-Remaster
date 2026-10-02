@@ -227,6 +227,9 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await surfaceTabs.getByText('PRE',{exact:true}).click();
   await expect(frame.locator('.pregameTablePage')).toBeVisible();
   expect(await frame.locator('body').evaluate(el=>getComputedStyle(el).overflow)).toBe('hidden');
+  await page.getByText('LAYERS',{exact:true}).click();
+  for(const label of ['Back','Header Information','Blinds / Table Info','Opponent Seat 8','Hero Hole Card 2','Start Control','Utility Controls','Chat','Hand Log / History'])await expect(page.getByText(label,{exact:true})).toBeVisible();
+  await page.locator('.adSheet>header button').click();
   await page.getByText('ASSETS',{exact:true}).click();
   await page.getByRole('button',{name:/ADD TEXT/i}).click();
   await page.locator('.adTextEditor textarea').fill('PRE ONLY');
@@ -236,6 +239,50 @@ test('Afterdark editor renders controls, Poker preview, and swaps skin backgroun
   await expect(frame.locator('.gameplayV3Page')).toBeVisible();
   expect(await frame.locator('body').evaluate(el=>getComputedStyle(el).overflow)).toBe('hidden');
   await expect(frame.locator('[data-afterdark-text]')).toHaveCount(0);
+
+  // Granular gameplay layers resolve to real runtime controls and retain editor operations.
+  await page.getByText('LAYERS',{exact:true}).click();
+  for(const label of ['Back / Exit','Opponent Seat 1','Community Card 1','Hero Hole Card 1','Fold','Bet Slider','Quick Bet 1','Chat','Hand Log / History'])await expect(page.getByText(label,{exact:true})).toBeVisible();
+  await page.getByText('Fold',{exact:true}).click();
+  await expect(page.locator('.adStatusLayer')).toHaveText('Fold');
+  const fold=frame.locator('[data-afterdark-slot="action-fold"]');
+  await expect(fold).toBeVisible();
+  const foldBefore=await fold.boundingBox();
+  await page.getByText('EDIT',{exact:true}).click();
+  const fields=page.locator('.adFields input');
+  await fields.nth(0).fill('16');
+  await fields.nth(2).fill('112');
+  await expect.poll(async()=>{const box=await fold.boundingBox();return Math.round(box?.width||0)}).toBe(112);
+  const foldMoved=await fold.boundingBox();
+  expect(foldBefore&&foldMoved&&foldMoved.x-foldBefore.x).toBeGreaterThan(14);
+  await page.getByText('REMOVE',{exact:true}).click();
+  await expect(fold).toBeHidden();
+  await page.getByText('LAYERS',{exact:true}).click();
+  const removedFoldRow=page.locator('.adLayerRow').filter({hasText:'Fold'});
+  await expect(removedFoldRow).toBeVisible();
+  await removedFoldRow.getByRole('button',{name:'Restore Fold'}).click();
+  await expect(fold).toBeVisible();
+  await page.getByRole('button',{name:'Layers'}).click();
+  await page.getByText('Fold',{exact:true}).click();
+  await page.getByText('EDIT',{exact:true}).click();
+  await page.getByRole('button',{name:'Lock layer position'}).click();
+  await expect(page.locator('.adFields input').first()).toBeDisabled();
+  await page.locator('.adSheet>header button').click();
+  await expect(page.locator('.adSelection.locked')).toHaveCSS('pointer-events','none');
+  // The authoring iframe is taller than the mobile editor workspace. Bring the
+  // actual control into that outer viewport before testing pointer hit-testing.
+  // A forced iframe click can land on the editor dock while Fold is clipped.
+  const lockedFoldBox=await fold.boundingBox();
+  expect(lockedFoldBox).toBeTruthy();
+  await page.locator('.adWorkspace').evaluate((workspace,centerY)=>{
+    const bounds=workspace.getBoundingClientRect();
+    workspace.scrollBy(0,centerY-bounds.top-bounds.height/2);
+  },lockedFoldBox.y+lockedFoldBox.height/2);
+  await fold.click();
+  await expect(page.locator('.adStatusLayer')).not.toHaveText('Fold');
+  const lockedFoldAfter=await fold.boundingBox();
+  expect(lockedFoldAfter.width).toBeCloseTo(lockedFoldBox.width,0);
+  expect(lockedFoldAfter.height).toBeCloseTo(lockedFoldBox.height,0);
 
   await surfaceTabs.getByText('HOME',{exact:true}).click();
   await expect(frame.locator('.homeShell')).toBeVisible();

@@ -2,68 +2,8 @@ const previewEnabled=()=>{try{return new URLSearchParams(location.search).get('a
 const BASE=import.meta.env.BASE_URL||'/';
 
 const PREVIEW_SURFACE=(()=>{try{return new URLSearchParams(location.search).get('afterdarkSurface')||'home'}catch{return'home'}})();
-const SURFACE_SLOT_DEFS={
- home:[
-  {id:'poker.logo',selector:'.homeBrand h1',asset:'background'},
-  {id:'poker.identity',selector:'.homeIdentityTicket',asset:'background'},
-  {id:'poker.hostBar',selector:'.homeHostIdentity',asset:'background'},
-  {id:'poker.create',selector:'.homeActionPrimary:first-child',asset:'background'},
-  {id:'poker.join',selector:'.homeActionPrimary:nth-child(2)',asset:'background'},
-  {id:'poker.shop',selector:'.homeActionShop',asset:'background'},
-  {id:'poker.utility',selector:'.homeUtilityEntry button',asset:'background'},
-  {id:'poker.background',selector:'.homeShell',asset:'home-bg'}
- ],
- entry:[
-  {id:'poker.entry.logo',selector:'.homeBrand h1',asset:'background'},
-  {id:'poker.entry.tagline',selector:'.homeBrand p'},
-  {id:'poker.entry.panel',selector:'.homeEntry',asset:'background',hideMode:'background'},
-  {id:'poker.entry.eyebrow',selector:'.privateGate>.entryEyebrow'},
-  {id:'poker.entry.title',selector:'.privateGate>h2'},
-  {id:'poker.entry.copy',selector:'.privateGate>p'},
-  {id:'poker.entry.key',selector:'.privateGateChoices>button:first-child'},
-  {id:'poker.entry.invite',selector:'.privateGateChoices>button:nth-child(2)'},
-  {id:'poker.background',selector:'.homeShell',asset:'home-bg'}
- ],
- invite:[
-  {id:'poker.invite.panel',selector:'.inviteJoin'},
-  {id:'poker.background',selector:'.tablePage',asset:'surface-bg'}
- ],
- pregame:[
-  {id:'poker.pregame.panel',selector:'.pregameRoom'},
-  {id:'poker.table',selector:'.ftp3Stage',asset:'child-img',assetSelector:'.ftp3TableShell'},
-  {id:'poker.hero',selector:'.ftp3Hero'},
-  {id:'poker.actions',selector:'.ftp3ActionDock'},
-  {id:'poker.background',selector:'.pregameTablePage',asset:'surface-bg'}
- ],
- gameplay:[
-  {id:'poker.header',selector:'.ftp3Header'},
-  {id:'poker.table',selector:'.ftp3Stage',asset:'child-img',assetSelector:'.ftp3TableShell'},
-  {id:'poker.hero',selector:'.ftp3Hero'},
-  {id:'poker.actions',selector:'.ftp3ActionDock'},
-  {id:'poker.background',selector:'.gameplayV3Page',asset:'surface-bg'}
- ],
- 'mtt-lobby':[
-  {id:'poker.mtt.header',selector:'.mttLobbyHeader'},
-  {id:'poker.mtt.status',selector:'.mttStatusCard'},
-  {id:'poker.mtt.field',selector:'.mttLobbyCard:not(.mttStatusCard)'},
-  {id:'poker.background',selector:'.mttLobbyPage',asset:'surface-bg'}
- ],
- 'mtt-break':[
-  {id:'poker.mtt.break',selector:'.mttBreakScreen'},
-  {id:'poker.background',selector:'.mttLobbyPage',asset:'surface-bg'}
- ],
- 'mtt-move':[
-  {id:'poker.mtt.move',selector:'.mttMoveScreen'},
-  {id:'poker.background',selector:'.mttLobbyPage',asset:'surface-bg'}
- ],
- 'mtt-result':[
-  {id:'poker.mtt.header',selector:'.mttLobbyHeader'},
-  {id:'poker.mtt.result',selector:'.mttResultHero'},
-  {id:'poker.mtt.standings',selector:'.mttResultStandings'},
-  {id:'poker.background',selector:'.mttLobbyPage',asset:'surface-bg'}
- ]
-};
-const SLOT_DEFS=SURFACE_SLOT_DEFS[PREVIEW_SURFACE]||SURFACE_SLOT_DEFS.home;
+import{AFTERDARK_SLOT_DEFS}from'./afterdark-surfaces.js';
+const SLOT_DEFS=AFTERDARK_SLOT_DEFS[PREVIEW_SURFACE]||AFTERDARK_SLOT_DEFS.home;
 
 function resolveAsset(value){
  const raw=String(value||'').trim();
