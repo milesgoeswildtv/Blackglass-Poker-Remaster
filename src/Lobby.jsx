@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useState}from'react';
-import'./home.css';
+import'./home-finish.css';
 import'./home-internal-surfaces.css';
 import'./create-game.css';
 import'./shop-modal.css';
