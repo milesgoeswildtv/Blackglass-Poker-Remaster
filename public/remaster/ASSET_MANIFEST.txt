@@ -1,0 +1,47 @@
+CRASHOUT POKER — AFTER HOURS — COMPLETE CODEX KIT V3
+
+PURPOSE
+This package contains the minimal production visual kit plus the three reference mockups that show how the assets should be presented.
+
+IMPORTANT
+- Files in /references are VISUAL REFERENCE ONLY. Do not ship them as flattened screens or backgrounds.
+- Files in /environments, /home, /gameplay and /chips are production assets intended for implementation.
+- All changing text, values, cards, player data, button labels and game state remain live UI.
+
+REFERENCES
+- references/afterhours_reference_home_entry.png
+- references/afterhours_reference_gameplay_mobile.png
+- references/afterhours_reference_gameplay_desktop.png
+
+ENVIRONMENTS
+- environments/afterhours_home_lobby_background.png
+- environments/afterhours_gameplay_background_mobile.png
+- environments/afterhours_gameplay_background_desktop.png
+
+HOME / LOBBY ASSETS
+- home/afterhours_create_game_panel.png
+- home/afterhours_join_game_panel.png
+- home/afterhours_profile_panel.png
+- home/afterhours_booster_shop_banner.png
+- home/afterhours_info_row_panel.png
+
+GAMEPLAY ASSETS
+- gameplay/afterhours_chat_history_panel.png
+- gameplay/afterhours_standard_seat_ticket.png
+- gameplay/afterhours_hero_active_seat_ticket.png
+- gameplay/afterhours_gameplay_action_button_shell.png
+
+CHIP ASSETS
+- chips/afterhours_chip_stack_01_red_loose.png
+- chips/afterhours_chip_stack_02_red_blue_loose.png
+- chips/afterhours_chip_stack_03_mixed_three.png
+- chips/afterhours_chip_stack_04_mixed_tall.png
+- chips/afterhours_chip_stack_05_mixed_four.png
+- chips/afterhours_chip_stack_06_mixed_four_alt.png
+
+IMPLEMENTATION NOTES
+- The gameplay table is baked into the gameplay environment backgrounds; do not layer a legacy separate table asset over them.
+- Use the mobile gameplay environment for portrait/mobile and the desktop gameplay environment for wide screens.
+- Use the neutral action-button shell for Fold/Check/Call/Bet/Raise/All-In; color/state/text should be live CSS/DOM.
+- Use the standard seat ticket for normal opponents and the hero/active ticket for the local/active player treatment.
+- Do not generate another asset family unless a real implementation gap is proven.
