@@ -161,6 +161,19 @@ test('focus-visible treatment is rendered by the real app', async ({ page }) => 
   await shot(page, 'home-focus-visible');
 });
 
+test('production Home uses live type and controls instead of legacy flattened panels', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openHome(page);
+  const brand = page.getByRole('heading', { name: 'CRASHOUT POKER' });
+  await expect(brand.locator('em')).toHaveText('POKER');
+  const presentation = await page.evaluate(() => ({
+    brandBackground: getComputedStyle(document.querySelector('.homeBrand h1')).backgroundImage,
+    createBackground: getComputedStyle(document.querySelector('.homeActionPrimary')).backgroundImage
+  }));
+  expect(presentation.brandBackground).not.toContain('/assets/remaster/');
+  expect(presentation.createBackground).not.toContain('/assets/remaster/');
+});
+
 test('long player identity compresses without replacing Home architecture', async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 760 });
   await openHome(page, 'AshesToAshesAndBackAgain');

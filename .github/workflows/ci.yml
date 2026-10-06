@@ -104,7 +104,7 @@ jobs:
         if: always() && (github.ref == 'refs/heads/visual-remaster' || github.ref == 'refs/heads/puck-visual-editor-spike' || github.event_name == 'pull_request')
         uses: actions/upload-artifact@v4
         with:
-          name: blackglass-home-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
+          name: miles-review-entry-home-390x844-and-desktop-${{ env.BLACKGLASS_SOURCE_SHA }}
           path: artifacts/browser-qa/
           if-no-files-found: warn
           retention-days: 14
