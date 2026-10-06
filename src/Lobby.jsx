@@ -18,7 +18,7 @@ const CHIP_PRESETS=[1000,2500,5000,10000],BLIND_PRESETS=[5,10,15,20,30],NOTIFICA
 function avatarFallback(name='FT'){return String(name).slice(0,2).toUpperCase()}
 function Stat({label,value}){return <div className="profileStat"><b>{Number(value||0).toLocaleString()}</b><span>{label}</span></div>}
 function checkoutReturn(){try{return new URLSearchParams(location.search).has('shop')}catch{return false}}
-function afterdarkPreview(){try{return new URLSearchParams(location.search).get('afterdarkPreview')==='1'}catch{return false}}
+function afterdarkPreview(){try{return new URLSearchParams(location.search).get('afterdarkPreview')==='1'||(location.hostname==='milesgoeswildtv.github.io'&&location.pathname.startsWith('/Blackglass-Poker-Remaster/'))}catch{return false}}
 const AFTERDARK_PREVIEW_ACCOUNT={ownerTools:true,identity:{displayName:'LAYOUT PREVIEW',username:'afterdark',provider:'discord'},account:{equipped:'default',inventory:[],skins:{},links:{},notifications:{},stats:{},access:{canHost:true,permanentHost:true,hostCredits:99}}};
 
 export default function Lobby({code,setCode}){
