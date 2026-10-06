@@ -2,7 +2,7 @@ import React,{useEffect,useState}from'react';
 import'./private-access.css';
 
 function cleanInvite(value=''){return String(value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6)}
-function afterdarkPreview(){try{return new URLSearchParams(location.search).get('afterdarkPreview')==='1'}catch{return false}}
+function afterdarkPreview(){try{return new URLSearchParams(location.search).get('afterdarkPreview')==='1'||(location.hostname==='milesgoeswildtv.github.io'&&location.pathname.startsWith('/Blackglass-Poker-Remaster/'))}catch{return false}}
 
 export default function AccessHome({account,authLoading,authError,telegram,name,discordLink,onRefresh,onCreate,onJoin,onShop}){
  const[choice,setChoice]=useState(''),[value,setValue]=useState(''),[pending,setPending]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[upgrade,setUpgrade]=useState(false);
