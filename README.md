@@ -71,10 +71,13 @@ Optional:
 DISCORD_REDIRECT_URI
 ```
 
-Current workers.dev callback:
+The production callback must use the same authoritative Cloudflare Worker origin
+that serves the React application and `/api/*`. Obtain that origin from the
+existing `blackglass-poker-remaster` Worker in the Afterdarklabs dashboard; do
+not infer it from the script name or reuse an older account's hostname.
 
 ```text
-https://full-tilt-poker-site.milesgoeswildtv.workers.dev/api/auth/callback
+<verified-existing-worker-origin>/api/auth/callback
 ```
 
 ## Stripe configuration
@@ -91,7 +94,7 @@ Sandbox uses `sk_test_...` plus the sandbox webhook destination’s `whsec_...` 
 Webhook endpoint:
 
 ```text
-https://full-tilt-poker-site.milesgoeswildtv.workers.dev/api/shop/webhook
+<verified-existing-worker-origin>/api/shop/webhook
 ```
 
 Subscribe the Stripe webhook destination to:
@@ -127,7 +130,9 @@ CRASHOUT_TEST_BOTS=on
 
 ## Verification
 
-Every push to `main` runs GitHub Actions on Node 22:
+Pushes to `main`, `visual-remaster`, `rebuild/after-hours-v2`, and
+`codex/rebuild-00-access-foundation` run GitHub Actions on Node 22. Pull requests
+into `main` or `rebuild/after-hours-v2` run the same checks:
 
 ```bash
 npm install
