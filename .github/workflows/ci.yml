@@ -35,7 +35,8 @@ jobs:
         run: npm install
       - name: Production dependency audit
         run: npm run audit:prod
-      - name: Full dependency audit
+      - name: Full dependency audit (advisory for dev tooling)
+        continue-on-error: true
         run: npm run audit:all
       - name: Run tests
         run: npm test
