@@ -2,9 +2,15 @@ name: Poker CI
 
 on:
   push:
-    branches: [main, visual-remaster]
+    branches:
+      - main
+      - visual-remaster
+      - rebuild/after-hours-v2
+      - codex/rebuild-00-access-foundation
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - rebuild/after-hours-v2
   workflow_dispatch:
 
 permissions:

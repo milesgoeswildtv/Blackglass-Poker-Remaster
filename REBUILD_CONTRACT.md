@@ -34,7 +34,7 @@ Only one phase is active at a time. Stop for Miles's approval before beginning t
 
 ## Phase 0 success gate
 Before any visual rebuild:
-- real Afterdarklabs Cloudflare URL is identified and documented;
+- real Afterdarklabs Cloudflare URL is verified from the existing Worker dashboard and documented before deployment;
 - latest branch build deploys there;
 - `GET /api/health` reaches the Worker;
 - `POST /api/access/key/prepare` reaches the Worker and returns structured JSON for an intentionally invalid dummy key;
