@@ -45,7 +45,7 @@ jobs:
           printf '%s\n' "$GITHUB_RUN_ID" > dist/BLACKGLASS_BUILD_RUN_ID.txt
       - name: Upload exact BLACKGLASS build artifact
         if: github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: crashout-poker-dist-${{ env.BLACKGLASS_SOURCE_SHA }}
           path: dist/
@@ -86,7 +86,7 @@ jobs:
         run: npm run qa:gameplay
       - name: Upload BLACKGLASS gameplay browser evidence
         if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blackglass-gameplay-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
           path: artifacts/browser-qa-gameplay/
@@ -94,7 +94,7 @@ jobs:
           retention-days: 14
       - name: Upload BLACKGLASS internal browser evidence
         if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blackglass-home-internal-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
           path: artifacts/browser-qa-internal/
@@ -102,7 +102,7 @@ jobs:
           retention-days: 14
       - name: Upload Afterdark browser evidence
         if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blackglass-afterdark-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
           path: artifacts/browser-qa-afterdark/
@@ -110,7 +110,7 @@ jobs:
           retention-days: 14
       - name: Upload BLACKGLASS browser evidence
         if: always() && (github.ref == 'refs/heads/visual-remaster' || github.event_name == 'pull_request')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blackglass-home-runtime-${{ env.BLACKGLASS_SOURCE_SHA }}
           path: artifacts/browser-qa/
