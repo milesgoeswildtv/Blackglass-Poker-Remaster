@@ -1,6 +1,7 @@
 import React,{useEffect,useState}from'react';
 import{assets}from'./assets.js';
 import{TableTopbar,PokerFelt,TableHUD}from'./TableSurface.jsx';
+import{tableSkinFor,tableSkinStyle}from'./table-skins.js';
 import'./home.css';
 import'./mtt-lobby.css';
 import'./afterdark-preview.css';
@@ -18,7 +19,7 @@ const players=[
 const hero=players[0];
 const baseState={players,viewer:{type:'player',name:'MILES'},smallBlind:25,bigBlind:50,handNumber:42,board:['A♣','7♦','2♠'],pot:640,livePots:[{amount:640}],street:'flop',started:true,paused:false,currentBet:120,toCall:120,raiseTo:300,canRaise:true,canAllIn:true,lastResult:{},handHistory:[],chat:[]};
 const pregameState={...baseState,started:false,street:'waiting',board:[],pot:0,livePots:[],currentBet:0,toCall:0,raiseTo:50,canRaise:false,canAllIn:false,players:players.map((p,i)=>({...p,turn:false,bet:0,cards:i===0?p.cards:[]}))};
-const gameplayStyle={'--gameplay-remaster-bg':'url('+assets.default.gameplayBackgroundRemaster+')'};
+const gameplayStyle=tableSkinStyle(tableSkinFor());
 
 const SLOT_DEFS={
  home:{
