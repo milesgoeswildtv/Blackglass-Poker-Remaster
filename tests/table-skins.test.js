@@ -1,6 +1,6 @@
 import test from'node:test';
 import assert from'node:assert/strict';
-import{TABLE_SKINS,CUPHOLDER_IDS,SEAT_ORDER,tableSkinFor,validateTableSkin,seatLayout,stagePoint,ticketBox,artAspect,tableSkinStyle,tableStageStyle}from'../src/table-skins.js';
+import{TABLE_SKINS,CUPHOLDER_IDS,SEAT_ORDER,FRONT_SEAT,tableSkinFor,validateTableSkin,seatLayout,seatEntries,stagePoint,ticketBox,artAspect,tableSkinStyle,tableStageStyle}from'../src/table-skins.js';
 import{ticketFor,plaqueFor,avatarFrameFor}from'../src/assets.js';
 
 // Layout contract for table skins, checked in table-art fractions so it holds at every viewport size.
@@ -76,6 +76,43 @@ test('seat layouts travel clockwise from the hero and use distinct seats',()=>{
  for(let n=1;n<=8;n++){const order=seatLayout(skin,n).map(id=>SEAT_ORDER.indexOf(id));assert.deepEqual([...order].sort((a,b)=>a-b),order,`layout ${n}`)}
 });
 
+test('seat entries: a seated viewer is the hero and the others fill the clockwise layout',()=>{
+ const players=Array.from({length:9},(_,i)=>({id:`p${i}`}));
+ const e=seatEntries(skin,players,players[3]);
+ assert.equal(e.length,8);
+ assert.deepEqual(e.map(x=>x.seatId),seatLayout(skin,8));
+ assert.deepEqual(e.map(x=>x.player.id),['p4','p5','p6','p7','p8','p0','p1','p2'],'clockwise from the hero');
+ assert.ok(e.every(x=>x.player===players[x.index]),'every entry wraps its player and table index');
+});
+
+test('seat entries: a spectator with no seat sees every player, the first in the front-centre seat',()=>{
+ for(let n=1;n<=9;n++){
+  const players=Array.from({length:n},(_,i)=>({id:`p${i}`})),e=seatEntries(skin,players,null);
+  assert.equal(e.length,n,`${n} players`);
+  assert.equal(e[0].seatId,FRONT_SEAT);
+  assert.equal(e[0].player.id,'p0');
+  assert.deepEqual(e.slice(1).map(x=>x.seatId),seatLayout(skin,n-1));
+  assert.deepEqual(e.slice(1).map(x=>x.player.id),players.slice(1).map(p=>p.id),'the rest follow clockwise');
+  assert.equal(new Set(e.map(x=>x.seatId)).size,n,'nobody shares a seat');
+  assert.ok(e.every(x=>x.player===players[x.index]&&skin.seats[x.seatId]),'wrapped players on real seats');
+ }
+ assert.deepEqual(seatEntries(skin,[],null),[]);
+});
+
+test('the spectator front seat fits a full table without colliding',()=>{
+ const front=skin.seats.front,box=ticketBox(skin,front.at),bet=centreBox(skin,front.bet,.11,.045),board=boardBox(skin);
+ assert.ok(inside(box,stageBounds(skin)),'front ticket stays on the stage');
+ assert.ok(!overlap(box,board)&&!overlap(bet,board),'clear of the board');
+ for(const id of seatLayout(skin,8)){
+  const other=ticketBox(skin,skin.seats[id].at),otherBet=centreBox(skin,skin.seats[id].bet,.11,.045);
+  assert.ok(!overlap(box,other),`front ticket overlaps ${id}`);
+  assert.ok(!overlap(bet,other),`front bet overlaps ${id} ticket`);
+  assert.ok(!overlap(otherBet,box),`${id} bet overlaps the front ticket`);
+  assert.ok(!overlap(bet,otherBet),`front bet overlaps ${id} bet`);
+ }
+ for(const id of CUPHOLDER_IDS)assert.ok(!coversCup(box,skin.cupholders.at[id]),`front ticket covers cupholder ${id}`);
+});
+
 test('the contract rejects broken skins',()=>{
  const clone=()=>structuredClone(skin);
  const noCup=clone();delete noCup.cupholders.at.left2;
@@ -88,6 +125,8 @@ test('the contract rejects broken skins',()=>{
  assert.ok(validateTableSkin(swapped).some(m=>/not clockwise/.test(m)));
  const orphan=clone();orphan.seats.left2.cupholder='left1';
  assert.ok(validateTableSkin(orphan).some(m=>/cupholder left2 has no seat/.test(m)));
+ const noFront=clone();delete noFront.seats.front;
+ assert.ok(validateTableSkin(noFront).some(m=>/front seat/.test(m)));
 });
 
 test('anchors convert to stage percentages through the frame',()=>{

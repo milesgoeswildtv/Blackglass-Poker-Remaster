@@ -67,7 +67,9 @@ const afterHoursInterim={
   farRight:{at:[.685,-.045],bet:[.62,.07],cupholder:'farCenter',side:'far',cards:'right'},
   right1:{at:[.775,.185],bet:[.563,.19],cupholder:'right1',side:'right',cards:'right'},
   right2:{at:[.835,.395],bet:[.75,.47],cupholder:'right2',side:'right',cards:'right'},
-  right3:{at:[.835,.607],bet:[.62,.607],cupholder:'right3',side:'right',cards:'right'}
+  right3:{at:[.835,.607],bet:[.62,.607],cupholder:'right3',side:'right',cards:'right'},
+  // Spectators only: with no seated viewer, the front-centre place is a ninth seat (see seatEntries).
+  front:{at:[.5,.885],bet:[.5,.6],cupholder:'frontCenter',side:'near',cards:'right'}
  },
  layouts:{
   1:['farCenter'],
@@ -100,6 +102,19 @@ export function artAspect(skin){return skin.table.height/skin.table.width}
 export function stagePoint(skin,[x,y]){const f=frameOf(skin);return[round((f.left+x)/(1+f.left+f.right)*100),round((f.top+y)/(1+f.top+f.bottom)*100)]}
 
 export function seatLayout(skin,count){const n=Math.max(0,Math.min(8,count|0));return n?skin.layouts[n]:[]}
+
+// Who sits where. A seated viewer is the hero at the front centre; everyone else takes the opponent seats
+// clockwise from the hero's left. A spectator has no seat, so the table is drawn from the first player's
+// point of view: that player takes the front-centre seat and the rest follow clockwise, so all nine players
+// of a full table have a place. Every entry is { player, index, rel, seatIndex, seatId }.
+export const FRONT_SEAT='front';
+export function seatEntries(skin,players=[],viewer=null){
+ if(!players.length)return[];
+ const heroIndex=viewer?players.findIndex(p=>p.id===viewer.id):-1,anchor=heroIndex<0?0:heroIndex;
+ const around=players.map((player,index)=>({player,index,rel:(index-anchor+players.length)%players.length})).sort((a,b)=>a.rel-b.rel);
+ const others=around.slice(1,9),ids=seatLayout(skin,others.length),entries=others.map((item,i)=>({...item,seatIndex:i,seatId:ids[i]}));
+ return heroIndex<0?[{...around[0],seatIndex:others.length,seatId:FRONT_SEAT},...entries]:entries;
+}
 
 // Ticket box in art fractions for contract checks: width w (of art width), 3:1 artwork.
 export function ticketBox(skin,[x,y],w=skin.ticket.width){const h=w/TICKET_ASPECT/artAspect(skin);return{left:x-w/2,right:x+w/2,top:y-h/2,bottom:y+h/2}}
@@ -152,6 +167,7 @@ export function validateTableSkin(skin){
  const claimed=new Set([skin.hero?.cupholder]);
  for(const id of SEAT_ORDER){const s=seats[id];if(!s){bad(`missing seat ${id}`);continue}if(!cups[s.cupholder])bad(`seat ${id} names unknown cupholder ${s.cupholder}`);claimed.add(s.cupholder)}
  if(skin.hero?.cupholder!=='frontCenter')bad('hero must sit at the front-centre cupholder');
+ if(!seats.front?.at||!seats.front?.bet)bad('missing the front seat that spectators use for the ninth player');
  for(const id of CUPHOLDER_IDS)if(!claimed.has(id))bad(`cupholder ${id} has no seat`);
  for(let n=1;n<=8;n++){const l=skin.layouts?.[n]||[];if(l.length!==n||new Set(l).size!==n||l.some(id=>!seats[id]))bad(`layout ${n} is invalid`);const order=l.map(id=>SEAT_ORDER.indexOf(id));if(order.some((v,i)=>i&&v<=order[i-1]))bad(`layout ${n} is not clockwise`)}
  return problems;
