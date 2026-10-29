@@ -2,12 +2,13 @@ import test from'node:test';
 import assert from'node:assert/strict';
 import fs from'node:fs';
 import{TABLE_SKINS,SEAT_ORDER,FRONT_SEAT,VARIANTS,LANDSCAPE_MEDIA,ROTATE_MEDIA,CHECK_WIDTHS,MAX_POTS,tableSkinFor,validateTableSkin,seatLayout,seatOf,seatEntries,seatVars,heroVars,potsVars,potsLayout,potColumns,allLayouts,layoutBoxes,safeRect,sceneStyle,hasFeltMark,heroCardsBox,ticketBox}from'../src/table-skins.js';
-import{ticketFor,plaqueFor,avatarFrameFor,betChipFor,chipFor,cardBackFor}from'../src/assets.js';
+import{assets,ticketFor,plaqueFor,avatarFrameFor,betChipFor,chipFor,cardBackFor}from'../src/assets.js';
 
 // Layout contract for the AFTER HOURS V3 table: one environment image per orientation, every live element on an anchor
 // of that image, no collisions for any player count, the same seat identities and clockwise order in both variants.
 const skin=tableSkinFor(),read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url));
-const imageSize=file=>{const b=read(`public${file}`);assert.equal(b.toString('latin1',1,4),'PNG',file);return[b.readUInt32BE(16),b.readUInt32BE(20)]};
+// Pixel size from a PNG or WebP header (lossy VP8, lossless VP8L or extended VP8X).
+const imageSize=file=>{const b=read(`public${file}`);if(b.toString('latin1',1,4)==='PNG')return[b.readUInt32BE(16),b.readUInt32BE(20)];assert.equal(b.toString('latin1',0,4)+b.toString('latin1',8,12),'RIFFWEBP',file);const chunk=b.toString('latin1',12,16);if(chunk==='VP8X')return[1+b.readUIntLE(24,3),1+b.readUIntLE(27,3)];if(chunk==='VP8 ')return[b.readUInt16LE(26)&0x3fff,b.readUInt16LE(28)&0x3fff];if(chunk==='VP8L'){const v=b.readUInt32LE(21);return[1+(v&0x3fff),1+((v>>14)&0x3fff)]}throw Error(`${file}: unknown WebP chunk ${chunk}`)};
 const css=p=>read(p).toString('utf8');
 
 test('every table skin satisfies the layout contract',()=>{
@@ -16,9 +17,9 @@ test('every table skin satisfies the layout contract',()=>{
 
 test('each orientation draws one approved AFTER HOURS V3 environment at its real pixel size',()=>{
  const{portrait,landscape}=skin.variants;
- assert.equal(portrait.art.src,'/remaster/afterhours_gameplay_background_mobile.png');
- assert.equal(landscape.art.src,'/remaster/afterhours_gameplay_background_desktop.png');
- for(const name of VARIANTS){const{src,width,height}=skin.variants[name].art;assert.deepEqual(imageSize(src),[width,height],`${name} art size`)}
+ assert.equal(portrait.art.src,'/remaster/afterhours_gameplay_background_mobile.webp');
+ assert.equal(landscape.art.src,'/remaster/afterhours_gameplay_background_desktop.webp');
+ for(const name of VARIANTS){const{src,width,height}=skin.variants[name].art;assert.deepEqual(imageSize(src),[width,height],`${name} art size`);assert.deepEqual(imageSize(src.replace(/\.webp$/,'.png')),[width,height],`${name}: the optimized copy keeps the original's pixel size`)}
  assert.ok(portrait.art.height>portrait.art.width&&landscape.art.width>landscape.art.height,'portrait art is tall, landscape art is wide');
  const source=['src/table-skins.js','src/table-skin.css','src/gameplay.css','src/TableSurface.jsx','src/assets.js'].map(css).join('\n');
  assert.doesNotMatch(source,/CRASHOUT_(BACKGROUND|TABLE)_REMASTER|\/assets\/remaster\//,'the legacy September room and table are gone from the table');
@@ -155,14 +156,27 @@ test('the contract rejects broken skins',()=>{
  assert.ok(validateTableSkin(noArt).some(m=>/environment art/.test(m)));
 });
 
+test('the gameplay art is served as optimized WebP copies beside untouched PNG originals',()=>{
+ const files=[skin.variants.portrait.art.src,skin.variants.landscape.art.src,ticketFor({chips:1}).src,ticketFor({chips:1},{hero:true}).src,...[50,250,400,900,2000,12500].map(a=>betChipFor({cosmetic:'default'},a,100)),assets.default.actionShell,assets.default.chatHistoryPanel];
+ assert.equal(new Set(files).size,12,'two environments, two tickets, six chip stacks, the button shell and the chat panel');
+ for(const page of['src/App.jsx','src/AfterdarkPreview.jsx'])assert.match(css(page),/'--v3-shell':`url\(\$\{assets\.default\.actionShell\}\)`,'--v3-panel':`url\(\$\{assets\.default\.chatHistoryPanel\}\)`/,`${page} hands the shell and panel art to the CSS`);
+ for(const file of new Set(files)){
+  assert.match(file,/^\/remaster\/afterhours_[a-z0-9_]+\.webp$/,file);
+  const original=read(`public${file.replace(/\.webp$/,'.png')}`),copy=read(`public${file}`);
+  assert.ok(copy.length<original.length/4,`${file} is much smaller than its original`);
+  const[w,h]=imageSize(file),[ow,oh]=imageSize(file.replace(/\.webp$/,'.png'));
+  assert.ok(Math.abs(w/h-ow/oh)<.01,`${file} keeps the original's proportions`);
+ }
+});
+
 test('tickets: V3 artwork for the default skin, equipped pack artwork for purchased packs',()=>{
  const idle=ticketFor({cosmetic:'default',chips:100});
- assert.match(idle.src,/afterhours_standard_seat_ticket\.png$/);assert.equal(idle.layout,'v3');assert.equal(idle.activeSrc,null);
+ assert.match(idle.src,/afterhours_standard_seat_ticket\.webp$/);assert.equal(idle.layout,'v3');assert.equal(idle.activeSrc,null);
  const acting=ticketFor({cosmetic:'default',chips:100,turn:true});
- assert.match(acting.src,/afterhours_standard_seat_ticket\.png$/,'an acting opponent keeps the standard ticket where it is compact');
- assert.match(acting.activeSrc,/afterhours_hero_active_seat_ticket\.png$/,'and switches to the hero/active art where it is wide');
+ assert.match(acting.src,/afterhours_standard_seat_ticket\.webp$/,'an acting opponent keeps the standard ticket where it is compact');
+ assert.match(acting.activeSrc,/afterhours_hero_active_seat_ticket\.webp$/,'and switches to the hero/active art where it is wide');
  const hero=ticketFor({cosmetic:'default',chips:100,turn:true},{hero:true});
- assert.match(hero.src,/afterhours_hero_active_seat_ticket\.png$/);assert.equal(hero.layout,'v3Active');assert.equal(hero.activeSrc,null);
+ assert.match(hero.src,/afterhours_hero_active_seat_ticket\.webp$/);assert.equal(hero.layout,'v3Active');assert.equal(hero.activeSrc,null);
  const pack=ticketFor({cosmetic:'regalia',chips:100,folded:true});
  assert.match(pack.src,/regalia-folded-player-plaque\.png$/);assert.equal(pack.layout,'pack');assert.equal(pack.activeSrc,null);
  const packActing=ticketFor({cosmetic:'regalia',chips:100,turn:true});
@@ -178,13 +192,13 @@ test('tickets: V3 artwork for the default skin, equipped pack artwork for purcha
 
 test('bets: V3 chip stacks sized by big blinds for the default skin, the pack’s own chip for purchased packs',()=>{
  const stack=(amount,bb=100)=>betChipFor({cosmetic:'default'},amount,bb);
- assert.match(stack(50),/afterhours_chip_stack_01_red_loose\.png$/);
- assert.match(stack(100),/afterhours_chip_stack_01_red_loose\.png$/);
- assert.match(stack(250),/afterhours_chip_stack_02_red_blue_loose\.png$/);
- assert.match(stack(400),/afterhours_chip_stack_03_mixed_three\.png$/);
- assert.match(stack(900),/afterhours_chip_stack_04_mixed_tall\.png$/);
- assert.match(stack(2000),/afterhours_chip_stack_05_mixed_four\.png$/);
- assert.match(stack(12500),/afterhours_chip_stack_06_mixed_four_alt\.png$/);
+ assert.match(stack(50),/afterhours_chip_stack_01_red_loose\.webp$/);
+ assert.match(stack(100),/afterhours_chip_stack_01_red_loose\.webp$/);
+ assert.match(stack(250),/afterhours_chip_stack_02_red_blue_loose\.webp$/);
+ assert.match(stack(400),/afterhours_chip_stack_03_mixed_three\.webp$/);
+ assert.match(stack(900),/afterhours_chip_stack_04_mixed_tall\.webp$/);
+ assert.match(stack(2000),/afterhours_chip_stack_05_mixed_four\.webp$/);
+ assert.match(stack(12500),/afterhours_chip_stack_06_mixed_four_alt\.webp$/);
  for(const file of new Set([50,250,400,900,2000,12500].map(a=>stack(a))))assert.ok(read(`public${file}`).length>0,file);
  assert.equal(betChipFor({cosmetic:'regalia'},12500,100),chipFor({cosmetic:'regalia'},'purple'));
  assert.match(betChipFor({cosmetic:'constellation'},50,100),/constellation-purple-chip\.png$/);

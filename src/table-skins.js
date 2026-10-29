@@ -51,6 +51,7 @@ const LAYOUTS={
  8:['left3','left2','left1','farLeft','farRight','right1','right2','right3']
 };
 
+// Optimized WebP copies of the V3 environments (same pixel size as the PNG originals beside them).
 const REMASTER='/remaster';
 
 const afterHoursV3={
@@ -61,7 +62,7 @@ const afterHoursV3={
  layouts:LAYOUTS,
  variants:{
   portrait:{
-   art:{src:`${REMASTER}/afterhours_gameplay_background_mobile.png`,width:864,height:1536},
+   art:{src:`${REMASTER}/afterhours_gameplay_background_mobile.webp`,width:864,height:1536},
    cupholders:null,
    sizes:{
     ticket:{f:.282},heroTicket:{f:.34},
@@ -93,7 +94,7 @@ const afterHoursV3={
    staging:{at:[.5,.4]}
   },
   landscape:{
-   art:{src:`${REMASTER}/afterhours_gameplay_background_desktop.png`,width:1536,height:864},
+   art:{src:`${REMASTER}/afterhours_gameplay_background_desktop.webp`,width:1536,height:864},
    // Four cupholders are painted into the desktop art. They are recorded, not protected: seats come first.
    cupholders:{painted:true,keepVisible:false,at:{farLeft:{x:.199,y:.203,r:.016},farRight:{x:.791,y:.197,r:.016},nearLeft:{x:.244,y:.708,r:.016},nearRight:{x:.755,y:.708,r:.016}}},
    sizes:{

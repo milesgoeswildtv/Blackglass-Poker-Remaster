@@ -43,7 +43,7 @@
 }
 
 /*
-  AFTER HOURS chat/history panel (afterhours_chat_history_panel.png). The art is drawn as a nine-slice border image so its
+  AFTER HOURS chat/history panel (afterhours_chat_history_panel, as its optimized WebP copy). The art is drawn as a nine-slice border image so its
   frame, tab box, send arrow and input outline keep their proportions at any panel size; --k converts art pixels to CSS
   pixels. Live tabs sit on the art's tab row, the log in its content area, and the message box on its drawn input.
   The art bakes the active highlight under the left (CHAT) tab, so the HISTORY state covers it and draws its own.

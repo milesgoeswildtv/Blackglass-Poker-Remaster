@@ -29,19 +29,21 @@ export const assets={
     lobbyMobile:`${root}/default/mobile-background.png`,
     pot:`${root}/default/default-pot-chips.png`,
     starterCardBack:`${root}/crashout/CrashoutCardBack.PNG`,
-    // Approved AFTER HOURS V3 seat tickets (public/remaster). Opponents use the standard ticket; the local player uses the
+    // AFTER HOURS V3 gameplay art is served as optimized WebP copies (public/remaster/*.webp, generated from the untouched
+    // PNG originals beside them and checked at the sizes they are drawn).
+    // Approved AFTER HOURS V3 seat tickets. Opponents use the standard ticket; the local player uses the
     // hero/active ticket. An acting opponent gets the hero/active ticket only where its ticket is wide enough to hold the
     // live text at 11px+ (table-skin.css decides from the rendered width); narrower, it keeps the standard ticket and a glow.
-    plaques:{idle:`${V3}/afterhours_standard_seat_ticket.png`,active:`${V3}/afterhours_standard_seat_ticket.png`,folded:`${V3}/afterhours_standard_seat_ticket.png`,allIn:`${V3}/afterhours_standard_seat_ticket.png`},
-    heroPlaque:`${V3}/afterhours_hero_active_seat_ticket.png`,
-    activePlaque:`${V3}/afterhours_hero_active_seat_ticket.png`,
+    plaques:{idle:`${V3}/afterhours_standard_seat_ticket.webp`,active:`${V3}/afterhours_standard_seat_ticket.webp`,folded:`${V3}/afterhours_standard_seat_ticket.webp`,allIn:`${V3}/afterhours_standard_seat_ticket.webp`},
+    heroPlaque:`${V3}/afterhours_hero_active_seat_ticket.webp`,
+    activePlaque:`${V3}/afterhours_hero_active_seat_ticket.webp`,
     ticketLayouts:{idle:'v3',active:'v3',folded:'v3',allIn:'v3',hero:'v3Active'},
     chips:{black:`${root}/default/default-chip-black.png`,blue:`${root}/default/default-chip-blue.png`,green:`${root}/default/default-chip-green.png`,purple:`${root}/default/default-chip-purple.png`,red:`${root}/default/default-chip-red.png`},
     // AFTER HOURS V3 chip stacks, smallest to biggest; bets pick one by size (table-view.js chipStackIndex).
-    chipStacks:[`${V3}/afterhours_chip_stack_01_red_loose.png`,`${V3}/afterhours_chip_stack_02_red_blue_loose.png`,`${V3}/afterhours_chip_stack_03_mixed_three.png`,`${V3}/afterhours_chip_stack_04_mixed_tall.png`,`${V3}/afterhours_chip_stack_05_mixed_four.png`,`${V3}/afterhours_chip_stack_06_mixed_four_alt.png`],
+    chipStacks:[`${V3}/afterhours_chip_stack_01_red_loose.webp`,`${V3}/afterhours_chip_stack_02_red_blue_loose.webp`,`${V3}/afterhours_chip_stack_03_mixed_three.webp`,`${V3}/afterhours_chip_stack_04_mixed_tall.webp`,`${V3}/afterhours_chip_stack_05_mixed_four.webp`,`${V3}/afterhours_chip_stack_06_mixed_four_alt.webp`],
     // AFTER HOURS V3 gameplay UI art: the neutral action-button shell and the chat/history panel.
-    actionShell:`${V3}/afterhours_gameplay_action_button_shell.png`,
-    chatHistoryPanel:`${V3}/afterhours_chat_history_panel.png`,
+    actionShell:`${V3}/afterhours_gameplay_action_button_shell.webp`,
+    chatHistoryPanel:`${V3}/afterhours_chat_history_panel.webp`,
     ui:{actionLog:`${root}/default/action-log.png`,chat:`${root}/default/chat-panel.png`,handHistory:`${root}/default/hand-history.png`,invite:`${root}/default/invite-table-code.png`,spectator:`${root}/default/spectator-ui.png`,showdown:`${root}/default/showdown-ui.png`,tournamentWinner:`${root}/default/tournament-winner-ui.png`,topBar:`${root}/default/top-bar.png`,infoStrip:`${root}/default/info-strip.png`,tournamentStats:`${root}/default/tournament-stats.png`}
   },
   cosmetics:{
