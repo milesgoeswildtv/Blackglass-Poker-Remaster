@@ -1,7 +1,8 @@
 import React,{useEffect,useState}from'react';
 import{assets}from'./assets.js';
 import{TableTopbar,PokerFelt,TableHUD}from'./TableSurface.jsx';
-import{tableSkinFor,tableSkinStyle}from'./table-skins.js';
+import{TablePanel}from'./TablePanels.jsx';
+import{sceneStyle,tableSkinFor}from'./table-skins.js';
 import'./home.css';
 import'./mtt-lobby.css';
 import'./afterdark-preview.css';
@@ -19,7 +20,8 @@ const players=[
 const hero=players[0];
 const baseState={players,viewer:{type:'player',name:'MILES'},smallBlind:25,bigBlind:50,handNumber:42,board:['A♣','7♦','2♠'],pot:640,livePots:[{amount:640}],street:'flop',started:true,paused:false,currentBet:120,toCall:120,raiseTo:300,canRaise:true,canAllIn:true,lastResult:{},handHistory:[],chat:[]};
 const pregameState={...baseState,started:false,street:'waiting',board:[],pot:0,livePots:[],currentBet:0,toCall:0,raiseTo:50,canRaise:false,canAllIn:false,players:players.map((p,i)=>({...p,turn:false,bet:0,cards:i===0?p.cards:[]}))};
-const gameplayStyle=tableSkinStyle(tableSkinFor());
+const gameplayStyle={...sceneStyle(tableSkinFor()),'--v3-shell':`url(${assets.default.actionShell})`,'--v3-panel':`url(${assets.default.chatHistoryPanel})`};
+const previewChat=[{id:'c1',name:'RUBY',message:'sick run',at:0},{id:'c2',name:'ZERO',message:'this table plays',at:0},{id:'c3',name:'PSYCHEE',message:'one time…',at:0}];
 
 const SLOT_DEFS={
  home:{
@@ -39,16 +41,16 @@ const SLOT_DEFS={
   'invite.background':{selector:'.afterdarkInvitePage',assetMode:'background'}
  },
  pregame:{
-  'pregame.header':{selector:'.pregameRoom',assetMode:'background'},
+  'pregame.header':{selector:'.ftp3Header',assetMode:'background'},
+  'pregame.staging':{selector:'.pregameRoom',assetMode:'background'},
   'pregame.table':{selector:'.ftp3Stage'},
   'pregame.hero':{selector:'.ftp3Hero'},
   'pregame.actions':{selector:'.ftp3ActionDock',assetMode:'background'},
-  'pregame.background':{selector:'.pregameTablePage',assetMode:'cssVar',assetName:'--gameplay-remaster-bg'},
-  'pregame.back':{selector:'.pregameBack'},
-  'pregame.headerLeft':{selector:'.pregameHeaderLeft'},
-  'pregame.headerRight':{selector:'.pregameHeaderRight'},
-  'pregame.blinds':{selector:'.pregameBlindBadge'},
-  'pregame.tableArtwork':{selector:'.ftp3TableShell',assetMode:'img'},
+  'pregame.background':{selector:'.ftp3Environment img',assetMode:'img'},
+  'pregame.tableArtwork':{selector:'.ftp3SceneArt'},
+  'pregame.back':{selector:'.ftp3Back'},
+  'pregame.headerInfo':{selector:'.ftp3HeaderBrand'},
+  'pregame.count':{selector:'.pregameMeta'},
   'pregame.seat1':{selector:'.ftp3SeatUnit[data-seat="0"]'},
   'pregame.seat2':{selector:'.ftp3SeatUnit[data-seat="1"]'},
   'pregame.seat3':{selector:'.ftp3SeatUnit[data-seat="2"]'},
@@ -62,7 +64,7 @@ const SLOT_DEFS={
   'pregame.heroCard2':{selector:'.ftp3HeroCards > :nth-child(2)'},
   'pregame.heroPlaque':{selector:'.ftp3HeroPlaque'},
   'pregame.start':{selector:'.ftp3Start'},
-  'pregame.utility':{selector:'.ftp3UtilityBar'},
+  'pregame.utility':{selector:'.ftp3PanelSlot'},
   'pregame.chat':{selector:'.ftp3Chat'},
   'pregame.handLog':{selector:'.ftp3HandLog'}
  },
@@ -71,15 +73,14 @@ const SLOT_DEFS={
   'gameplay.table':{selector:'.ftp3Stage'},
   'gameplay.hero':{selector:'.ftp3Hero'},
   'gameplay.actions':{selector:'.ftp3ActionDock',assetMode:'background'},
-  'gameplay.utility':{selector:'.ftp3UtilityBar',assetMode:'background'},
-  'gameplay.background':{selector:'.gameplayV3Page',assetMode:'cssVar',assetName:'--gameplay-remaster-bg'},
+  'gameplay.utility':{selector:'.ftp3PanelSlot'},
+  'gameplay.background':{selector:'.ftp3Environment img',assetMode:'img'},
+  'gameplay.tableArtwork':{selector:'.ftp3SceneArt'},
   'gameplay.back':{selector:'.ftp3Back'},
   'gameplay.headerInfo':{selector:'.ftp3HeaderBrand'},
   'gameplay.topCommands':{selector:'.ftp3TopCommands'},
   'gameplay.sitOut':{selector:'.ftp3SitOut'},
-  'gameplay.pause':{selector:'.ftp3Pause'},
-  'gameplay.endGame':{selector:'.ftp3EndGame'},
-  'gameplay.tableArtwork':{selector:'.ftp3TableShell',assetMode:'img'},
+  'gameplay.hostMenu':{selector:'.ftp3HostMenuToggle'},
   'gameplay.seat1':{selector:'.ftp3SeatUnit[data-seat="0"]'},
   'gameplay.seat2':{selector:'.ftp3SeatUnit[data-seat="1"]'},
   'gameplay.seat3':{selector:'.ftp3SeatUnit[data-seat="2"]'},
@@ -95,7 +96,8 @@ const SLOT_DEFS={
   'gameplay.boardCard4':{selector:'.ftp3Board > :nth-child(4)'},
   'gameplay.boardCard5':{selector:'.ftp3Board > :nth-child(5)'},
   'gameplay.pot':{selector:'.ftp3Pot'},
-  'gameplay.sidePots':{selector:'.ftp3SidePots'},
+  'gameplay.pots':{selector:'.ftp3Pots'},
+  'gameplay.feltMark':{selector:'.ftp3FeltMark'},
   'gameplay.heroCards':{selector:'.ftp3HeroCards'},
   'gameplay.heroCard1':{selector:'.ftp3HeroCards > :nth-child(1)'},
   'gameplay.heroCard2':{selector:'.ftp3HeroCards > :nth-child(2)'},
@@ -105,7 +107,7 @@ const SLOT_DEFS={
   'gameplay.fold':{selector:'.ftp3ActionRow .fold'},
   'gameplay.call':{selector:'.ftp3ActionRow .call'},
   'gameplay.raise':{selector:'.ftp3ActionRow .raise'},
-  'gameplay.allIn':{selector:'.ftp3ActionRow .allin'},
+  'gameplay.allIn':{selector:'.ftp3ActionRow .ftp3AllIn'},
   'gameplay.betLabel':{selector:'.ftp3RaiseRow > span'},
   'gameplay.betSlider':{selector:'.ftp3RaiseRow > input'},
   'gameplay.betQuickGroup':{selector:'.ftp3RaiseRow > div'},
@@ -143,7 +145,7 @@ function applyAsset(el,def,asset){
  const value=cleanAsset(asset);
  if(def.assetMode==='img'){
   const img=el.matches?.('img')?el:el.querySelector(def.assetSelector||'img');
-  if(img)img.src=value||assets.default.gameplayTableRemaster;
+  if(img)img.src=value||tableSkinFor().variants.portrait.art.src;
  }else if(def.assetMode==='cssVar'){
   if(value)el.style.setProperty(def.assetName,'url("'+value+'")');else el.style.removeProperty(def.assetName);
  }else if(def.assetMode==='background'){
@@ -182,11 +184,11 @@ function InvitePreview(){
  return <main className="tablePage afterdarkInvitePage" style={gameplayStyle}><div className="topbar"><button className="ghost">← Lobby</button><div><b>TABLE {CODE}</b><span> Private Crashout Poker tournament • LIVE</span></div></div><section className="inviteJoin productionInvite"><div className="mark bigMark">FT</div><span className="eyebrow">YOU&apos;VE BEEN INVITED</span><h2>Take a seat at Table {CODE}</h2><p>Your Crashout Poker identity is locked in. Take a seat now, or watch from the rail without affecting the game.</p><button className="primary">Take My Seat</button><button className="watchButton">Watch Table</button><small>6/9 players seated • 2 watching</small></section></main>;
 }
 function PregamePreview(){
- const me=pregameState.players[0];
- return <main className="tablePage pregameTablePage" style={gameplayStyle}><button className="pregameBack" aria-label="Back to lobby">Back</button><section className="pregameRoom" aria-label="Crashout staging room"><div className="pregameHeaderLeft"><span>CRASHOUT STAGING ROOM</span><h2>THE TABLE IS READY.</h2><p>Everyone seated? Start when you&apos;re ready to deal.</p></div><div className="pregameHeaderRight"><div className="pregameCount"><b>6<small>/9</small></b><span>SEATED</span></div><div className="pregameInviteCluster"><button className="pregameInviteButton">INVITE</button><strong className="pregameCode">{CODE}</strong></div></div><div className="pregameBlindBadge">25 / 50 NLH</div></section><PokerFelt state={pregameState} finished={false} pos={{1:'D',2:'SB',3:'BB'}} turnLeft={null} me={me} onKick={noop} onThrowTarget={noop}/><TableHUD state={pregameState} me={me} isSpectator={false} strength="" turnLeft={null} raise="" setRaise={noop} showHistory={false} setShowHistory={noop} showChat={false} unreadChat={0} onToggleChat={noop} preAction="" onPreAction={noop} showTestBot={false} onAction={noop}/></main>;
+ const me=pregameState.players[0],staging=<section className="pregameRoom" aria-label="Crashout staging room"><span className="pregameEyebrow">CRASHOUT STAGING ROOM</span><h2>THE TABLE IS READY.</h2><div className="pregameMeta"><div className="pregameCount"><b>6<small>/9</small></b><span>SEATED</span></div><div className="pregameInviteCluster"><button className="pregameInviteButton">INVITE</button><strong className="pregameCode">{CODE}</strong></div></div></section>;
+ return <main className="tablePage gameplayV3Page pregameTablePage" style={gameplayStyle}><TableTopbar code={CODE} state={pregameState} onExit={noop} me={me} onAction={noop}/><PokerFelt state={pregameState} finished={false} pos={{}} turnLeft={null} me={me} staging={staging} onKick={noop} onThrowTarget={noop}/><TablePanel tab="chat" onTab={noop} onOpenChange={noop} messages={previewChat} draft="" setDraft={noop} onSend={noop} viewer={baseState.viewer} history={[]} onReplay={noop}/><TableHUD state={pregameState} me={me} isSpectator={false} raise="" setRaise={noop} preAction="" onPreAction={noop} showTestBot={false} onAction={noop} pregameNote="Everyone seated? Start when you’re ready to deal."/></main>;
 }
 function GameplayPreview(){
- return <main className="tablePage gameplayV3Page" style={gameplayStyle}><TableTopbar code={CODE} state={baseState} onExit={noop} me={hero} onAction={noop}/><PokerFelt state={baseState} finished={false} pos={{1:'D',2:'SB',3:'BB'}} turnLeft={18} me={hero} onKick={noop} onThrowTarget={noop} throwingEnabled/><TableHUD state={baseState} me={hero} isSpectator={false} strength="Top Pair" turnLeft={18} raise="300" setRaise={noop} showHistory={false} setShowHistory={noop} showChat={false} unreadChat={2} onToggleChat={noop} preAction="" onPreAction={noop} showTestBot={false} onAction={noop}/></main>;
+ return <main className="tablePage gameplayV3Page" style={gameplayStyle}><TableTopbar code={CODE} state={baseState} onExit={noop} me={hero} onAction={noop}/><PokerFelt state={baseState} finished={false} pos={{1:'D',2:'SB',3:'BB'}} turnLeft={18} me={hero} onKick={noop} onThrowTarget={noop} throwingEnabled/><TablePanel tab="chat" onTab={noop} onOpenChange={noop} unread={2} messages={previewChat} draft="" setDraft={noop} onSend={noop} viewer={baseState.viewer} history={[]} onReplay={noop}/><TableHUD state={baseState} me={hero} isSpectator={false} strength="Top Pair" raise="300" setRaise={noop} preAction="" onPreAction={noop} showTestBot={false} onAction={noop}/></main>;
 }
 function MttLobbyPreview(){
  const names=['MILES','RUBY','ZERO','PSYCHEE','DROOPY','MICHAEL'];

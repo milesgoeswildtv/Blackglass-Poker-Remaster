@@ -1,133 +1,749 @@
-/* BLACKGLASS live visual integration — approved room + table assets. Protected gameplay geometry and semantics remain source-owned. */
-.gameplayV3Page,.pregameTablePage{
-  --ftp-safe-top:max(0px,env(safe-area-inset-top),var(--telegram-safe-top,0px));
-  --ftp-safe-right:max(0px,env(safe-area-inset-right),var(--telegram-safe-right,0px));
-  --ftp-safe-bottom:max(0px,env(safe-area-inset-bottom),var(--telegram-safe-bottom,0px));
-  --ftp-safe-left:max(0px,env(safe-area-inset-left),var(--telegram-safe-left,0px));
+/*
+  AFTER HOURS gameplay page (pre-game and live). One grid: header, optional info bar (tournament field / table closing),
+  the table scene (table-skin.css), the chat/history panel (social.css) and the action dock. The bands have fixed heights
+  so the scene can be fitted into what they leave; on phones spare height goes to the chat panel, on wide screens the panel
+  sits beside the dock as in the desktop reference.
+*/
+.gameplayV3Page {
+  --ftp-safe-top: max(0px, env(safe-area-inset-top), var(--telegram-safe-top, 0px));
+  --ftp-safe-right: max(0px, env(safe-area-inset-right), var(--telegram-safe-right, 0px));
+  --ftp-safe-bottom: max(0px, env(safe-area-inset-bottom), var(--telegram-safe-bottom, 0px));
+  --ftp-safe-left: max(0px, env(safe-area-inset-left), var(--telegram-safe-left, 0px));
+  --app-h: var(--telegram-viewport-stable-height, 100dvh);
+  --head-h: calc(54px + var(--ftp-safe-top));
+  --info-h: 0px;
+  --dock-h: calc(156px + var(--ftp-safe-bottom));
+  --panel-min: 60px;
+  --panel-max: 240px;
+  --band-gap: 6px;
+  --side: max(8px, var(--ftp-safe-left));
+  --side-r: max(8px, var(--ftp-safe-right));
+  --avail-h: calc(var(--app-h) - var(--head-h) - var(--info-h) - var(--panel-min) - var(--dock-h) - 2 * var(--band-gap));
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: var(--app-h) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: var(--head-h) var(--info-h) minmax(var(--stage-h), 1fr) minmax(var(--panel-min), var(--panel-max)) var(--dock-h);
+  grid-template-areas: "header" "info" "stage" "panel" "dock";
+  row-gap: 0;
+  isolation: isolate;
+  background: var(--cp-bg-world) !important;
+  color: var(--cp-text-primary);
+  font-family: var(--cp-font-ui);
+  filter: none !important;
 }
-html,body,#root{min-height:100%}
-html:has(.gameplayV3Page),html:has(.pregameTablePage),body:has(.gameplayV3Page),body:has(.pregameTablePage),#root:has(.gameplayV3Page),#root:has(.pregameTablePage){height:var(--telegram-viewport-stable-height,100dvh);min-height:0;overflow:hidden!important;overscroll-behavior:none}
-body:has(.gameplayV3Page),body:has(.pregameTablePage){margin:0;background:var(--cp-bg-world)}
-
-.gameplayV3Page{
-  position:fixed!important;
-  inset:0!important;
-  width:100vw!important;
-  height:var(--telegram-viewport-stable-height,100dvh)!important;
-  min-height:0!important;
-  overflow:hidden!important;
-  margin:0!important;
-  padding:0!important;
-  isolation:isolate;
-  color:var(--cp-text-primary);
-  font-family:var(--cp-font-ui);
-  filter:none!important;
+.gameplayV3Page.withInfoBar {
+  --info-h: 26px;
 }
-.gameplayV3Page:before,.gameplayV3Page:after{display:none!important;content:none!important}
-.gameplayV3Page>*{position:relative;z-index:2}
-.gameplayV3Page button:focus-visible,.gameplayV3Page input:focus-visible,.gameplayV3Page [role="button"]:focus-visible{outline:2px solid var(--cp-accent-focus);outline-offset:2px;box-shadow:none}
-
-.gameplayV3Page>.belowTable{z-index:130}
-
-.ftp3Header{
-  position:absolute!important;
-  inset:0 0 auto 0!important;
-  height:9.7dvh!important;
-  min-height:68px!important;
-  margin:0!important;
-  padding:max(7px,var(--ftp-safe-top)) 14px 0!important;
-  display:grid!important;
-  grid-template-columns:92px 1fr 92px!important;
-  align-items:start!important;
-  gap:10px!important;
-  background:none!important;
-  border:0!important;
-  border-radius:0!important;
-  box-shadow:none!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  pointer-events:none!important;
-  overflow:visible!important;
-  z-index:100!important;
+.gameplayV3Page:before,
+.gameplayV3Page:after {
+  display: none !important;
+  content: none !important;
 }
-.ftp3Header:before,.ftp3Header:after{display:none!important;content:none!important}
-.ftp3Header button{font:inherit;cursor:pointer}
-.ftp3Back{pointer-events:auto!important}
-.ftp3Back{
-  align-self:start!important;
-  width:52px;
-  height:52px;
-  padding:0;
-  border-radius:var(--cp-radius-control);
-  border:1px solid var(--cp-border-default);
-  background:var(--cp-surface-plate);
-  color:var(--cp-text-primary);
-  font-family:var(--cp-font-ui);
-  font-size:30px;
-  line-height:1;
-  display:grid;
-  place-items:center;
-  box-shadow:0 8px 22px #0008;
+html:has(.gameplayV3Page),
+body:has(.gameplayV3Page),
+#root:has(.gameplayV3Page) {
+  height: var(--telegram-viewport-stable-height, 100dvh);
+  min-height: 0;
+  overflow: hidden !important;
+  overscroll-behavior: none;
 }
-.ftp3HeaderBrand{
-  position:absolute!important;
-  left:50%!important;
-  top:max(4px,var(--ftp-safe-top))!important;
-  transform:translateX(-50%)!important;
-  width:48%!important;
-  display:flex!important;
-  min-width:0;
-  flex-direction:column!important;
-  align-items:center!important;
-  text-align:center!important;
-  gap:2px!important;
-  pointer-events:none!important;
-  text-shadow:none;
-  font-family:var(--cp-font-display);
-  background:none!important;
-  border:0!important;
-  box-shadow:none!important;
+body:has(.gameplayV3Page) {
+  margin: 0;
+  background: var(--cp-bg-world);
 }
-.ftp3HeaderBrand:before,.ftp3HeaderBrand:after{display:none!important;content:none!important}
-.ftp3HeaderBrand strong{color:var(--cp-text-primary);font-size:clamp(12px,2.9vw,19px)!important;line-height:1!important;letter-spacing:.02em}
-.ftp3HeaderBrand span{display:flex;align-items:center;gap:7px;color:var(--cp-text-secondary);font-size:clamp(11px,2vw,13px)!important;line-height:1!important;white-space:nowrap;text-transform:uppercase;letter-spacing:.07em}
-.ftp3HeaderBrand i{width:3px;height:3px;border-radius:0;background:var(--cp-border-strong)}
-.ftp3TopCommands{position:absolute;right:10px;bottom:5px;display:flex;gap:5px;pointer-events:auto!important;z-index:102}
-.ftp3TopCommands button{height:24px;padding:0 8px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-plate);color:var(--cp-text-secondary);font:inherit;font-size:11px;font-weight:900;letter-spacing:.04em;box-shadow:0 4px 12px #0007}
-.ftp3TopCommands button.active{border-color:var(--cp-accent-focus);background:var(--cp-surface-raised);color:var(--cp-text-primary)}
-.ftp3TopCommands button.danger{border-color:var(--cp-state-danger);background:#21130f;color:var(--cp-on-danger)}
-
-
-.ftp3UtilityBar{position:absolute;left:12px!important;right:12px!important;bottom:4px!important;z-index:86;display:flex;gap:8px;pointer-events:none}
-.ftp3UtilityBar button{pointer-events:auto;flex:1 1 0;min-width:0!important;height:38px!important;padding:0 10px!important;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-plate);color:var(--cp-text-secondary);display:flex;align-items:center;justify-content:center;gap:7px;font:inherit;font-size:11px!important;font-weight:900;letter-spacing:.05em;box-shadow:0 6px 16px #0007}
-.ftp3UtilityBar button.active{border-color:var(--cp-accent-focus);color:var(--cp-text-primary);background:var(--cp-surface-raised)}.ftp3UtilityBar svg{width:18px;height:18px;stroke:currentColor;fill:none}
-
-.ftp3ActionDock{position:absolute!important;left:10px!important;right:10px!important;bottom:max(8px,var(--ftp-safe-bottom))!important;min-height:0!important;padding:6px 12px 48px!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;outline:0!important;z-index:80!important;display:block!important}
-.ftp3ActionDock:before,.ftp3ActionDock:after{display:none!important;content:none!important}
-.ftp3ActionRow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.ftp3ActionRow button{min-height:42px;padding:5px 5px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-plate);color:var(--cp-text-primary);font:inherit;font-weight:900;font-size:15px;line-height:1;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
-.ftp3ActionRow button small{display:block;margin-top:3px;color:var(--cp-text-secondary);font-size:11px;font-weight:700;line-height:1}.ftp3ActionRow button.raise{background:var(--cp-surface-raised);border-color:var(--cp-accent-focus)}.ftp3ActionRow button.allin{background:var(--cp-surface-raised);border-color:var(--cp-border-strong);color:var(--cp-text-primary)}.ftp3ActionRow button:disabled{opacity:var(--cp-disabled-opacity);filter:grayscale(.65)}
-.ftp3RaiseRow{margin-top:6px;display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center}.ftp3RaiseRow>span{color:var(--cp-text-secondary);font-size:11px;white-space:nowrap}.ftp3RaiseRow>span b{color:var(--cp-text-primary)}.ftp3RaiseRow input{width:100%;accent-color:var(--cp-accent-focus)}.ftp3RaiseRow>div{display:flex;gap:5px}.ftp3RaiseRow button{height:30px;min-width:40px;padding:0 8px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-inset);color:var(--cp-text-secondary);font:inherit;font-size:11px}
-.ftp3Watching{height:62px;display:grid;place-items:center;color:var(--cp-text-secondary);font-size:12px}
-.ftp3SittingOut{border:1px dashed var(--cp-border-default);border-radius:var(--cp-radius-plate);background:var(--cp-surface-inset);color:var(--cp-text-secondary);letter-spacing:.08em;font-size:11px;font-weight:900}
-.ftp3PreActions{display:grid;gap:6px}.ftp3PreActions>small{color:var(--cp-text-muted);font-size:11px;font-weight:900;letter-spacing:.14em}.ftp3PreActions>div{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.ftp3PreActions button{min-height:42px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-inset);color:var(--cp-text-secondary);font:inherit;font-size:11px;font-weight:900}.ftp3PreActions button.active{border-color:var(--cp-accent-focus);background:var(--cp-surface-raised);color:var(--cp-text-primary);box-shadow:inset 3px 0 0 var(--cp-accent-focus)}
-.ftp3ShowdownChoice{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;margin-bottom:7px;padding:8px 9px;border:1px solid var(--cp-border-default);border-radius:var(--cp-radius-plate);background:var(--cp-surface-inset)}.ftp3ShowdownChoice span{display:grid;gap:2px}.ftp3ShowdownChoice small{color:var(--cp-text-muted);font-size:11px;letter-spacing:.12em}.ftp3ShowdownChoice b{font-size:11px}.ftp3ShowdownChoice button,.ftp3Rabbit button{min-height:36px;padding:0 10px;border-radius:var(--cp-radius-control);border:1px solid var(--cp-border-default);background:var(--cp-surface-plate);color:var(--cp-text-primary);font:inherit;font-size:11px;font-weight:900}.ftp3ShowdownChoice button:last-child{border-color:var(--cp-state-danger);color:var(--cp-on-danger)}
-.ftp3Rabbit{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px;padding:8px 9px;border:1px solid var(--cp-border-default);border-radius:var(--cp-radius-plate);background:var(--cp-surface-inset)}.ftp3Rabbit small{color:var(--cp-text-muted);font-size:11px}.ftp3Rabbit button{border-color:var(--cp-border-strong);color:var(--cp-text-primary);background:var(--cp-surface-plate)}
-.ftp3StateNotice{margin-bottom:7px;padding:7px 9px;border:1px solid var(--cp-border-default);border-radius:var(--cp-radius-plate);background:var(--cp-surface-inset);color:var(--cp-text-secondary);text-align:center;font-size:11px;font-weight:900;letter-spacing:.08em}
-
-.gameplayV3Page>.belowTable{position:fixed!important;inset:11dvh 10px 19dvh!important;margin:0!important;padding:0!important;pointer-events:none!important;background:transparent!important}
-.gameplayV3Page>.belowTable>.tablePanels,.gameplayV3Page>.belowTable>.chatOverlay,.gameplayV3Page>.belowTable .historyOverlay{pointer-events:auto!important;position:absolute!important;inset:0!important;display:grid!important;place-items:center!important;background:transparent!important}
-.gameplayV3Page>.belowTable>.tablePanels:empty{display:none!important}
-.gameplayV3Page>.spectatorRibbon{position:absolute!important;top:10.1dvh!important;left:50%!important;transform:translateX(-50%)!important;width:auto!important;min-height:0!important;padding:5px 12px!important;border-radius:var(--cp-radius-plate)!important;background:var(--cp-surface-inset)!important;border:1px solid var(--cp-border-default)!important;color:var(--cp-text-secondary)!important;font-size:11px!important;z-index:90!important}
-.gameplayV3Page>.mttFieldBar{position:absolute!important;top:10.1dvh!important;left:50%!important;transform:translateX(-50%)!important;width:min(62vw,430px)!important;min-height:0!important;padding:5px 12px!important;border-radius:var(--cp-radius-plate)!important;background:var(--cp-surface-inset)!important;z-index:89!important;font-size:11px!important}
-.gameplayV3Page>.mttHostBar{position:absolute!important;left:50%!important;bottom:18.2dvh!important;transform:translateX(-50%)!important;z-index:91!important;min-height:0!important;padding:4px 8px!important;border-radius:var(--cp-radius-plate)!important;background:var(--cp-surface-inset)!important}
-.gameplayV3Page>.toast{z-index:150!important}
-
-
-@media(max-width:430px){
-  .ftp3HeaderBrand{top:max(3px,env(safe-area-inset-top))!important;width:46%!important}
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  .gameplayV3Page {
+    --head-h: calc(clamp(54px, 8.4vh, 76px) + var(--ftp-safe-top));
+    --dock-h: calc(clamp(150px, 19.7vh, 206px) + var(--ftp-safe-bottom));
+    --dock-w: clamp(420px, 34vw, 600px);
+    --avail-h: calc(var(--app-h) - var(--head-h) - var(--info-h) - var(--dock-h) - 2 * var(--band-gap));
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--dock-w)) minmax(0, 1fr);
+    grid-template-rows: var(--head-h) var(--info-h) minmax(var(--stage-h), 1fr) var(--dock-h);
+    grid-template-areas: "header header header" "info info info" "stage stage stage" "panel dock .";
+  }
 }
-@media(max-width:520px){
-  .ftp3TopCommands{right:7px;bottom:4px;gap:4px}.ftp3TopCommands button{height:22px;padding:0 6px;font-size:11px}.ftp3SittingOut{font-size:11px}
-  .ftp3UtilityBar{left:8px!important;right:8px!important;gap:6px}.ftp3UtilityBar button{height:36px!important;padding:0 7px!important;font-size:11px!important}.ftp3UtilityBar svg{width:16px;height:16px}
+.gameplayV3Page button:focus-visible,
+.gameplayV3Page input:focus-visible,
+.gameplayV3Page [role=button]:focus-visible {
+  outline: 2px solid var(--cp-accent-focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* ---- header: phones use two rows (wordmark and commands, then the table meta under both); wide screens one row ---- */
+.ftp3Header {
+  grid-area: header;
+  position: relative;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "back word cmds" "back meta meta";
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: calc(var(--ftp-safe-top) + 6px) var(--side-r) 3px var(--side);
+  background: linear-gradient(180deg, rgba(8, 7, 6, .86), rgba(8, 7, 6, .45) 70%, rgba(8, 7, 6, 0));
+  border: 0;
+  box-shadow: none;
+}
+.ftp3Header button {
+  font-family: inherit;
+  cursor: pointer;
+}
+.ftp3Back {
+  grid-area: back;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: var(--cp-radius-control);
+  border: 1px solid var(--cp-border-default);
+  background: rgba(22, 19, 15, .85);
+  color: var(--cp-text-primary);
+  font-size: 24px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+.ftp3Wordmark {
+  grid-area: word;
+  container: wordmark / inline-size;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  overflow: hidden;
+  font-family: var(--cp-font-display);
+  line-height: 1;
+  text-shadow: 0 2px 8px #000;
+}
+.ftp3Wordmark strong {
+  overflow: hidden;
+  color: #e9dfcd;
+  /* sized to the column the header leaves it, so the full name fits beside the commands on narrow phones; capped so the
+     two-line mark stays within the first header row */
+  font-size: clamp(13px, 9.4cqw, 17px);
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ftp3Wordmark span {
+  color: #a79b88;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .3em;
+  white-space: nowrap;
+}
+.ftp3HeaderBrand {
+  grid-area: meta;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px;
+  overflow: hidden;
+  font-family: var(--cp-font-display);
+  text-align: right;
+  text-shadow: 0 2px 8px #000;
+}
+.ftp3HeaderBrand strong {
+  color: var(--cp-text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.ftp3HeaderBrand span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--cp-text-secondary);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.ftp3HeaderBrand i {
+  width: 3px;
+  height: 3px;
+  flex: 0 0 auto;
+  background: var(--cp-border-strong);
+}
+.ftp3TopCommands {
+  grid-area: cmds;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.ftp3Header:not(:has(.ftp3TopCommands)) {
+  grid-template-areas: "back word word" "back meta meta";
+}
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  .ftp3Header {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "back word meta cmds";
+    column-gap: 14px;
+    padding-top: calc(var(--ftp-safe-top) + 4px);
+  }
+  .ftp3Header:not(:has(.ftp3TopCommands)) {
+    grid-template-areas: "back word meta meta";
+  }
+  .ftp3HeaderBrand {
+    display: grid;
+    gap: 4px;
+    justify-items: end;
+  }
+  .ftp3HeaderBrand strong {
+    font-size: 13px;
+  }
+  .ftp3Wordmark strong {
+    font-size: clamp(16px, 9.4cqw, 30px);
+  }
+}
+.ftp3SitOut,
+.ftp3HostMenuToggle {
+  height: 30px;
+  padding: 0 9px;
+  border-radius: var(--cp-radius-control);
+  border: 1px solid var(--cp-border-default);
+  background: rgba(22, 19, 15, .88);
+  color: var(--cp-text-secondary);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.ftp3SitOut.active {
+  border-color: var(--cp-accent-focus);
+  color: var(--cp-text-primary);
+  background: var(--cp-surface-raised);
+}
+.ftp3HostMenu {
+  position: relative;
+}
+.ftp3HostMenuToggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ftp3HostMenuToggle i {
+  font-style: normal;
+  font-size: 14px;
+  line-height: 1;
+}
+.ftp3HostMenu.open .ftp3HostMenuToggle {
+  border-color: var(--cp-accent-focus);
+  color: var(--cp-text-primary);
+}
+.ftp3HostMenuList {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 60;
+  min-width: 190px;
+  padding: 6px;
+  display: grid;
+  gap: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--cp-border-default);
+  background: rgba(16, 14, 11, .97);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .7);
+}
+.ftp3HostMenuList > button,
+.ftp3HostConfirm button {
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--cp-radius-control);
+  border: 1px solid var(--cp-border-subtle);
+  background: var(--cp-surface-plate);
+  color: var(--cp-text-primary);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-align: left;
+}
+.ftp3HostMenuList > button.ftp3Danger {
+  border-color: rgba(167, 68, 53, .7);
+  color: #f0c9bf;
+}
+.ftp3HostConfirm {
+  display: grid;
+  gap: 6px;
+  padding: 6px;
+  border-radius: var(--cp-radius-control);
+  border: 1px solid rgba(167, 68, 53, .7);
+  background: #1d120f;
+}
+.ftp3HostConfirm small {
+  color: #f0c9bf;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.ftp3HostConfirm > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.ftp3HostConfirm button {
+  text-align: center;
+}
+.ftp3HostConfirm button.ftp3Danger {
+  border-color: var(--cp-state-danger);
+  background: #3a1812;
+  color: var(--cp-on-danger);
+}
+
+/* ---- info bar: tournament field and table-closing countdown ---- */
+.ftp3InfoBar {
+  grid-area: info;
+  position: relative;
+  z-index: 29;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 var(--side-r) 0 var(--side);
+}
+.ftp3InfoBar > * {
+  margin: 0 !important;
+  padding: 4px 12px !important;
+  min-height: 0 !important;
+  border-radius: var(--cp-radius-plate) !important;
+  border: 1px solid var(--cp-border-subtle) !important;
+  background: rgba(16, 14, 11, .9) !important;
+  color: var(--cp-text-secondary) !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+}
+
+/* ---- action dock ---- */
+.ftp3ActionDock {
+  grid-area: dock;
+  position: relative;
+  z-index: 25;
+  min-height: 0;
+  margin: 0 var(--side-r) calc(var(--ftp-safe-bottom) + 6px) var(--side);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(214, 196, 160, .12);
+  background: rgba(13, 12, 10, .9);
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, .45);
+}
+.ftp3ActionDock.acting {
+  justify-content: flex-start;
+}
+/* Fold / Check / Call / Bet / Raise / All In on the V3 neutral button shell (corners and bevels keep their proportions);
+   colour and state are live CSS. */
+.ftp3ActionRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.ftp3ActionRow button,
+.ftp3PregameControls .ftp3Start {
+  --shell-y: 15px;
+  --shell-x: 17px;
+  position: relative;
+  isolation: isolate;
+  min-height: 46px;
+  padding: 0 4px;
+  border-style: solid;
+  border-width: 7px 9px;
+  border-color: transparent;
+  border-image-source: var(--v3-shell);
+  border-image-slice: 25% 8.7% 25.6% 8.7% fill;
+  border-image-width: var(--shell-y) var(--shell-x);
+  border-image-outset: calc(var(--shell-y) * .53) calc(var(--shell-x) * .55);
+  border-image-repeat: stretch;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--cp-text-primary);
+  font-family: var(--cp-font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px #000;
+  cursor: pointer;
+}
+.ftp3ActionRow button::before,
+.ftp3PregameControls .ftp3Start::before {
+  content: "";
+  position: absolute;
+  inset: -1px -2px;
+  z-index: -1;
+  border-radius: 3px;
+  background: var(--shell-fill, transparent);
+}
+.ftp3ActionRow button small {
+  display: block;
+  margin-top: 2px;
+  color: #e5c77e;
+  font-family: var(--cp-font-ui);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  line-height: 1;
+  text-transform: none;
+}
+.ftp3ActionRow button.fold {
+  filter: grayscale(1) brightness(.82);
+  color: #dcd6cc;
+}
+.ftp3ActionRow button.call {
+  color: #f4ecdd;
+}
+.ftp3ActionRow button.raise,
+.ftp3PregameControls .ftp3Start {
+  --shell-fill: linear-gradient(180deg, rgba(150, 104, 36, .62), rgba(96, 64, 20, .62));
+  color: #f6d27a;
+}
+.ftp3ActionRow button.ftp3AllIn {
+  --shell-fill: linear-gradient(180deg, rgba(128, 36, 26, .75), rgba(84, 22, 16, .75));
+  color: #f6e3d9;
+}
+.ftp3ActionRow button.ftp3AllIn small {
+  color: #f0c9bf;
+}
+.ftp3ActionRow button:disabled {
+  opacity: .45;
+  filter: grayscale(.8);
+  cursor: not-allowed;
+}
+.ftp3ActionRow button:not(:disabled):active,
+.ftp3PregameControls .ftp3Start:active {
+  transform: translateY(1px);
+}
+.ftp3RaiseRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "label slider value" "presets presets presets";
+  align-items: center;
+  gap: 6px 10px;
+}
+.ftp3RaiseRow > span {
+  grid-area: label;
+  color: var(--cp-text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.ftp3RaiseRow > input {
+  grid-area: slider;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.ftp3RaiseRow > input::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #b8842c calc(var(--raise-fill) * 100%), #3a342b 0);
+}
+.ftp3RaiseRow > input::-moz-range-track {
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #b8842c calc(var(--raise-fill) * 100%), #3a342b 0);
+}
+.ftp3RaiseRow > input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 22px;
+  margin-top: -9px;
+  border-radius: 8px;
+  border: 1px solid #8a6a2c;
+  background: linear-gradient(180deg, #f4dfa6, #d9b367);
+}
+.ftp3RaiseRow > input::-moz-range-thumb {
+  width: 16px;
+  height: 22px;
+  border-radius: 8px;
+  border: 1px solid #8a6a2c;
+  background: linear-gradient(180deg, #f4dfa6, #d9b367);
+}
+.ftp3RaiseValue {
+  grid-area: value;
+  min-width: 52px;
+  color: var(--cp-text-primary);
+  font-size: 13px;
+  font-weight: 900;
+  text-align: right;
+  white-space: nowrap;
+}
+.ftp3RaiseRow > div {
+  grid-area: presets;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.ftp3RaiseRow button,
+.ftp3PreActions button,
+.ftp3ShowdownChoice button,
+.ftp3Rabbit button,
+.ftp3PregameControls .ftp3OwnerBotControl {
+  min-height: 34px;
+  padding: 0 8px;
+  border-radius: 5px;
+  border: 1px solid #3c342a;
+  background: linear-gradient(180deg, #1d1a16, #151310);
+  color: var(--cp-text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ftp3RaiseRow button:active,
+.ftp3PreActions button:active {
+  transform: translateY(1px);
+}
+.ftp3PreActions {
+  display: grid;
+  gap: 6px;
+}
+/* dock head: what the dock is for right now, the hand's strength and the time bank */
+.ftp3DockHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+}
+.ftp3DockHead small {
+  margin-right: auto;
+  color: var(--cp-text-muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+.ftp3Strength {
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid rgba(214, 196, 160, .24);
+  background: rgba(255, 255, 255, .03);
+  color: #e5c77e;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.ftp3ExtraTime {
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 12px;
+  border: 1px solid rgba(242, 196, 95, .55);
+  background: rgba(242, 196, 95, .08);
+  color: var(--cp-accent-focus);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  line-height: 1;
+  cursor: pointer;
+}
+.ftp3ExtraTime:active {
+  transform: translateY(1px);
+}
+.ftp3PreActions > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.ftp3PreActions button {
+  min-height: 44px;
+}
+.ftp3PreActions button.active {
+  border-color: var(--cp-accent-focus);
+  background: var(--cp-surface-raised);
+  color: var(--cp-text-primary);
+  box-shadow: inset 3px 0 0 var(--cp-accent-focus);
+}
+.ftp3ShowdownChoice {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 7px;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid var(--cp-border-subtle);
+  border-radius: 6px;
+  background: var(--cp-surface-inset);
+}
+.ftp3ShowdownChoice span {
+  display: grid;
+  gap: 2px;
+}
+.ftp3ShowdownChoice small {
+  color: var(--cp-text-muted);
+  font-size: 11px;
+  letter-spacing: .12em;
+}
+.ftp3ShowdownChoice b {
+  font-size: 12px;
+}
+.ftp3ShowdownChoice button {
+  min-height: 40px;
+  color: var(--cp-text-primary);
+}
+.ftp3ShowdownChoice button:last-child {
+  border-color: var(--cp-state-danger);
+  color: var(--cp-on-danger);
+}
+.ftp3Rabbit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--cp-border-subtle);
+  border-radius: 6px;
+  background: var(--cp-surface-inset);
+}
+.ftp3Rabbit small {
+  color: var(--cp-text-muted);
+  font-size: 11px;
+}
+.ftp3Rabbit button {
+  min-height: 40px;
+  border-color: var(--cp-border-strong);
+  color: var(--cp-text-primary);
+  text-transform: none;
+}
+.ftp3StateNotice {
+  padding: 6px 9px;
+  border: 1px solid var(--cp-border-subtle);
+  border-radius: 6px;
+  background: var(--cp-surface-inset);
+  color: var(--cp-text-secondary);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+.ftp3Watching {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--cp-text-secondary);
+  font-size: 12px;
+  text-align: center;
+}
+.ftp3SittingOut {
+  border: 1px dashed var(--cp-border-default);
+  border-radius: 6px;
+  background: var(--cp-surface-inset);
+  letter-spacing: .08em;
+  font-size: 11px;
+  font-weight: 900;
+}
+.ftp3ActionDock .spectatorRibbon {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cp-text-secondary);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+.ftp3DockNote {
+  margin: 0;
+  color: var(--cp-text-secondary);
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+}
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  .ftp3ActionDock {
+    margin: 0 0 calc(var(--ftp-safe-bottom) + 10px);
+    padding: 10px 12px;
+  }
+  .ftp3ActionRow button {
+    --shell-y: 17px;
+    --shell-x: 19px;
+    min-height: clamp(44px, 6vh, 58px);
+    font-size: clamp(15px, 1.9vh, 18px);
+  }
+  .ftp3RaiseRow button,
+  .ftp3PreActions button {
+    min-height: 36px;
+  }
+}
+
+/* ---- sideways phone: portrait gameplay comes first ---- */
+.ftp3RotatePrompt {
+  display: none;
+}
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) and (max-height: 500px) and (pointer: coarse) {
+  .ftp3RotatePrompt {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 8px;
+    padding: 24px;
+    background: var(--cp-bg-world);
+    color: var(--cp-text-primary);
+    text-align: center;
+  }
+  .ftp3RotatePrompt i {
+    width: 34px;
+    height: 56px;
+    border: 3px solid var(--cp-text-secondary);
+    border-radius: 7px;
+    transform: rotate(-90deg);
+    animation: ftp3Rotate 1.8s ease-in-out infinite;
+  }
+  .ftp3RotatePrompt b {
+    font-family: var(--cp-font-display);
+    font-size: 22px;
+    letter-spacing: .04em;
+  }
+  .ftp3RotatePrompt span {
+    color: var(--cp-text-secondary);
+    font-size: 13px;
+  }
+}
+@keyframes ftp3Rotate {
+  0%, 25% { transform: rotate(-90deg); }
+  60%, 100% { transform: rotate(0deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ftp3RotatePrompt i {
+    animation: none;
+    transform: none;
+  }
+}
+
+.gameplayV3Page > .toast {
+  z-index: 150 !important;
 }

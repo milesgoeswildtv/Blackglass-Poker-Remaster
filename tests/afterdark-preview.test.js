@@ -29,8 +29,10 @@ test('granular gameplay controls are exposed without replacing gameplay componen
 });
 
 test('production pre-game and gameplay are viewport locked while Home is not',()=>{
- assert.match(gameplay,/html:has\(\.pregameTablePage\)/);
- assert.match(gameplay,/body:has\(\.pregameTablePage\)/);
- assert.match(gameplay,/overflow:hidden!important/);
- assert.doesNotMatch(gameplay,/homeShell[^\n]*overflow:hidden!important/);
+ // pre-game renders as the same gameplay page (it adds .pregameTablePage), so one lock covers both
+ assert.match(app,/className=\{`tablePage gameplayV3Page \$\{pregame\?'pregameTablePage':''\}/);
+ assert.match(gameplay,/html:has\(\.gameplayV3Page\)/);
+ assert.match(gameplay,/body:has\(\.gameplayV3Page\)/);
+ assert.match(gameplay,/overflow:\s*hidden\s*!important/);
+ assert.doesNotMatch(gameplay,/homeShell[^\n]*overflow:\s*hidden\s*!important/);
 });

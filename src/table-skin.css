@@ -1,148 +1,1215 @@
-/* CRASHOUT POKER table surface — one table coordinate system for pre-game and live play.
-   The active table skin (src/table-skins.js) supplies the numbers as custom properties on the table page:
-   art ratio, frame margins, ticket widths and the hero anchor. Everything on the table is placed in
-   fractions of the table artwork, so seats, cupholders, bets, board and pots keep their relationship
-   at every viewport size. */
+/*
+  AFTER HOURS table scene. All geometry comes from src/table-skins.js: sceneStyle() sets the --p-* (portrait) and --l-*
+  (landscape) numbers on the page, and every live element carries its anchor as --px/--py (portrait) and --lx/--ly
+  (landscape). This file only draws: it picks the variant with ONE media query (keep it identical to LANDSCAPE_MEDIA),
+  scales the environment art so the skin's safe rectangle fits the stage area that gameplay.css leaves between the bands,
+  and pins each element to its anchor. Ticket text layouts follow each ticket's own rendered width (container queries).
+*/
 
-.gameplayV3Page,.pregameTablePage{
-  --tb-page-w:100vw;
-  --tb-app-h:var(--telegram-viewport-stable-height,100dvh);
-  --tb-head:max(68px,calc(var(--ftp-safe-top) + 60px));
-  --tb-foot:calc(156px + var(--ftp-safe-bottom));
-  --tb-frame-w:calc(1 + var(--table-frame-left,0) + var(--table-frame-right,0));
-  --tb-frame-h:calc(1 + var(--table-frame-top,0) + var(--table-frame-bottom,0));
-  --tb-art-w:min(calc((var(--tb-page-w) - var(--ftp-safe-left) - var(--ftp-safe-right)) / var(--tb-frame-w)),calc((var(--tb-app-h) - var(--tb-head) - var(--tb-foot)) / (var(--table-art-ratio,1) * var(--tb-frame-h))),620px);
-  --tb-art-h:calc(var(--tb-art-w) * var(--table-art-ratio,1));
-  --tb-w:calc(var(--tb-art-w) * var(--tb-frame-w));
-  --tb-h:calc(var(--tb-art-h) * var(--tb-frame-h));
-  --tb-top:calc(var(--tb-head) + (var(--tb-app-h) - var(--tb-head) - var(--tb-foot) - var(--tb-h)) * .7);
-  --tb-ticket-w:calc(var(--tb-art-w) * var(--table-ticket-w,.3));
-  --tb-hero-w:calc(var(--tb-art-w) * var(--table-hero-ticket-w,.46));
+.gameplayV3Page {
+  --art-ratio: var(--p-art-ratio);
+  --art-aspect: var(--p-art-aspect);
+  --safe-l: var(--p-safe-l);
+  --safe-t: var(--p-safe-t);
+  --safe-w: var(--p-safe-w);
+  --safe-h: var(--p-safe-h);
+  --tk-w: var(--p-tk-w);
+  --hero-w: var(--p-hero-w);
+  --board-w: var(--p-board-w);
+  --hero-card-f: var(--p-hero-card-f);
+  --hero-card-min: var(--p-hero-card-min);
+  --chip-f: var(--p-chip-f);
+  --chip-min: var(--p-chip-min);
+  --pot-f: var(--p-pot-f);
+  --pot-min: var(--p-pot-min);
+  --pot-h-f: var(--p-pot-h-f);
+  --pot-h-min: var(--p-pot-h-min);
+  --disc-f: var(--p-disc-f);
+  --disc-min: var(--p-disc-min);
+  --felt-f: var(--p-felt-f);
+  --felt-min: var(--p-felt-min);
+  --staging-w: var(--p-staging-w);
+  /* The art is as wide as the viewport allows, unless the height left between the bands runs out first. */
+  --stage-gutter: 4px;
+  --avail-w: calc(100vw - var(--ftp-safe-left) - var(--ftp-safe-right) - 2 * var(--stage-gutter));
+  --art-w: min(calc(var(--avail-w) / var(--safe-w)), calc(var(--avail-h) / (var(--safe-h) * var(--art-ratio))));
+  --stage-w: calc(var(--art-w) * var(--safe-w));
+  --stage-h: calc(var(--art-w) * var(--art-ratio) * var(--safe-h));
+  --chip: max(var(--chip-min), calc(var(--art-w) * var(--chip-f)));
+  --disc: max(var(--disc-min), calc(var(--art-w) * var(--disc-f)));
 }
-/* Room layer: independent of the table art. */
-.tablePage.gameplayV3Page,.tablePage.pregameTablePage{background-color:var(--table-room-color,#120d08)!important;background-image:var(--gameplay-remaster-bg)!important;background-size:cover!important;background-position:var(--table-room-position,center top)!important;background-repeat:no-repeat!important;background-attachment:scroll!important}
-
-/* Stage = table art + frame. Fixed aspect; never moves between pre-game and live play. */
-.ftp3Stage{position:absolute;left:50%;top:var(--tb-top);width:var(--tb-w);height:var(--tb-h);margin:0 0 0 calc(var(--tb-w) / -2);padding:0;overflow:visible;z-index:20}
-.ftp3TableShell,.ftp3Cupholders{position:absolute;left:var(--table-art-left);top:var(--table-art-top);width:var(--table-art-width);height:var(--table-art-height);margin:0;padding:0;border:0;object-fit:fill;pointer-events:none;user-select:none}
-.ftp3TableShell{z-index:1;filter:drop-shadow(0 18px 22px rgba(0,0,0,.5))}
-.ftp3Cupholders{z-index:2}
-
-/* Opponent seats sit on skin anchors (--seat-x/--seat-y are stage percentages). */
-.ftp3SeatUnit{position:absolute;inset:0;z-index:22;pointer-events:none}
-.ftp3Seat{position:absolute;left:var(--seat-x);top:var(--seat-y);width:var(--tb-ticket-w);transform:translate(-50%,-50%);pointer-events:none;z-index:22}
-
-/* Ticket artwork is the seat background; name, stack and status stay live text on top of it.
-   Each artwork family declares where its avatar ring and text panels are (percent of the ticket box):
-   pack = purchased plaque template, v3 = AFTER HOURS standard ticket, v3Active = AFTER HOURS hero/active ticket.
-   Badges stay inside the ticket so a ticket never reaches a neighbouring cupholder. */
-.ftp3SeatPlaque,.ftp3HeroPlaque{
-  --tk-av-x:15%;--tk-av-box:22.4%;
-  --tk-name-l:31%;--tk-name-r:17%;--tk-name-y:39%;
-  --tk-stack-l:31%;--tk-stack-r:auto;--tk-stack-y:62%;--tk-stack-max:52%;
-  --tk-pos-x:8%;--tk-pos-y:80%;
-  --tk-clock-r:2.5%;--tk-clock-y:50%;--tk-clock-room:0%;
-  --tk-time-x:89.5%;
-  position:relative;z-index:3;display:block;width:100%;aspect-ratio:3/1;margin:0;padding:0;border:0;border-radius:0;
-  background:var(--player-plaque) center/100% 100% no-repeat;box-shadow:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55));
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  .gameplayV3Page {
+    --art-ratio: var(--l-art-ratio);
+    --art-aspect: var(--l-art-aspect);
+    --safe-l: var(--l-safe-l);
+    --safe-t: var(--l-safe-t);
+    --safe-w: var(--l-safe-w);
+    --safe-h: var(--l-safe-h);
+    --tk-w: var(--l-tk-w);
+    --hero-w: var(--l-hero-w);
+    --board-w: var(--l-board-w);
+    --hero-card-f: var(--l-hero-card-f);
+    --hero-card-min: var(--l-hero-card-min);
+    --chip-f: var(--l-chip-f);
+    --chip-min: var(--l-chip-min);
+    --pot-f: var(--l-pot-f);
+    --pot-min: var(--l-pot-min);
+    --pot-h-f: var(--l-pot-h-f);
+    --pot-h-min: var(--l-pot-h-min);
+    --disc-f: var(--l-disc-f);
+    --disc-min: var(--l-disc-min);
+    --felt-f: var(--l-felt-f);
+    --felt-min: var(--l-felt-min);
+    --staging-w: var(--l-staging-w);
+  }
 }
-.ftp3SeatPlaque[data-ticket="v3"],.ftp3HeroPlaque[data-ticket="v3"]{
-  --tk-av-x:17.4%;--tk-av-box:24.4%;
-  --tk-name-l:31.5%;--tk-name-r:7%;--tk-name-y:35%;
-  --tk-stack-l:auto;--tk-stack-r:7%;--tk-stack-y:74%;--tk-stack-max:47%;
-  --tk-pos-x:36.5%;--tk-pos-y:74%;
-  --tk-clock-r:7%;--tk-clock-y:35%;
+
+/* ---- stage and environment ---- */
+.ftp3Stage {
+  grid-area: stage;
+  position: relative;
+  justify-self: center;
+  align-self: center;
+  width: var(--stage-w);
+  height: var(--stage-h);
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  z-index: 1;
 }
-.ftp3SeatPlaque[data-ticket="v3"]:has(.ftp3Clock){--tk-clock-room:24%}
-.ftp3HeroPlaque[data-ticket="v3Active"]{
-  --tk-av-x:17.3%;--tk-av-box:22.4%;
-  --tk-name-l:30%;--tk-name-r:30%;--tk-name-y:74%;
-  --tk-stack-l:30.5%;--tk-stack-r:32%;--tk-stack-y:38%;
-  --tk-time-x:82%;
+.ftp3SceneArt {
+  position: absolute;
+  left: calc(var(--art-w) * var(--safe-l) * -1);
+  top: calc(var(--art-w) * var(--art-ratio) * var(--safe-t) * -1);
+  width: var(--art-w);
+  aspect-ratio: var(--art-aspect);
 }
-.ftp3SeatPlaque:before,.ftp3HeroPlaque:before{content:none;display:none}
-.ftp3IdentityAvatar{display:grid;place-items:center;aspect-ratio:1;overflow:visible}
-.ftp3Avatar,.ftp3HeroAvatar{position:absolute;left:var(--tk-av-x);top:50%;width:var(--tk-av-box);height:auto;max-width:none;transform:translate(-50%,-50%);z-index:5}
-.ftp3AvatarFallback,.ftp3AvatarPhoto{position:absolute;inset:11%;width:78%;height:78%;border-radius:50%;border:0}
-.ftp3AvatarFallback{display:grid;place-items:center;background:var(--cp-surface-inset);color:var(--cp-text-primary);font-size:11px;font-weight:900;z-index:1}
-.ftp3AvatarPhoto{object-fit:cover;background:var(--cp-surface-inset);z-index:2}
-.ftp3AvatarFrame{position:absolute;inset:-7%;width:114%;height:114%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 3px #000a);z-index:3}
-.ftp3SeatCopy{position:absolute;inset:0;display:block;min-width:0;pointer-events:none}
-.ftp3SeatCopy b,.ftp3SeatCopy strong{position:absolute;display:block;min-width:0;transform:translateY(-50%);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.15;color:var(--cp-text-primary);text-shadow:0 1px 2px #000,0 0 4px #000}
-.ftp3SeatCopy b{left:var(--tk-name-l);right:calc(var(--tk-name-r) + var(--tk-clock-room));top:var(--tk-name-y);font-size:11px;font-weight:700}
-.ftp3SeatCopy strong{left:var(--tk-stack-l);right:var(--tk-stack-r);top:var(--tk-stack-y);max-width:var(--tk-stack-max);font-size:12px;font-weight:900;letter-spacing:.02em}
+.ftp3Environment,
+.ftp3Environment img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+}
+/* Where the art ends inside the viewport it fades into the page colour (no new artwork). */
+.ftp3SceneArt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  box-shadow: inset 0 0 calc(var(--art-w) * .03) calc(var(--art-w) * .012) var(--cp-bg-world);
+}
 
-.ftp3Pos{position:absolute;left:var(--tk-pos-x);top:var(--tk-pos-y);transform:translate(-50%,-50%);min-width:19px;height:19px;padding:0 4px;border-radius:10px;display:grid;place-items:center;background:var(--cp-surface-paper);border:1px solid var(--cp-border-strong);color:var(--cp-text-on-light);font-style:normal;font-size:11px;font-weight:900;line-height:1;z-index:7;box-shadow:0 2px 4px #000a}
-.ftp3Clock{position:absolute;right:var(--tk-clock-r);top:var(--tk-clock-y);transform:translateY(-50%);padding:1px 4px;border-radius:var(--cp-radius-control);background:var(--cp-surface-paper);border:1px solid var(--cp-border-strong);color:var(--cp-text-on-light);font-style:normal;font-size:11px;font-weight:900;line-height:1.1;white-space:nowrap;z-index:7}
-/* AWAY and the winner's take sit on the avatar ring, clear of the name and stack. */
-.ftp3Away,.ftp3Win{position:absolute;left:2%;top:50%;transform:translateY(-50%);padding:1px 2px;border-radius:var(--cp-radius-control);font-style:normal;font-size:11px;font-weight:900;line-height:1.1;letter-spacing:0;white-space:nowrap;z-index:8}
-.ftp3Away{border:1px dashed var(--cp-border-default);background:rgba(22,19,15,.92);color:var(--cp-text-secondary)}
-.ftp3Win{padding:1px 4px;background:var(--cp-surface-inset);border:1px solid var(--cp-state-success);color:var(--cp-state-success)}
-.ftp3SeatKick{position:absolute;right:-6px;top:-9px;width:22px;height:22px;padding:0;border-radius:var(--cp-radius-control);border:1px solid var(--cp-state-danger);background:var(--cp-surface-inset);color:var(--cp-on-danger);font:inherit;font-size:13px;line-height:1;pointer-events:auto;cursor:pointer;z-index:9}
-.ftp3SeatUnit[data-side="right"] .ftp3SeatKick{right:auto;left:-6px}
+/* ---- anchors: every live element sits on its point in the active variant ---- */
+.ftp3SeatUnit,
+.ftp3HeroUnit {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+.ftp3Seat,
+.ftp3Hero,
+.ftp3Bet,
+.ftp3Board,
+.ftp3Pots,
+.ftp3FeltMark,
+.ftp3Staging {
+  position: absolute;
+  left: calc(var(--px) * 100%);
+  top: calc(var(--py) * 100%);
+}
+.ftp3Bet {
+  left: calc(var(--bpx) * 100%);
+  top: calc(var(--bpy) * 100%);
+}
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  .ftp3Seat,
+  .ftp3Hero,
+  .ftp3Board,
+  .ftp3Pots,
+  .ftp3FeltMark,
+  .ftp3Staging {
+    left: calc(var(--lx) * 100%);
+    top: calc(var(--ly) * 100%);
+  }
+  .ftp3Bet {
+    left: calc(var(--blx) * 100%);
+    top: calc(var(--bly) * 100%);
+  }
+}
 
-/* Seat states keep the live ticket readable; art changes come from the equipped pack. */
-.ftp3Seat.turn .ftp3SeatPlaque{filter:drop-shadow(0 0 5px rgba(242,196,95,.75)) drop-shadow(0 3px 5px rgba(0,0,0,.55))}
-.ftp3Seat.folded{opacity:.58;filter:grayscale(.78) contrast(.9)}
-.ftp3Seat.out{opacity:.22;filter:grayscale(.8)}
-.ftp3Seat.sittingout .ftp3SeatPlaque{filter:saturate(.35) brightness(.8) drop-shadow(0 3px 5px rgba(0,0,0,.55))}
-.ftp3Seat.showdownDim{opacity:.4;filter:saturate(.5) brightness(.74);transition:opacity .22s ease,filter .22s ease}
-.ftp3Seat.winner{opacity:1;filter:none;z-index:24}
-.ftp3Seat.winner .ftp3SeatPlaque{filter:brightness(1.12) drop-shadow(0 0 6px rgba(116,138,98,.9)) drop-shadow(0 3px 5px rgba(0,0,0,.55))}
+/* ---- tickets ---- */
+.ftp3Seat {
+  width: calc(var(--art-w) * var(--tk-w));
+  transform: translate(-50%, -50%);
+  container: ticket / inline-size;
+  z-index: 10;
+  pointer-events: none;
+}
+.ftp3Hero {
+  width: calc(var(--art-w) * var(--hero-w));
+  transform: translate(-50%, -50%);
+  container: heroticket / inline-size;
+  z-index: 12;
+  pointer-events: none;
+}
+.ftp3SeatPlaque,
+.ftp3HeroPlaque {
+  /* 'pack' template: purchased plaques (2172x724) */
+  --tk-av-x: 15%;
+  --tk-av-box: 22.4%;
+  --tk-name-l: 31%;
+  --tk-name-r: 17%;
+  --tk-name-y: 39%;
+  --tk-name-size: 11px;
+  --tk-stack-l: 31%;
+  --tk-stack-r: auto;
+  --tk-stack-y: 62%;
+  --tk-stack-size: 12px;
+  --tk-stack-max: 52%;
+  --tk-stack-fit: 52cqw;
+  --tk-pos-x: 8%;
+  --tk-pos-y: 80%;
+  --tk-clock-room: 0%;
+  position: relative;
+  z-index: 3;
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--player-plaque) center / 100% 100% no-repeat;
+  box-shadow: none;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, .6));
+}
+.ftp3SeatPlaque:before,
+.ftp3HeroPlaque:before {
+  content: none;
+  display: none;
+}
+/* V3 standard ticket, compact (phones): name in the top panel, stack in the wide slot, blind badge on the small slot. */
+.ftp3SeatPlaque[data-ticket=v3] {
+  --tk-av-x: 17.4%;
+  --tk-av-box: 24.4%;
+  --tk-name-l: 31.5%;
+  --tk-name-r: 7%;
+  --tk-name-y: 33%;
+  --tk-stack-l: auto;
+  --tk-stack-r: 7%;
+  --tk-stack-y: 74%;
+  --tk-stack-max: 47%;
+  --tk-stack-fit: 47cqw;
+  --tk-pos-x: 36.5%;
+  --tk-pos-y: 76%;
+}
+.ftp3SeatPlaque[data-ticket=v3]:has(.ftp3Clock) {
+  --tk-clock-room: 26%;
+}
+/* the host's pre-game remove button sits on the top-right corner; the name keeps clear of it */
+.ftp3SeatPlaque[data-ticket=v3]:has(.ftp3SeatKick) {
+  --tk-name-r: 16%;
+}
+/* AWAY sits on the avatar ring; the name moves clear of it */
+.ftp3Seat.sittingout .ftp3SeatPlaque[data-ticket=v3] {
+  --tk-name-l: 36%;
+}
+.ftp3IdentityAvatar {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  overflow: visible;
+}
+.ftp3Avatar,
+.ftp3HeroAvatar {
+  position: absolute;
+  left: var(--tk-av-x);
+  top: 50%;
+  width: var(--tk-av-box);
+  height: auto;
+  max-width: none;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+.ftp3AvatarFallback,
+.ftp3AvatarPhoto {
+  position: absolute;
+  inset: 11%;
+  width: 78%;
+  height: 78%;
+  border-radius: 50%;
+  border: 0;
+}
+.ftp3AvatarFallback {
+  display: grid;
+  place-items: center;
+  background: var(--cp-surface-inset);
+  color: var(--cp-text-primary);
+  font-size: 11px;
+  font-weight: 900;
+  z-index: 1;
+}
+.ftp3AvatarPhoto {
+  object-fit: cover;
+  background: var(--cp-surface-inset);
+  z-index: 2;
+}
+.ftp3AvatarFrame {
+  position: absolute;
+  inset: -7%;
+  width: 114%;
+  height: 114%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px #000a);
+  z-index: 3;
+}
+.ftp3SeatCopy {
+  position: absolute;
+  inset: 0;
+  display: block;
+  min-width: 0;
+  pointer-events: none;
+}
+.ftp3SeatCopy b,
+.ftp3SeatCopy strong {
+  position: absolute;
+  display: block;
+  min-width: 0;
+  transform: translateY(-50%);
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 1.15;
+  color: var(--cp-text-primary);
+  text-shadow: 0 1px 2px #000, 0 0 4px #000;
+}
+.ftp3SeatCopy b {
+  left: var(--tk-name-l);
+  right: calc(var(--tk-name-r) + var(--tk-clock-room));
+  top: var(--tk-name-y);
+  text-overflow: ellipsis;
+  font-size: var(--tk-name-size);
+  font-weight: 700;
+}
+.ftp3SeatCopy strong {
+  left: var(--tk-stack-l);
+  right: var(--tk-stack-r);
+  top: var(--tk-stack-y);
+  max-width: var(--tk-stack-max);
+  /* long stacks shrink to fit their slot (about .56em a character), never below 11px */
+  font-size: max(11px, min(var(--tk-stack-size), calc(var(--tk-stack-fit) / (var(--chars, 6) * .56))));
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+/* blind badge: a cream pill on compact tickets, an outlined tag in the small slot on full ones */
+.ftp3Pos {
+  position: absolute;
+  left: var(--tk-pos-x);
+  top: var(--tk-pos-y);
+  transform: translate(-50%, -50%);
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--cp-surface-paper);
+  border: 1px solid var(--cp-border-strong);
+  color: var(--cp-text-on-light);
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  z-index: 7;
+  box-shadow: 0 2px 4px #000a;
+}
+/* dealer: a cream disc above the avatar ring */
+.ftp3Dealer {
+  position: absolute;
+  left: calc(var(--tk-av-x) - var(--disc) * .5);
+  top: calc(var(--disc) * -.72);
+  width: var(--disc);
+  height: var(--disc);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 35% 30%, #fffaf0, #e8dcc6 62%, #bfae8f);
+  border: 1px solid #6a573d;
+  color: #1a1712;
+  font-style: normal;
+  font-family: var(--cp-font-display);
+  font-size: max(11px, calc(var(--disc) * .56));
+  font-weight: 700;
+  line-height: 1;
+  z-index: 9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .7);
+}
+/* statuses: on compact tickets only ALL-IN / OUT (in place of the stack) and AWAY (on the avatar) need words */
+.ftp3Status {
+  display: none;
+  position: absolute;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: .06em;
+  white-space: nowrap;
+  z-index: 8;
+}
+.ftp3Seat[data-status=allin] .ftp3SeatPlaque[data-ticket=v3] .ftp3SeatCopy strong,
+.ftp3Seat[data-status=out] .ftp3SeatPlaque[data-ticket=v3] .ftp3SeatCopy strong {
+  visibility: hidden;
+}
+.ftp3SeatPlaque[data-ticket=v3] .ftp3Status[data-status=allin],
+.ftp3SeatPlaque[data-ticket=v3] .ftp3Status[data-status=out] {
+  display: block;
+  right: 7%;
+  top: 74%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #f3d9cc;
+}
+.ftp3SeatPlaque[data-ticket=v3] .ftp3Status[data-status=out] {
+  color: var(--cp-text-muted);
+}
+.ftp3Status[data-status=away] {
+  display: block;
+  left: var(--tk-av-x);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1px 2px;
+  letter-spacing: .02em;
+  border: 1px dashed var(--cp-border-default);
+  border-radius: 2px;
+  background: rgba(22, 19, 15, .92);
+  color: var(--cp-text-secondary);
+}
+.ftp3Seat[data-status=allin] .ftp3SeatPlaque:not([data-ticket=v3]) .ftp3SeatCopy strong,
+.ftp3Seat[data-status=out] .ftp3SeatPlaque:not([data-ticket=v3]) .ftp3SeatCopy strong {
+  visibility: hidden;
+}
+.ftp3SeatPlaque:not([data-ticket=v3]) .ftp3Status[data-status=allin],
+.ftp3SeatPlaque:not([data-ticket=v3]) .ftp3Status[data-status=out] {
+  display: block;
+  left: var(--tk-stack-l);
+  top: var(--tk-stack-y);
+  transform: translateY(-50%);
+  font-size: var(--tk-stack-size);
+  color: #f3d9cc;
+  text-shadow: 0 1px 2px #000, 0 0 4px #000;
+}
+.ftp3SeatPlaque:not([data-ticket=v3]) .ftp3Status[data-status=out] {
+  color: var(--cp-text-muted);
+}
+/* the acting player's clock: a pill on the name line of compact tickets */
+.ftp3Clock,
+.ftp3HeroClock {
+  position: absolute;
+  right: 7%;
+  top: 33%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 4px;
+  border-radius: var(--cp-radius-control);
+  background: #efe5d0;
+  border: 1px solid var(--cp-border-strong);
+  color: var(--cp-text-on-light);
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.1;
+  white-space: nowrap;
+  z-index: 7;
+}
+.ftp3Clock small,
+.ftp3HeroClock small,
+.ftp3Clock .ftp3ClockLong,
+.ftp3HeroClock .ftp3ClockLong,
+.ftp3Clock s,
+.ftp3HeroClock s {
+  display: none;
+}
+.ftp3Win {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  border-radius: var(--cp-radius-control);
+  background: var(--cp-surface-inset);
+  border: 1px solid var(--cp-state-success);
+  color: #b9cf9f;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.15;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  z-index: 9;
+}
+/* a winner's amount takes the stack's place on compact and purchased tickets (the status slot on full ones, below) */
+.ftp3SeatPlaque .ftp3Win {
+  left: var(--tk-stack-l);
+  right: var(--tk-stack-r);
+  top: var(--tk-stack-y);
+}
+.ftp3Seat.winner .ftp3SeatCopy strong {
+  visibility: hidden;
+}
+.ftp3SeatKick {
+  position: absolute;
+  right: -6px;
+  top: -9px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: var(--cp-radius-control);
+  border: 1px solid var(--cp-state-danger);
+  background: var(--cp-surface-inset);
+  color: var(--cp-on-danger);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 9;
+}
 
-/* Opponent hole cards: small backs tucked behind the avatar ring while the hand is live; revealed cards sit
-   on the ticket's text panel, inside the ticket. Neither reaches a neighbouring cupholder. */
-.ftp3SeatCards{position:absolute;bottom:62%;left:2%;right:auto;top:auto;width:auto;height:calc(var(--tb-ticket-w) * .22);display:flex;justify-content:flex-start;gap:0;overflow:visible;transform:none;z-index:1}
-.ftp3SeatUnit[data-cards="right"] .ftp3SeatCards{left:auto;right:2%;justify-content:flex-end}
-.ftp3SeatCards .card{flex:0 0 auto;width:auto;height:100%;aspect-ratio:62/86;min-width:0;max-width:none;min-height:0;padding:0;border-radius:var(--cp-radius-control);box-shadow:0 2px 5px rgba(0,0,0,.45);background-size:cover;background-position:center;font-size:11px;line-height:1}
-.ftp3SeatCards .card:first-child{transform:rotate(-7deg) translateX(18%)}
-.ftp3SeatCards .card:last-child{transform:rotate(7deg) translateX(-18%)}
-.ftp3SeatCards.revealed{top:8%;bottom:8%;left:auto;right:5%;height:auto;gap:4%;justify-content:flex-end;z-index:8}
-.ftp3SeatCards.revealed .card{transform:none;padding:4% 6%;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;font-size:12px;font-weight:900;line-height:.95}
-.ftp3SeatCards.revealed .card b,.ftp3SeatCards.revealed .card span{display:block;position:static;line-height:.95}
-.ftp3SeatCards.revealed .card span{font-size:11px;margin-top:1px}
+/* Full ticket layout (tickets 180px and wider, mockup arrangement): name and stack in the top panel, blind tag in the small slot,
+   status in the wide slot. An acting default-skin opponent switches to the hero/active art with the TURN box. */
+@container ticket (min-width: 180px) {
+  .ftp3SeatPlaque {
+    --tk-name-size: max(11px, 5cqw);
+    --tk-stack-size: max(12px, 6.2cqw);
+  }
+  .ftp3SeatPlaque[data-ticket=v3],
+  .ftp3SeatPlaque[data-ticket=v3]:has(.ftp3Clock) {
+    --tk-name-l: 31.5%;
+    --tk-name-r: 7%;
+    --tk-name-y: 29%;
+    --tk-name-size: max(12px, 5.6cqw);
+    --tk-stack-l: 31.5%;
+    --tk-stack-r: 7%;
+    --tk-stack-y: 47%;
+    --tk-stack-size: max(16px, 7.6cqw);
+    --tk-stack-max: none;
+    --tk-stack-fit: 61.5cqw;
+    --tk-pos-x: 36.55%;
+    --tk-pos-y: 74.1%;
+    --tk-clock-room: 0%;
+  }
+  .ftp3Seat.sittingout .ftp3SeatPlaque[data-ticket=v3] {
+    --tk-name-l: 31.5%;
+  }
+  .ftp3Seat.turn .ftp3SeatPlaque[data-ticket=v3] {
+    background-image: var(--player-plaque-active, var(--player-plaque));
+    --tk-av-x: 17.7%;
+    --tk-av-box: 23.4%;
+    --tk-name-l: 30.5%;
+    --tk-name-r: 31%;
+    --tk-stack-l: 30.5%;
+    --tk-stack-r: 31%;
+    --tk-stack-fit: 38.5cqw;
+    --tk-pos-x: 34.15%;
+    --tk-pos-y: 74.2%;
+  }
+  .ftp3SeatPlaque[data-ticket=v3] .ftp3Pos {
+    width: 11.9%;
+    min-width: 0;
+    height: 22.5%;
+    padding: 0;
+    border-radius: 2px;
+    background: rgba(12, 11, 9, .55);
+    border: 1px solid rgba(214, 205, 190, .55);
+    color: var(--cp-text-primary);
+    font-size: max(11px, 4.2cqw);
+    box-shadow: none;
+  }
+  .ftp3Seat.turn .ftp3SeatPlaque[data-ticket=v3] .ftp3Pos {
+    width: 11.1%;
+    height: 13.7%;
+  }
+  .ftp3SeatPlaque[data-ticket=v3] .ftp3Status {
+    left: 43.5%;
+    right: 4.8%;
+    top: 62.5%;
+    height: 24.8%;
+    padding: 0 4.5%;
+    border: 0;
+    border-radius: 3px;
+    background: none;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    color: var(--cp-text-secondary);
+    font-size: max(11px, 4.4cqw);
+  }
+  .ftp3Seat.turn .ftp3SeatPlaque[data-ticket=v3] .ftp3Status {
+    left: 40.5%;
+    right: 29.2%;
+    top: 67.4%;
+    height: 13.7%;
+  }
+  .ftp3SeatPlaque[data-ticket=v3] .ftp3Status[data-status=allin] {
+    background: linear-gradient(180deg, #7b2a20, #5a1c15);
+    box-shadow: inset 0 0 0 1px rgba(255, 170, 150, .25);
+    color: #f6e3d9;
+  }
+  .ftp3Seat[data-status=allin] .ftp3SeatPlaque[data-ticket=v3] .ftp3SeatCopy strong,
+  .ftp3Seat[data-status=out] .ftp3SeatPlaque[data-ticket=v3] .ftp3SeatCopy strong {
+    visibility: visible;
+  }
+  .ftp3SeatPlaque[data-ticket=v3] .ftp3Status[data-status=away] {
+    left: 43.5%;
+    transform: none;
+  }
+  .ftp3SeatPlaque[data-ticket=v3] .ftp3Win {
+    left: 43.5%;
+    right: 4.8%;
+    top: 62.5%;
+    height: 24.8%;
+    padding: 0 4.5%;
+    transform: none;
+    justify-content: flex-end;
+    border-radius: 3px;
+    font-size: max(11px, 4.4cqw);
+  }
+  .ftp3Seat.winner .ftp3SeatPlaque[data-ticket=v3] .ftp3SeatCopy strong {
+    visibility: visible;
+  }
+  .ftp3Seat.winner .ftp3SeatPlaque[data-ticket=v3] .ftp3Status {
+    display: none;
+  }
+  .ftp3SeatPlaque[data-ticket=v3] .ftp3Clock {
+    left: 71.6%;
+    right: 7.2%;
+    top: 19.9%;
+    height: 48.5%;
+    padding: 4% 3% 5%;
+    transform: none;
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: 0;
+    border-radius: 4px;
+    border: 1px solid #c9b48a;
+    background: linear-gradient(180deg, #f4ead6, #e3d5b8);
+  }
+  .ftp3SeatPlaque[data-ticket=v3] .ftp3Clock small {
+    display: block;
+    font-size: 11px;
+    letter-spacing: .04em;
+  }
+  .ftp3SeatPlaque[data-ticket=v3] .ftp3Clock .ftp3ClockLong {
+    display: block;
+    font-size: max(13px, 6.4cqw);
+  }
+  .ftp3SeatPlaque[data-ticket=v3] .ftp3Clock .ftp3ClockShort {
+    display: none;
+  }
+  .ftp3SeatPlaque[data-ticket=v3] .ftp3Clock s {
+    display: block;
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    bottom: 9%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #a8701f calc(var(--clock-left) * 100%), rgba(26, 23, 18, .25) 0);
+  }
+}
 
-/* Bets sit on their own anchors on the felt, in front of each seat. */
-.ftp3Bet{position:absolute;left:var(--bet-x);top:var(--bet-y);transform:translate(-50%,-50%);display:flex;align-items:center;gap:3px;padding:0;background:transparent;border:0;color:var(--cp-text-primary);font-size:11px;font-weight:800;white-space:nowrap;box-shadow:none;text-shadow:0 1px 2px #000,0 0 5px #000;z-index:15}
-.ftp3Bet img{width:18px;height:18px;object-fit:contain}
+/* ---- seat states ---- */
+.ftp3Seat.turn .ftp3SeatPlaque {
+  filter: drop-shadow(0 0 6px rgba(242, 196, 95, .8)) drop-shadow(0 3px 6px rgba(0, 0, 0, .6));
+}
+.ftp3Seat.folded {
+  opacity: .55;
+  filter: grayscale(.75) contrast(.9);
+}
+.ftp3Seat.out {
+  opacity: .3;
+  filter: grayscale(.85);
+}
+.ftp3Seat.sittingout .ftp3SeatPlaque {
+  filter: saturate(.35) brightness(.8) drop-shadow(0 3px 6px rgba(0, 0, 0, .6));
+}
+.ftp3Seat[data-status=allin] .ftp3Avatar,
+.ftp3Hero[data-status=allin] .ftp3HeroAvatar {
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(196, 64, 46, .9), 0 0 8px rgba(196, 64, 46, .55);
+}
+/* at showdown the losing tickets dim; an opponent's revealed cards stay bright */
+.ftp3Seat.showdownDim .ftp3SeatPlaque,
+.ftp3Hero.showdownDim {
+  opacity: .42;
+  filter: saturate(.5) brightness(.75);
+  transition: opacity .22s ease, filter .22s ease;
+}
+.ftp3Seat.winner,
+.ftp3Hero.winner {
+  opacity: 1;
+  filter: none;
+  z-index: 14;
+}
+.ftp3Seat.winner .ftp3SeatPlaque,
+.ftp3Hero.winner .ftp3HeroPlaque {
+  filter: brightness(1.12) drop-shadow(0 0 8px rgba(242, 196, 95, .75)) drop-shadow(0 3px 6px rgba(0, 0, 0, .6));
+}
 
-/* Board, pot and side pots on the skin's centre-table anchors. */
-.ftp3Board{position:absolute;left:var(--board-x);top:var(--board-y);width:calc(var(--tb-art-w) * var(--board-w,.4));height:calc(var(--tb-art-w) * var(--board-w,.4) * .2441);transform:translate(-50%,-50%);display:flex;justify-content:center;align-items:stretch;gap:3%;z-index:10}
-.ftp3Board .card{position:relative;flex:0 0 auto;width:auto;height:100%;aspect-ratio:62/86;min-width:0;max-width:none;min-height:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;overflow:hidden;padding:7% 8%;line-height:.82;border-radius:var(--cp-radius-control);border:1px solid rgba(0,0,0,.24);background:#f6f3ef;color:#19131e;box-shadow:0 2px 6px rgba(0,0,0,.32);font-size:max(15px,calc(var(--tb-w) * .042))}
-.ftp3Board .card.red{color:#a51f3b}
-.ftp3Board .card b,.ftp3Board .card span{position:static;display:block;width:auto;height:auto;margin:0;padding:0;line-height:.9;transform:none}
-.ftp3Board .card b{font-size:1em}
-.ftp3Board .card span{font-size:max(.74em,11px);margin-top:3px}
-.ftp3Street{align-self:center;padding:3px 8px;background:transparent;border:0;color:var(--cp-text-secondary);text-align:center;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;text-shadow:0 2px 7px #000}
-.ftp3Pot{position:absolute;left:var(--pot-x);top:var(--pot-y);transform:translate(-50%,-50%);display:flex;align-items:baseline;gap:6px;padding:2px 8px;background:transparent;border:0;white-space:nowrap;z-index:11;box-shadow:none;text-shadow:0 2px 7px #000}
-.ftp3Pot small{color:var(--cp-text-secondary);font-size:11px;letter-spacing:.14em}
-.ftp3Pot strong{color:var(--cp-text-primary);font-size:max(16px,calc(var(--tb-w) * .046));line-height:1}
-.ftp3SidePots{position:absolute;left:var(--sidepots-x);top:var(--sidepots-y);width:calc(var(--tb-art-w) * var(--sidepots-w,.37));transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:3px;z-index:11}
-.ftp3SidePots span{display:flex;align-items:baseline;gap:4px;min-width:0;flex:0 0 auto;padding:2px 5px;background:rgba(12,11,9,.6);border:0;white-space:nowrap;text-shadow:0 1px 4px #000}
-.ftp3SidePots small{color:var(--cp-text-muted);font-size:11px;letter-spacing:.04em;white-space:nowrap}
-.ftp3SidePots b{color:var(--cp-text-secondary);font-size:11px}
+/* ---- face-down cards tuck behind the ticket's top-right corner; revealed cards cover the avatar ring at showdown, so
+   the name, stack and result stay readable ---- */
+.ftp3SeatCards {
+  position: absolute;
+  right: 7%;
+  bottom: 74%;
+  height: calc(var(--art-w) * var(--tk-w) * .2);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 1;
+  pointer-events: none;
+}
+.ftp3SeatCards .card {
+  flex: 0 0 auto;
+  width: auto;
+  height: 100%;
+  aspect-ratio: 62 / 86;
+  min-width: 0;
+  max-width: none;
+  min-height: 0;
+  padding: 0;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .5);
+  background-size: cover;
+  background-position: center;
+}
+.ftp3SeatCards .card:first-child {
+  transform: rotate(-8deg) translateX(30%);
+}
+.ftp3SeatCards .card:last-child {
+  transform: rotate(6deg);
+}
+.ftp3SeatCards.revealed {
+  left: 1%;
+  right: auto;
+  top: 12.5%;
+  bottom: auto;
+  height: 75%;
+  justify-content: flex-start;
+  z-index: 8;
+}
+.ftp3SeatCards.revealed .card:first-child {
+  transform: none;
+}
+.ftp3SeatCards.revealed .card:last-child {
+  transform: translateX(-30%);
+}
+/* the blind badge has done its job by showdown; the shown cards take its corner */
+.ftp3Seat.showing .ftp3Pos {
+  visibility: hidden;
+}
 
-/* Hero ticket sits on the skin's hero anchor (in front of the front-centre cupholder), cards to its right. */
-.ftp3Hero{position:absolute;left:calc(50% - var(--tb-w) / 2 + var(--tb-art-w) * (var(--table-frame-left,0) + var(--table-hero-x,.5)));top:calc(var(--tb-top) + var(--tb-art-h) * (var(--table-frame-top,0) + var(--table-hero-y,.9)));width:var(--tb-hero-w);transform:translate(-50%,-50%);z-index:65;display:block;pointer-events:none}
-.ftp3HeroPlaque{z-index:3}
-.ftp3HeroPlaque>div{position:absolute;inset:0;display:block}
-.ftp3HeroPlaque small{position:absolute;left:var(--tk-name-l);right:var(--tk-name-r);top:var(--tk-name-y);transform:translateY(-50%);display:block;overflow:hidden;text-overflow:ellipsis;color:var(--cp-text-secondary);font-size:11px;font-weight:800;letter-spacing:.12em;line-height:1.15;white-space:nowrap;text-shadow:0 1px 2px #000}
-.ftp3HeroPlaque b{position:absolute;left:var(--tk-stack-l);right:var(--tk-stack-r);top:var(--tk-stack-y);transform:translateY(-50%);display:block;overflow:hidden;text-overflow:ellipsis;color:var(--cp-text-primary);font-size:max(16px,calc(var(--tb-hero-w) * .1));font-weight:900;line-height:1.1;white-space:nowrap;text-shadow:0 1px 2px #000,0 0 4px #000}
-.ftp3HeroPlaque em{position:absolute;left:var(--tk-time-x);top:66%;transform:translate(-50%,-50%);color:#fff;font-style:normal;font-size:11px;font-weight:900;line-height:1;text-shadow:0 1px 2px #000}
-.ftp3ExtraTime{position:absolute;left:var(--tk-time-x);top:32%;transform:translate(-50%,-50%);min-height:24px;padding:0 2px;border:0;background:transparent;color:var(--cp-accent-focus);font:inherit;font-size:11px;font-weight:900;letter-spacing:.04em;line-height:1;cursor:pointer;pointer-events:auto;text-shadow:0 1px 4px #000}
-.ftp3ExtraTime:active{transform:translate(-50%,calc(-50% + 1px))}
-.ftp3HeroCards{position:absolute;left:calc(100% - 4%);bottom:2%;height:calc(var(--tb-hero-w) * .32);display:flex;align-items:flex-end;justify-content:flex-start;margin:0;z-index:2}
-.ftp3HeroCards .card{flex:0 0 auto;width:auto;height:100%;aspect-ratio:62/86;min-width:0;min-height:0;padding:6% 7%;border-radius:var(--cp-radius-control);background:#f7f4ef;color:#19131e;box-shadow:0 2px 6px rgba(0,0,0,.4);font-size:max(18px,calc(var(--tb-hero-w) * .11));line-height:.9}
-.ftp3HeroCards .card.red{color:#a51f3b}
-.ftp3HeroCards .card.back{background-color:transparent;background-size:cover;background-position:center}
-.ftp3HeroCards .card:first-child{transform:rotate(-4deg) translateX(8%)}
-.ftp3HeroCards .card:last-child{transform:rotate(4deg) translateX(-8%)}
-.ftp3Strength{position:absolute;left:calc(100% + 2%);bottom:calc(100% + 4px);transform:none;white-space:nowrap;margin:0;padding:2px 6px;color:var(--cp-text-secondary);font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;background:transparent;border:0;text-shadow:0 2px 7px #000;z-index:35}
-.ftp3Hero.showdownDim{opacity:.42;filter:saturate(.52) brightness(.76);transition:opacity .22s ease,filter .22s ease}
-.ftp3Hero.winner{opacity:1;filter:none}
-.ftp3Hero.winner .ftp3HeroPlaque{filter:brightness(1.12) drop-shadow(0 0 6px rgba(116,138,98,.9)) drop-shadow(0 3px 5px rgba(0,0,0,.55))}
+/* ---- playing cards (board, hero, revealed): cream face, corner index, large centre pip ---- */
+.ftp3Board .card,
+.ftp3HeroCards .card,
+.ftp3SeatCards.revealed .card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 0;
+  border-radius: max(3px, 6%);
+  border: 1px solid rgba(0, 0, 0, .28);
+  background: linear-gradient(160deg, #f8f3e9, #ece4d5 70%, #e2d8c6);
+  color: #1b1712;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .45);
+  container: playingcard / size;
+}
+.ftp3Board .card.red,
+.ftp3HeroCards .card.red,
+.ftp3SeatCards.revealed .card.red {
+  color: #a8222f;
+}
+.ftp3Board .card b,
+.ftp3HeroCards .card b,
+.ftp3SeatCards.revealed .card b,
+.ftp3Board .card span,
+.ftp3HeroCards .card span,
+.ftp3SeatCards.revealed .card span {
+  position: absolute;
+  left: 9%;
+  display: block;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  transform: none;
+}
+.ftp3Board .card b,
+.ftp3HeroCards .card b,
+.ftp3SeatCards.revealed .card b {
+  top: 6%;
+  font-family: var(--cp-font-display);
+  font-size: max(12px, 30cqh);
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+.ftp3Board .card span,
+.ftp3HeroCards .card span,
+.ftp3SeatCards.revealed .card span {
+  top: calc(6% + max(12px, 30cqh));
+  font-size: max(11px, 20cqh);
+}
+.ftp3Board .card::after,
+.ftp3HeroCards .card::after,
+.ftp3SeatCards.revealed .card::after {
+  content: attr(data-suit);
+  position: absolute;
+  right: 8%;
+  bottom: 4%;
+  font-size: 44cqh;
+  line-height: 1;
+}
+/* shown cards on a compact ticket are small: rank and suit only */
+.ftp3SeatCards.revealed .card::after {
+  content: none;
+}
+@container ticket (min-width: 180px) {
+  .ftp3SeatCards.revealed .card::after {
+    content: attr(data-suit);
+  }
+}
+.ftp3HeroCards .card.back,
+.ftp3SeatCards .card.back {
+  background-color: transparent;
+  background-size: cover;
+  background-position: center;
+}
 
-/* Desktop: the table page is a centred column in both pre-game and live play, so geometry matches. */
-@media(min-width:761px){
-  .gameplayV3Page,.pregameTablePage{--tb-page-w:min(76vw,980px);left:50%!important;right:auto!important;width:min(76vw,980px)!important;transform:translateX(-50%);box-shadow:0 0 90px #000d}
+/* ---- board, street label, pots ---- */
+.ftp3Board {
+  width: calc(var(--art-w) * var(--board-w));
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  gap: 2%;
+  z-index: 6;
+}
+.ftp3Board .card {
+  flex: 0 0 18.4%;
+  aspect-ratio: .8;
+  height: auto;
+}
+.ftp3Street {
+  padding: 3px 8px;
+  color: var(--cp-text-secondary);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 2px 7px #000;
+}
+.ftp3Pots {
+  --pot-w: max(var(--pot-min), calc(var(--art-w) * var(--pot-f)));
+  --pot-h: max(var(--pot-h-min), calc(var(--art-w) * var(--pot-h-f)));
+  --pot-cols: var(--pcols, 1);
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-end;
+  gap: 4px;
+  width: calc(var(--pot-cols) * var(--pot-w) + (var(--pot-cols) - 1) * 4px);
+  z-index: 6;
+}
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  .ftp3Pots {
+    --pot-cols: var(--lcols, 1);
+  }
+}
+.ftp3Pot {
+  box-sizing: border-box;
+  width: var(--pot-w);
+  height: var(--pot-h);
+  padding: 2px 6px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1px;
+  border-radius: 4px;
+  background: rgba(13, 12, 10, .86);
+  border: 1px solid rgba(214, 196, 160, .16);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .45);
+  text-align: center;
+  white-space: nowrap;
+}
+.ftp3Pot small {
+  color: var(--cp-text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  line-height: 1;
+}
+.ftp3Pot strong {
+  color: var(--cp-text-primary);
+  font-size: max(13px, calc(var(--pot-h) * .36));
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* ---- felt mark: faint live text, removable by dropping the skin's feltMark anchor ---- */
+.ftp3FeltMark {
+  --felt-size: max(var(--felt-min), calc(var(--art-w) * var(--felt-f)));
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  gap: .12em;
+  color: #e5dccb;
+  opacity: .2;
+  font-family: var(--cp-font-display);
+  font-size: var(--felt-size);
+  letter-spacing: .14em;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 2;
+}
+.ftp3FeltMark b {
+  font-weight: 700;
+}
+.ftp3FeltMark span {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  font-size: max(11px, .46em);
+  font-weight: 600;
+  letter-spacing: .16em;
+}
+.ftp3FeltMark span::before,
+.ftp3FeltMark span::after {
+  content: "";
+  width: 1.2em;
+  height: 1px;
+  background: currentColor;
+}
+
+/* ---- bets: V3 chip stack (or an equipped pack's chip) and the amount ---- */
+.ftp3Bet {
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  white-space: nowrap;
+  z-index: 8;
+  pointer-events: none;
+}
+.ftp3Bet img {
+  width: var(--chip);
+  height: var(--chip);
+  object-fit: contain;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .6));
+}
+.ftp3Bet b {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(12, 11, 9, .84);
+  border: 1px solid rgba(214, 196, 160, .14);
+  color: var(--cp-text-primary);
+  font-size: max(12px, calc(var(--chip) * .34));
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+/* ---- hero: hero/active ticket, cards above it on phones and inside its right-hand slots on wide screens ---- */
+.ftp3HeroPlaque[data-ticket=v3Active] {
+  --tk-av-x: 17.7%;
+  --tk-av-box: 23.4%;
+}
+.ftp3HeroCopy {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+.ftp3HeroCopy small,
+.ftp3HeroCopy b {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  text-shadow: 0 1px 2px #000, 0 0 4px #000;
+}
+.ftp3HeroCopy small {
+  left: 30.5%;
+  right: 31%;
+  top: 30%;
+  display: none;
+  color: var(--cp-text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  line-height: 1.15;
+}
+.ftp3HeroCopy b {
+  left: 30.5%;
+  right: 28.4%;
+  top: 41%;
+  color: var(--cp-text-primary);
+  font-size: max(11px, min(15px, calc(41cqw / (var(--chars, 6) * .56))));
+  font-weight: 900;
+  line-height: 1.1;
+}
+.ftp3HeroPlaque:not([data-ticket=v3Active]) .ftp3HeroCopy small {
+  display: block;
+  left: var(--tk-name-l);
+  right: var(--tk-name-r);
+  top: var(--tk-name-y);
+}
+.ftp3HeroPlaque:not([data-ticket=v3Active]) .ftp3HeroCopy b {
+  left: var(--tk-stack-l);
+  right: auto;
+  top: var(--tk-stack-y);
+  font-size: max(11px, min(max(14px, 8cqw), calc(var(--tk-stack-fit) / (var(--chars, 6) * .56))));
+}
+.ftp3Hero[data-status=allin] .ftp3HeroCopy b {
+  visibility: hidden;
+}
+.ftp3HeroPlaque .ftp3Status[data-status=allin],
+.ftp3HeroPlaque .ftp3Status[data-status=out] {
+  display: block;
+  left: 30.5%;
+  top: 41%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: #f3d9cc;
+}
+.ftp3HeroPlaque:not([data-ticket=v3Active]) .ftp3Status[data-status=allin],
+.ftp3HeroPlaque:not([data-ticket=v3Active]) .ftp3Status[data-status=out] {
+  left: var(--tk-stack-l);
+  top: var(--tk-stack-y);
+  text-shadow: 0 1px 2px #000, 0 0 4px #000;
+}
+.ftp3HeroPlaque[data-ticket=v3Active] .ftp3Pos {
+  left: 34.15%;
+  top: 74.2%;
+}
+.ftp3HeroCards {
+  position: absolute;
+  left: 50%;
+  bottom: 86%;
+  height: calc(max(var(--hero-card-min), calc(var(--art-w) * var(--hero-card-f))) / .72);
+  transform: translateX(-50%);
+  display: flex;
+  z-index: 2;
+}
+.ftp3HeroCards .card {
+  flex: 0 0 auto;
+  height: 100%;
+  aspect-ratio: .72;
+  width: auto;
+  min-width: 0;
+  min-height: 0;
+}
+.ftp3HeroCards .card:first-child {
+  transform: rotate(-4deg) translateX(6%);
+}
+.ftp3HeroCards .card:last-child {
+  transform: rotate(4deg) translateX(-6%);
+}
+/* The hero's turn clock: in the ticket's right-hand box while the hole cards sit above the ticket (portrait), in the free
+   part of the wide slot when the cards fill the right-hand box (landscape). */
+.ftp3HeroClock {
+  left: 71.6%;
+  right: 7.2%;
+  top: 19.9%;
+  height: 48.5%;
+  padding: 0;
+  transform: none;
+  justify-content: center;
+  border-radius: 3px;
+}
+.ftp3HeroPlaque .ftp3Win {
+  left: 30.5%;
+  top: 41%;
+}
+.ftp3HeroPlaque:not([data-ticket=v3Active]) .ftp3Win {
+  left: var(--tk-stack-l);
+  top: var(--tk-stack-y);
+}
+.ftp3Hero.winner .ftp3HeroCopy b {
+  visibility: hidden;
+}
+.ftp3Hero.folded .ftp3HeroPlaque {
+  filter: grayscale(.7) brightness(.8) drop-shadow(0 3px 6px rgba(0, 0, 0, .6));
+}
+.ftp3Hero.folded .ftp3HeroCards {
+  opacity: .5;
+  filter: grayscale(.6);
+}
+.ftp3Hero.turn .ftp3HeroPlaque {
+  filter: drop-shadow(0 0 7px rgba(242, 196, 95, .7)) drop-shadow(0 3px 6px rgba(0, 0, 0, .6));
+}
+@container heroticket (min-width: 220px) {
+  .ftp3HeroPlaque[data-ticket=v3Active] .ftp3HeroCopy small {
+    display: block;
+    top: 31%;
+    font-size: max(11px, 3.6cqw);
+  }
+  .ftp3HeroPlaque[data-ticket=v3Active] .ftp3HeroCopy b {
+    top: 51%;
+    right: 31%;
+    font-size: max(11px, min(max(16px, 6.6cqw), calc(38.5cqw / (var(--chars, 6) * .56))));
+  }
+  .ftp3HeroPlaque[data-ticket=v3Active] .ftp3Status {
+    display: flex;
+    left: 40.5%;
+    right: 29.2%;
+    top: 67.4%;
+    height: 13.7%;
+    transform: none;
+    align-items: center;
+    justify-content: center;
+    font-size: max(11px, 3.4cqw);
+    color: var(--cp-text-secondary);
+  }
+  .ftp3Hero[data-status=allin] .ftp3HeroPlaque[data-ticket=v3Active] .ftp3HeroCopy b {
+    visibility: visible;
+  }
+  .ftp3HeroPlaque[data-ticket=v3Active] .ftp3Status[data-status=allin] {
+    background: linear-gradient(180deg, #7b2a20, #5a1c15);
+    color: #f6e3d9;
+  }
+  .ftp3HeroPlaque[data-ticket=v3Active] .ftp3Win {
+    left: 40.5%;
+    right: 29.2%;
+    top: 67.4%;
+    height: 13.7%;
+    padding: 0;
+    transform: none;
+    justify-content: center;
+    border-radius: 2px;
+    font-size: max(11px, 3.4cqw);
+  }
+  .ftp3Hero.winner .ftp3HeroPlaque[data-ticket=v3Active] .ftp3HeroCopy b {
+    visibility: visible;
+  }
+  .ftp3Hero.winner .ftp3HeroPlaque[data-ticket=v3Active] .ftp3Status {
+    display: none;
+  }
+  /* the full TURN box, as on an acting opponent's ticket */
+  .ftp3HeroPlaque .ftp3HeroClock {
+    padding: 4% 3% 5%;
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: 0;
+    border-radius: 4px;
+    border: 1px solid #c9b48a;
+    background: linear-gradient(180deg, #f4ead6, #e3d5b8);
+  }
+  .ftp3HeroPlaque .ftp3HeroClock small {
+    display: block;
+    font-size: 11px;
+    letter-spacing: .04em;
+  }
+  .ftp3HeroPlaque .ftp3HeroClock .ftp3ClockLong {
+    display: block;
+    font-size: max(13px, 5.4cqw);
+  }
+  .ftp3HeroPlaque .ftp3HeroClock .ftp3ClockShort {
+    display: none;
+  }
+  .ftp3HeroPlaque .ftp3HeroClock s {
+    display: block;
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    bottom: 9%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #a8701f calc(var(--clock-left) * 100%), rgba(26, 23, 18, .25) 0);
+  }
+}
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  /* wide screens: the hole cards sit in the hero ticket's right-hand box (as in the desktop reference) */
+  .ftp3HeroCards {
+    left: auto;
+    right: 5%;
+    bottom: 12%;
+    height: 76%;
+    transform: none;
+    z-index: 5;
+  }
+  .ftp3HeroPlaque .ftp3HeroClock {
+    left: 40.5%;
+    right: 39%;
+    top: 67.4%;
+    height: 13.7%;
+    padding: 0 3%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+  }
+  .ftp3HeroPlaque .ftp3HeroClock small,
+  .ftp3HeroPlaque .ftp3HeroClock .ftp3ClockShort {
+    display: none;
+  }
+  .ftp3HeroPlaque .ftp3HeroClock .ftp3ClockLong {
+    display: block;
+    font-size: 12px;
+  }
+  /* the hole cards take the right of the ticket from 58%, so the stack keeps to the left of them */
+  .ftp3HeroPlaque[data-ticket=v3Active] .ftp3HeroCopy b {
+    right: 43%;
+    font-size: max(11px, min(max(15px, 6.6cqw), calc(26.5cqw / (var(--chars, 6) * .56))));
+  }
+  .ftp3HeroPlaque:not([data-ticket=v3Active]) .ftp3HeroCopy b {
+    --tk-stack-fit: 27cqw;
+  }
+  .ftp3HeroPlaque .ftp3HeroClock s {
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 2px;
+    background: linear-gradient(90deg, #d9a441 calc(var(--clock-left) * 100%), rgba(255, 255, 255, .12) 0);
+  }
+}
+@container heroticket (min-width: 220px) {
+  @media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+    .ftp3HeroPlaque[data-ticket=v3Active] .ftp3Status,
+    .ftp3HeroPlaque[data-ticket=v3Active] .ftp3Win {
+      right: 39%;
+    }
+  }
+}
+
+/* ---- staging card position (content styles live in pregame.css) ---- */
+.ftp3Staging {
+  width: calc(var(--art-w) * var(--staging-w));
+  transform: translate(-50%, -50%);
+  z-index: 6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ftp3Seat.showdownDim .ftp3SeatPlaque,
+  .ftp3Hero.showdownDim {
+    transition: none;
+  }
 }

@@ -1,1 +1,273 @@
-.watchButton{width:100%;margin-top:10px;padding:14px;border:1px solid #74518a;border-radius:13px;background:#17101e;color:#d8c7df;font-weight:800;cursor:pointer}.watchButton:hover{border-color:#a56ac2}.watchButton:disabled{opacity:.55;cursor:wait}.spectatorRibbon{max-width:1050px;margin:0 auto 8px;padding:8px 14px;border:1px solid #5b4268;border-radius:999px;background:#120d18;color:#c9b2d5;text-align:center;font-size:10px;font-weight:900;letter-spacing:.14em}.railBadge{padding:11px 14px;border:1px solid #5a3e68;border-radius:13px;background:#17101e;color:#cdb8d7;font-size:11px;font-weight:900;letter-spacing:.12em;text-align:center}.railBadge small{font-size:8px;color:#7f7087}.readOnlyNote{align-self:center;padding:8px 11px;border:1px solid #46334f;border-radius:999px;color:#95869c;font-size:10px;font-weight:800;letter-spacing:.1em}.belowTable{max-width:1050px;margin:14px auto 0;display:grid;grid-template-columns:1fr;gap:14px}.belowTable.withChat{grid-template-columns:minmax(0,1fr) 330px;align-items:start}.tablePanels{min-width:0}.chatOverlay{width:100%;height:100%;display:grid;place-items:center}.chatPanel{position:relative;width:min(94vw,680px,calc(48dvh * 1.5));aspect-ratio:3/2;height:auto;min-height:0;max-height:none;overflow:hidden;background:transparent;border:0;border-radius:0;box-shadow:none;isolation:isolate;container-type:inline-size}.chatPanelArt{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;z-index:0}.chatPanelContent{position:absolute;left:8.5%;top:8.5%;width:83%;height:83%;z-index:2;display:grid;grid-template-rows:auto minmax(0,1fr) auto;min-height:0}.chatHead{display:flex;align-items:center;justify-content:space-between;min-height:13%;padding:0 2%;border:0;background:transparent}.chatHead>div{display:grid;gap:2px}.chatHead b{font-size:2.2cqw;letter-spacing:.12em;color:#e0c36c}.chatHead span,.chatHead small{font-size:1.75cqw;color:#82758a}.chatLog{min-height:0;height:auto;overflow-y:auto;padding:2.2% 2%;display:flex;flex-direction:column;gap:8px}.chatEmpty{margin:auto;color:#6d6173;font-size:2cqw}.chatMsg{padding:8px 9px;border:1px solid #2d2134;border-radius:10px;background:#0d0911cc}.chatMsg>div{display:flex;align-items:center;gap:7px}.chatMsg b{font-size:1.9cqw;color:#e2d7e7}.chatMsg i{padding:2px 5px;border:1px solid #5c4567;border-radius:999px;color:#a993b4;font-size:1.1cqw;font-style:normal;letter-spacing:.08em}.chatMsg time{margin-left:auto;color:#655a6b;font-size:1.45cqw}.chatMsg p{margin:5px 0 0;color:#baafc0;font-size:1.9cqw;line-height:1.4;overflow-wrap:anywhere}.systemMsg{border-style:dashed;background:#0b090ecc}.systemMsg b{color:#8e7e96}.systemMsg p{color:#7f7187;font-style:italic}.chatForm{display:flex;gap:8px;padding:2% 2% 1.5%;border:0;background:transparent}.chatForm input{min-width:0;flex:1;background:#09070ce8;border:1px solid #3d2c47;color:white;border-radius:9px;padding:9px 10px;outline:none}.chatForm button{border:1px solid #6f4b7c;background:#24142f;color:#e5d7ea;border-radius:9px;padding:0 12px;font-weight:800;cursor:pointer}.chatForm button:disabled{opacity:.4;cursor:not-allowed}@media(max-width:900px){.belowTable.withChat{grid-template-columns:1fr}.chatPanel{width:min(94vw,600px,calc(46dvh * 1.5));aspect-ratio:3/2;height:auto}}@media(max-width:650px){.belowTable{width:calc(100% - 16px);margin:7px auto 0;gap:7px}.chatPanel{width:min(94vw,520px,calc(44dvh * 1.5));aspect-ratio:3/2;height:auto}.chatPanelContent{left:7%;top:8%;width:86%;height:84%}.chatHead b{font-size:3.4cqw}.chatHead span,.chatHead small{font-size:2.5cqw}.chatLog{padding:2% 2%;gap:5px}.chatEmpty{font-size:2.7cqw}.chatMsg{padding:6px 7px;border-radius:8px}.chatMsg b{font-size:2.8cqw}.chatMsg i{font-size:1.7cqw}.chatMsg time{font-size:2.1cqw}.chatMsg p{font-size:2.8cqw;margin-top:3px}.chatForm{padding:2%}.chatForm input{padding:7px 8px;font-size:11px}.chatForm button{padding:0 10px;font-size:9px}}
+.watchButton {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px;
+  border: 1px solid #74518a;
+  border-radius: 13px;
+  background: #17101e;
+  color: #d8c7df;
+  font-weight: 800;
+  cursor: pointer;
+}
+.watchButton:hover {
+  border-color: #a56ac2;
+}
+.watchButton:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+.railBadge {
+  padding: 11px 14px;
+  border: 1px solid #5a3e68;
+  border-radius: 13px;
+  background: #17101e;
+  color: #cdb8d7;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-align: center;
+}
+.railBadge small {
+  font-size: 8px;
+  color: #7f7087;
+}
+.readOnlyNote {
+  align-self: center;
+  padding: 8px 11px;
+  border: 1px solid #46334f;
+  border-radius: 999px;
+  color: #95869c;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+
+/*
+  AFTER HOURS chat/history panel (afterhours_chat_history_panel.png). The art is drawn as a nine-slice border image so its
+  frame, tab box, send arrow and input outline keep their proportions at any panel size; --k converts art pixels to CSS
+  pixels. Live tabs sit on the art's tab row, the log in its content area, and the message box on its drawn input.
+  The art bakes the active highlight under the left (CHAT) tab, so the HISTORY state covers it and draws its own.
+*/
+.ftp3PanelSlot {
+  grid-area: panel;
+  position: relative;
+  z-index: 24;
+  min-height: 0;
+  margin: 0 var(--side-r) var(--band-gap) var(--side);
+}
+.ftp3Panel {
+  --k: .245;
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  margin: 0;
+  border-style: solid;
+  border-width: 1px;
+  border-color: transparent;
+  border-image-source: var(--v3-panel);
+  border-image-slice: 32.04% 15.06% 35.54% 32.46% fill;
+  border-image-width: calc(348px * var(--k)) calc(218px * var(--k)) calc(386px * var(--k)) calc(470px * var(--k));
+  border-image-outset: calc(201px * var(--k)) calc(41px * var(--k)) calc(187px * var(--k)) calc(40px * var(--k));
+  border-image-repeat: stretch;
+  color: var(--cp-text-primary);
+}
+.ftp3PanelSlot.compact .ftp3Panel {
+  --k: .17;
+}
+/* compact and closed: the tab strip and the message box; the log opens over the table (a tab, or focusing the box) */
+.ftp3PanelSlot.compact:not(.open) .ftp3PanelBody {
+  visibility: hidden;
+}
+.ftp3PanelSlot.compact.open .ftp3Panel {
+  --k: .245;
+  inset: auto 0 0 0;
+  height: min(62vh, 420px);
+  z-index: 60;
+  filter: drop-shadow(0 -10px 26px rgba(0, 0, 0, .7));
+}
+.ftp3PanelTabs {
+  position: absolute;
+  left: calc(22px * var(--k));
+  right: calc(22px * var(--k));
+  top: calc(22px * var(--k));
+  height: calc(117px * var(--k));
+  display: flex;
+  align-items: stretch;
+}
+.ftp3PanelTabs [role=tab] {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: calc(401px * var(--k));
+  margin: 0;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #8f877a;
+  font: inherit;
+  font-family: var(--cp-font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ftp3PanelTabs [role=tab].active {
+  color: #e7bb52;
+}
+.ftp3PanelTabs [role=tab] i {
+  display: inline-grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 5px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #c9952f;
+  color: #15120e;
+  font-style: normal;
+  font-family: var(--cp-font-ui);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+  vertical-align: 1px;
+}
+/* HISTORY active: cover the baked CHAT highlight with the inactive strip and draw the same highlight under HISTORY */
+.ftp3Panel[data-tab=history] .ftp3Chat {
+  background: #121414;
+}
+.ftp3Panel[data-tab=history] .ftp3HandLog {
+  background: #26241f;
+  box-shadow: inset 1px 0 0 #3a3631, inset -1px 0 0 #3a3631, inset 0 1px 0 #3a3631;
+}
+.ftp3Panel[data-tab=history] .ftp3HandLog::after {
+  content: "";
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  bottom: 0;
+  height: max(2px, calc(7px * var(--k)));
+  border-radius: 2px;
+  background: linear-gradient(90deg, #7b5a1d, #f4e79a 50%, #7b5a1d);
+}
+.ftp3PanelClose {
+  margin: 0 0 0 auto;
+  width: 34px;
+  border: 0;
+  background: none;
+  color: var(--cp-text-secondary);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.ftp3PanelBody {
+  position: absolute;
+  left: calc(38px * var(--k));
+  right: calc(39px * var(--k));
+  top: calc(144px * var(--k));
+  bottom: calc(199px * var(--k));
+  overflow: hidden auto;
+  padding: 4px 8px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #4a4135 transparent;
+}
+.chatLog {
+  display: grid;
+  gap: 3px;
+}
+.chatMsg {
+  margin: 0;
+  color: #e3dacb;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.chatMsg b {
+  margin-right: 5px;
+  color: #a59b8b;
+  font-weight: 700;
+}
+.chatMsg i {
+  margin-right: 5px;
+  padding: 0 4px;
+  border: 1px solid #4b4136;
+  border-radius: 3px;
+  color: #a59b8b;
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: .06em;
+}
+.systemMsg,
+.systemMsg b {
+  color: #8f877a;
+  font-style: italic;
+}
+.chatEmpty {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  color: #7f786c;
+  font-size: 12px;
+  text-align: center;
+}
+.ftp3Panel .chatForm {
+  position: absolute;
+  left: calc(67px * var(--k));
+  right: calc(65px * var(--k));
+  bottom: calc(46px * var(--k));
+  height: calc(133px * var(--k));
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.ftp3Panel .chatForm input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 calc(140px * var(--k)) 0 10px;
+  border: 0;
+  border-radius: 6px;
+  outline: none;
+  background: transparent;
+  color: var(--cp-text-primary);
+  font: inherit;
+  font-size: 13px;
+}
+.ftp3Panel .chatForm input::placeholder {
+  color: #77706a;
+}
+.ftp3Panel .chatForm input:focus-visible {
+  box-shadow: inset 0 0 0 1px rgba(242, 196, 95, .55);
+}
+.ftp3Panel .chatForm button {
+  position: absolute;
+  right: calc(16px * var(--k));
+  top: 0;
+  bottom: 0;
+  width: calc(110px * var(--k));
+  min-width: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: transparent;
+  font-size: 11px;
+  cursor: pointer;
+}
+.ftp3Panel .chatForm button:disabled {
+  background: rgba(16, 17, 17, .6);
+  cursor: not-allowed;
+}
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  .ftp3PanelSlot {
+    justify-self: start;
+    align-self: stretch;
+    width: clamp(250px, 24vw, 400px);
+    max-width: calc(100% - 12px);
+    margin: 0 0 calc(var(--ftp-safe-bottom) + 10px) var(--side);
+  }
+}

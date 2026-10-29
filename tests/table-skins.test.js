@@ -1,71 +1,46 @@
 import test from'node:test';
 import assert from'node:assert/strict';
-import{TABLE_SKINS,CUPHOLDER_IDS,SEAT_ORDER,FRONT_SEAT,tableSkinFor,validateTableSkin,seatLayout,seatEntries,stagePoint,ticketBox,artAspect,tableSkinStyle,tableStageStyle}from'../src/table-skins.js';
-import{ticketFor,plaqueFor,avatarFrameFor}from'../src/assets.js';
+import fs from'node:fs';
+import{TABLE_SKINS,SEAT_ORDER,FRONT_SEAT,VARIANTS,LANDSCAPE_MEDIA,ROTATE_MEDIA,CHECK_WIDTHS,MAX_POTS,tableSkinFor,validateTableSkin,seatLayout,seatOf,seatEntries,seatVars,heroVars,potsVars,potsLayout,potColumns,allLayouts,layoutBoxes,safeRect,sceneStyle,hasFeltMark,heroCardsBox,ticketBox}from'../src/table-skins.js';
+import{ticketFor,plaqueFor,avatarFrameFor,betChipFor,chipFor,cardBackFor}from'../src/assets.js';
 
-// Layout contract for table skins, checked in table-art fractions so it holds at every viewport size.
-const skins=Object.values(TABLE_SKINS),skin=tableSkinFor();
-const overlap=(a,b,eps=0)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>eps&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>eps;
-// A box covers a cupholder if it contains the ring centre or any of 8 points on the ring.
-const coversCup=(r,c)=>[[0,0],[1,0],[-1,0],[0,1],[0,-1],[.7,.7],[-.7,.7],[.7,-.7],[-.7,-.7]].some(([dx,dy])=>{const x=c.x+dx*c.rx,y=c.y+dy*c.ry;return x>r.left&&x<r.right&&y>r.top&&y<r.bottom});
-const centreBox=(s,[x,y],w,h)=>({left:x-w/2,right:x+w/2,top:y-h/2,bottom:y+h/2});
-const boardBox=s=>{const w=s.board.width,h=w*.2441/artAspect(s);return centreBox(s,s.board.at,w,h)};
-const stageBounds=s=>({left:-s.frame.left,right:1+s.frame.right,top:-s.frame.top,bottom:1+s.frame.bottom});
-const inside=(r,b)=>r.left>=b.left-1e-9&&r.right<=b.right+1e-9&&r.top>=b.top-1e-9&&r.bottom<=b.bottom+1e-9;
+// Layout contract for the AFTER HOURS V3 table: one environment image per orientation, every live element on an anchor
+// of that image, no collisions for any player count, the same seat identities and clockwise order in both variants.
+const skin=tableSkinFor(),read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url));
+const imageSize=file=>{const b=read(`public${file}`);assert.equal(b.toString('latin1',1,4),'PNG',file);return[b.readUInt32BE(16),b.readUInt32BE(20)]};
+const css=p=>read(p).toString('utf8');
 
 test('every table skin satisfies the layout contract',()=>{
- for(const s of skins)assert.deepEqual(validateTableSkin(s),[],s.id);
+ for(const s of Object.values(TABLE_SKINS))assert.deepEqual(validateTableSkin(s),[],s.id);
 });
 
-test('the default skin declares its interim art honestly and keeps room, table and cupholders separable',()=>{
- assert.equal(skin.table.interim,true);
- assert.match(skin.table.note,/interim/i);
- assert.equal(skin.cupholders.paintedIntoTable,true,'cupholders are a temporary part of the table art');
- assert.equal(skin.cupholders.src,null,'no separate cupholder layer is invented');
- assert.match(skin.cupholders.note,/TEMPORARY/);
- assert.match(skin.room.src,/CRASHOUT_BACKGROUND_REMASTER\.webp$/);
- assert.match(skin.table.src,/CRASHOUT_TABLE_REMASTER\.webp$/);
- assert.notEqual(skin.room.src,skin.table.src,'room and table are independent layers');
+test('each orientation draws one approved AFTER HOURS V3 environment at its real pixel size',()=>{
+ const{portrait,landscape}=skin.variants;
+ assert.equal(portrait.art.src,'/remaster/afterhours_gameplay_background_mobile.png');
+ assert.equal(landscape.art.src,'/remaster/afterhours_gameplay_background_desktop.png');
+ for(const name of VARIANTS){const{src,width,height}=skin.variants[name].art;assert.deepEqual(imageSize(src),[width,height],`${name} art size`)}
+ assert.ok(portrait.art.height>portrait.art.width&&landscape.art.width>landscape.art.height,'portrait art is tall, landscape art is wide');
+ const source=['src/table-skins.js','src/table-skin.css','src/gameplay.css','src/TableSurface.jsx','src/assets.js'].map(css).join('\n');
+ assert.doesNotMatch(source,/CRASHOUT_(BACKGROUND|TABLE)_REMASTER|\/assets\/remaster\//,'the legacy September room and table are gone from the table');
 });
 
-test('the eight cupholders follow the canonical arrangement',()=>{
- const c=skin.cupholders.at;
- assert.deepEqual(Object.keys(c).sort(),[...CUPHOLDER_IDS].sort());
- assert.equal(['left1','left2','left3'].filter(id=>c[id].x<.5).length,3,'three on the left');
- assert.equal(['right1','right2','right3'].filter(id=>c[id].x>.5).length,3,'three on the right');
- assert.ok(Math.abs(c.farCenter.x-.5)<.02&&CUPHOLDER_IDS.every(id=>c.farCenter.y<=c[id].y),'one at the far centre');
- assert.ok(Math.abs(c.frontCenter.x-.5)<.02&&CUPHOLDER_IDS.every(id=>c.frontCenter.y>=c[id].y),'one at the front centre');
- for(const i of[1,2,3])assert.ok(Math.abs(c[`left${i}`].x+c[`right${i}`].x-1)<.02&&Math.abs(c[`left${i}`].y-c[`right${i}`].y)<.02,`pair ${i} mirrored`);
-});
-
-test('each seat is tied to its cupholder: same side, adjacent, never covering it',()=>{
- const c=skin.cupholders.at;
- for(const id of SEAT_ORDER){
-  const seat=skin.seats[id],cup=c[seat.cupholder],box=ticketBox(skin,seat.at);
-  if(seat.side==='left')assert.ok(seat.at[0]<.5&&cup.x<.5,id);
-  if(seat.side==='right')assert.ok(seat.at[0]>.5&&cup.x>.5,id);
-  if(seat.side==='far')assert.equal(seat.cupholder,'farCenter',id);
-  const dx=Math.max(box.left-cup.x,0,cup.x-box.right),dy=Math.max(box.top-cup.y,0,cup.y-box.bottom);
-  assert.ok(Math.hypot(dx,dy)<.1,`${id} ticket is next to cupholder ${seat.cupholder}`);
-  for(const other of CUPHOLDER_IDS)assert.ok(!coversCup(box,c[other]),`${id} ticket covers cupholder ${other}`);
+test('the CSS picks the variant with exactly the media queries the skin module exports',()=>{
+ for(const file of['src/table-skin.css','src/gameplay.css','src/social.css']){
+  const queries=[...css(file).matchAll(/@media\s*([^{]*aspect-ratio[^{]*)\{/g)].map(m=>m[1].trim());
+  for(const q of queries)assert.ok(q===LANDSCAPE_MEDIA||q===ROTATE_MEDIA,`${file}: ${q}`);
  }
- const hero=ticketBox(skin,skin.hero.at,skin.ticket.heroWidth);
- for(const id of CUPHOLDER_IDS)assert.ok(!coversCup(hero,c[id]),`hero ticket covers ${id}`);
- assert.ok(hero.top>c.frontCenter.y+c.frontCenter.ry,'hero sits in front of the front-centre cupholder');
+ assert.ok(css('src/table-skin.css').includes(`@media ${LANDSCAPE_MEDIA}`));
+ assert.ok(css('src/gameplay.css').includes(`@media ${ROTATE_MEDIA}`),'the rotate prompt uses ROTATE_MEDIA');
+ assert.ok(ROTATE_MEDIA.startsWith(LANDSCAPE_MEDIA),'the rotate prompt only appears on the landscape variant');
 });
 
-test('for 1–8 opponents, tickets, bets, board and pot never collide and stay on the stage',()=>{
- const stage=stageBounds(skin),board=boardBox(skin),hero=ticketBox(skin,skin.hero.at,skin.ticket.heroWidth);
- for(let n=1;n<=8;n++){
-  const ids=seatLayout(skin,n),boxes=ids.map(id=>[id,ticketBox(skin,skin.seats[id].at)]);
-  for(const[id,b]of boxes){
-   assert.ok(inside(b,stage),`${n}: ${id} leaves the stage`);
-   assert.ok(!overlap(b,board),`${n}: ${id} overlaps the board`);
-   assert.ok(!overlap(b,hero),`${n}: ${id} overlaps the hero`);
-   const bet=centreBox(skin,skin.seats[id].bet,.11,.045);
-   assert.ok(!overlap(bet,board),`${n}: ${id} bet overlaps the board`);
-   for(const[other,ob]of boxes){if(other!==id){assert.ok(!overlap(b,ob),`${n}: ${id}/${other} tickets overlap`);assert.ok(!overlap(bet,ob),`${n}: ${id} bet overlaps ${other} ticket`)}}
-  }
+test('sceneStyle emits every page variable table-skin.css reads, for both variants',()=>{
+ const style=sceneStyle(skin),used=new Set([...css('src/table-skin.css').matchAll(/var\(--([pl])-([a-z-]+)\)/g)].map(m=>m[2]));
+ for(const name of used)for(const v of['p','l'])assert.ok(`--${v}-${name}` in style,`--${v}-${name} is read but not emitted`);
+ for(const key of Object.keys(style))assert.ok(used.has(key.slice(4)),`${key} is emitted but never read`);
+ for(const name of VARIANTS){
+  const s=safeRect(skin,name);
+  assert.ok(s.left>=0&&s.top>=0&&s.right<=1&&s.bottom<=1&&s.left<s.right&&s.top<s.bottom,`${name} safe rectangle`);
  }
 });
 
@@ -74,6 +49,23 @@ test('seat layouts travel clockwise from the hero and use distinct seats',()=>{
  assert.deepEqual(seatLayout(skin,1),['farCenter']);
  assert.deepEqual(seatLayout(skin,0),[]);
  for(let n=1;n<=8;n++){const order=seatLayout(skin,n).map(id=>SEAT_ORDER.indexOf(id));assert.deepEqual([...order].sort((a,b)=>a-b),order,`layout ${n}`)}
+ for(const name of VARIANTS){
+  const v=skin.variants[name],[cx,cy]=v.board.at,angle=([x,y])=>(Math.atan2((y-cy)*v.art.height,(x-cx)*v.art.width)*180/Math.PI-90+720)%360;
+  const angles=SEAT_ORDER.map(id=>angle(v.seats[id].at));
+  assert.ok(angles.every((a,i)=>!i||a>angles[i-1]),`${name}: seats run clockwise around the board`);
+  assert.ok(SEAT_ORDER.slice(0,3).every(id=>v.seats[id].at[0]<.5)&&SEAT_ORDER.slice(6).every(id=>v.seats[id].at[0]>.5),`${name}: left seats on the left, right seats on the right`);
+ }
+});
+
+test('for 1–8 opponents, a spectator’s nine and pre-game, nothing collides or leaves the art at the checked widths',()=>{
+ const labels=allLayouts(skin).map(l=>l.label);
+ assert.ok(labels.includes('spectator, 9 players')&&labels.includes('8 opponents (pre-game)'));
+ for(const name of VARIANTS)for(const artW of CHECK_WIDTHS[name])for(const l of allLayouts(skin)){
+  const boxes=layoutBoxes(skin,name,l.seatIds,artW,l.opts),kinds=new Set(boxes.map(b=>b.kind));
+  assert.ok(kinds.has('ticket'),`${name}@${artW} ${l.label}`);
+  if(!l.opts.pregame)assert.ok(kinds.has('board')&&kinds.has('pots')&&kinds.has('bet'),`${name}@${artW} ${l.label}: live elements`);
+  else assert.ok(kinds.has('staging')&&!kinds.has('board'),`${name}@${artW} ${l.label}: the staging card stands in for board and pots`);
+ }
 });
 
 test('seat entries: a seated viewer is the hero and the others fill the clockwise layout',()=>{
@@ -94,65 +86,106 @@ test('seat entries: a spectator with no seat sees every player, the first in the
   assert.deepEqual(e.slice(1).map(x=>x.seatId),seatLayout(skin,n-1));
   assert.deepEqual(e.slice(1).map(x=>x.player.id),players.slice(1).map(p=>p.id),'the rest follow clockwise');
   assert.equal(new Set(e.map(x=>x.seatId)).size,n,'nobody shares a seat');
-  assert.ok(e.every(x=>x.player===players[x.index]&&skin.seats[x.seatId]),'wrapped players on real seats');
+  assert.ok(e.every(x=>x.player===players[x.index]),'wrapped players');
+  for(const name of VARIANTS)assert.ok(e.every(x=>seatOf(skin.variants[name],x.seatId)?.at),`${name}: every entry resolves to an anchor`);
  }
  assert.deepEqual(seatEntries(skin,[],null),[]);
 });
 
-test('the spectator front seat fits a full table without colliding',()=>{
- const front=skin.seats.front,box=ticketBox(skin,front.at),bet=centreBox(skin,front.bet,.11,.045),board=boardBox(skin);
- assert.ok(inside(box,stageBounds(skin)),'front ticket stays on the stage');
- assert.ok(!overlap(box,board)&&!overlap(bet,board),'clear of the board');
- for(const id of seatLayout(skin,8)){
-  const other=ticketBox(skin,skin.seats[id].at),otherBet=centreBox(skin,skin.seats[id].bet,.11,.045);
-  assert.ok(!overlap(box,other),`front ticket overlaps ${id}`);
-  assert.ok(!overlap(bet,other),`front bet overlaps ${id} ticket`);
-  assert.ok(!overlap(otherBet,box),`${id} bet overlaps the front ticket`);
-  assert.ok(!overlap(bet,otherBet),`front bet overlaps ${id} bet`);
+test('the front seat is the hero’s place, and every element carries its anchor for both variants',()=>{
+ for(const name of VARIANTS){const v=skin.variants[name];assert.deepEqual(seatOf(v,FRONT_SEAT).at,v.hero.at);assert.deepEqual(seatOf(v,FRONT_SEAT).bet,v.hero.bet)}
+ const vars=seatVars(skin,'left2');
+ assert.deepEqual(Object.keys(vars).sort(),['--blx','--bly','--bpx','--bpy','--lx','--ly','--px','--py']);
+ assert.equal(vars['--px'],String(skin.variants.portrait.seats.left2.at[0]));
+ assert.equal(vars['--lx'],String(skin.variants.landscape.seats.left2.at[0]));
+ assert.deepEqual(seatVars(skin,FRONT_SEAT),heroVars(skin));
+});
+
+test('pots: one box per pot, at most the variant’s columns per row, and the row is exactly as wide as its boxes',()=>{
+ assert.equal(MAX_POTS,4);
+ for(const name of VARIANTS){
+  const v=skin.variants[name];
+  for(let count=1;count<=MAX_POTS;count++){
+   const l=potsLayout(v,CHECK_WIDTHS[name][0],count);
+   assert.equal(l.perRow,Math.min(count,v.sizes.potCols));
+   assert.equal(l.rows,Math.ceil(count/l.perRow));
+   assert.equal(Math.round(l.width),Math.round(l.one*l.perRow+4*(l.perRow-1)));
+  }
  }
- for(const id of CUPHOLDER_IDS)assert.ok(!coversCup(box,skin.cupholders.at[id]),`front ticket covers cupholder ${id}`);
+ assert.deepEqual(potsVars(skin,4),{...potsVars(skin,4),'--pcols':'2','--lcols':'4'});
+ assert.equal(potsVars(skin,1)['--pcols'],'1');
+ assert.equal(potColumns(skin.variants.portrait,3),2);
+});
+
+test('the hero’s hole cards sit above the ticket on phones and inside its right-hand box on wide screens',()=>{
+ const{portrait,landscape}=skin.variants;
+ assert.equal(portrait.hero.cards,'above');
+ assert.equal(landscape.hero.cards,'inside');
+ const t=ticketBox(portrait,portrait.hero.at,390,{hero:true}),c=heroCardsBox(portrait,390);
+ assert.ok(c.top<t.top&&c.bottom<t.bottom,'phone cards stand above the ticket');
+ assert.ok(Math.round((c.bottom-c.top)*390*portrait.art.height/portrait.art.width)>=46,'phone cards are at least ~34×48px');
+ const lt=ticketBox(landscape,landscape.hero.at,1536,{hero:true}),lc=heroCardsBox(landscape,1536);
+ assert.ok(lc.left>lt.left+(lt.right-lt.left)/2&&lc.right<=lt.right&&lc.top>=lt.top&&lc.bottom<=lt.bottom,'wide-screen cards stay inside the ticket’s right half');
+});
+
+test('the felt mark is optional and removable from the skin data alone',()=>{
+ assert.equal(hasFeltMark(skin),true);
+ const plain=structuredClone(skin);
+ for(const name of VARIANTS)delete plain.variants[name].feltMark;
+ assert.equal(hasFeltMark(plain),false);
+ assert.deepEqual(validateTableSkin(plain),[]);
+ for(const name of VARIANTS)assert.ok(layoutBoxes(plain,name,seatLayout(plain,8),CHECK_WIDTHS[name][0]).every(b=>b.kind!=='feltMark'));
 });
 
 test('the contract rejects broken skins',()=>{
  const clone=()=>structuredClone(skin);
- const noCup=clone();delete noCup.cupholders.at.left2;
- assert.ok(validateTableSkin(noCup).some(m=>/eight canonical cupholders/.test(m)));
- const noArt=clone();noArt.cupholders.paintedIntoTable=false;noArt.cupholders.src=null;
- assert.ok(validateTableSkin(noArt).some(m=>/no cupholder artwork/.test(m)));
- const lopsided=clone();lopsided.cupholders.at.right2.y+=.1;
- assert.ok(validateTableSkin(lopsided).some(m=>/not mirrored/.test(m)));
  const swapped=clone();swapped.layouts[8]=['right3',...swapped.layouts[8].slice(0,7)];
  assert.ok(validateTableSkin(swapped).some(m=>/not clockwise/.test(m)));
- const orphan=clone();orphan.seats.left2.cupholder='left1';
- assert.ok(validateTableSkin(orphan).some(m=>/cupholder left2 has no seat/.test(m)));
- const noFront=clone();delete noFront.seats.front;
- assert.ok(validateTableSkin(noFront).some(m=>/front seat/.test(m)));
-});
-
-test('anchors convert to stage percentages through the frame',()=>{
- const f=skin.frame;
- assert.deepEqual(stagePoint(skin,[0,0]),[Math.round(f.left/(1+f.left+f.right)*1e6)/1e4,Math.round(f.top/(1+f.top+f.bottom)*1e6)/1e4]);
- assert.deepEqual(stagePoint(skin,[.5,1]).map(Math.round),[50,100]);
- const style=tableSkinStyle(skin),stageStyle=tableStageStyle(skin);
- assert.match(style['--gameplay-remaster-bg'],/CRASHOUT_BACKGROUND_REMASTER/);
- assert.equal(Number(style['--table-art-ratio']).toFixed(3),(1080/1024).toFixed(3));
- assert.equal(stageStyle['--table-art-width'],'100%');
- assert.match(stageStyle['--table-art-top'],/%$/);
+ const missing=clone();delete missing.variants.landscape.seats.left2;
+ assert.ok(validateTableSkin(missing).some(m=>/landscape: missing seat left2/.test(m)));
+ const crowded=clone();crowded.variants.portrait.seats.left2.at=[...crowded.variants.portrait.seats.left1.at];
+ assert.ok(validateTableSkin(crowded).some(m=>/portrait@\d+px .*ticket left2 overlaps ticket left1|portrait: seats are not clockwise/.test(m)));
+ const outside=clone();outside.variants.landscape.seats.farCenter.at=[.5,.01];
+ assert.ok(validateTableSkin(outside).some(m=>/leaves the art/.test(m)));
+ const noCols=clone();noCols.variants.portrait.sizes.potCols=1.5;
+ assert.ok(validateTableSkin(noCols).some(m=>/potCols/.test(m)));
+ const halfMark=clone();delete halfMark.variants.portrait.feltMark;
+ assert.ok(validateTableSkin(halfMark).some(m=>/felt mark must be on both variants/.test(m)));
+ const noArt=clone();noArt.variants.portrait.art.src='';
+ assert.ok(validateTableSkin(noArt).some(m=>/environment art/.test(m)));
 });
 
 test('tickets: V3 artwork for the default skin, equipped pack artwork for purchased packs',()=>{
  const idle=ticketFor({cosmetic:'default',chips:100});
- assert.match(idle.src,/afterhours_standard_seat_ticket\.png$/);assert.equal(idle.layout,'v3');
+ assert.match(idle.src,/afterhours_standard_seat_ticket\.png$/);assert.equal(idle.layout,'v3');assert.equal(idle.activeSrc,null);
  const acting=ticketFor({cosmetic:'default',chips:100,turn:true});
- assert.match(acting.src,/afterhours_standard_seat_ticket\.png$/,'acting opponents keep the standard ticket: its slots hold 11px+ text');assert.equal(acting.layout,'v3');
- const hero=ticketFor({cosmetic:'default',chips:100},{hero:true});
- assert.match(hero.src,/afterhours_hero_active_seat_ticket\.png$/);assert.equal(hero.layout,'v3Active');
+ assert.match(acting.src,/afterhours_standard_seat_ticket\.png$/,'an acting opponent keeps the standard ticket where it is compact');
+ assert.match(acting.activeSrc,/afterhours_hero_active_seat_ticket\.png$/,'and switches to the hero/active art where it is wide');
+ const hero=ticketFor({cosmetic:'default',chips:100,turn:true},{hero:true});
+ assert.match(hero.src,/afterhours_hero_active_seat_ticket\.png$/);assert.equal(hero.layout,'v3Active');assert.equal(hero.activeSrc,null);
  const pack=ticketFor({cosmetic:'regalia',chips:100,folded:true});
- assert.match(pack.src,/regalia-folded-player-plaque\.png$/);assert.equal(pack.layout,'pack');
+ assert.match(pack.src,/regalia-folded-player-plaque\.png$/);assert.equal(pack.layout,'pack');assert.equal(pack.activeSrc,null);
+ const packActing=ticketFor({cosmetic:'regalia',chips:100,turn:true});
+ assert.match(packActing.src,/regalia-active-player-plaque\.png$/,'a pack keeps its own active art');assert.equal(packActing.activeSrc,null);
  const packHero=ticketFor({cosmetic:'constellation',chips:100,turn:true},{hero:true});
  assert.match(packHero.src,/constellation-active-player-plaque\.png$/);assert.equal(packHero.layout,'pack');
  assert.equal(ticketFor({cosmetic:'wat',chips:1}).layout,'v3','unknown cosmetics fall back to the default ticket');
  assert.equal(plaqueFor({cosmetic:'deadMansHand',chips:0,eliminated:false}).endsWith('dead-mans-hand-all-in-player-plaque.png'),true);
  assert.equal(avatarFrameFor({cosmetic:'default'}),null,'the V3 ticket ring replaces the legacy default frame');
  assert.match(avatarFrameFor({cosmetic:'regalia'}),/regalia-avatar-frame\.png$/,'purchased avatar frames still render');
+ assert.match(cardBackFor({cosmetic:'deadMansHand'}),/card-back-skull\.png$/,'purchased card backs still render');
+});
+
+test('bets: V3 chip stacks sized by big blinds for the default skin, the pack’s own chip for purchased packs',()=>{
+ const stack=(amount,bb=100)=>betChipFor({cosmetic:'default'},amount,bb);
+ assert.match(stack(50),/afterhours_chip_stack_01_red_loose\.png$/);
+ assert.match(stack(100),/afterhours_chip_stack_01_red_loose\.png$/);
+ assert.match(stack(250),/afterhours_chip_stack_02_red_blue_loose\.png$/);
+ assert.match(stack(400),/afterhours_chip_stack_03_mixed_three\.png$/);
+ assert.match(stack(900),/afterhours_chip_stack_04_mixed_tall\.png$/);
+ assert.match(stack(2000),/afterhours_chip_stack_05_mixed_four\.png$/);
+ assert.match(stack(12500),/afterhours_chip_stack_06_mixed_four_alt\.png$/);
+ for(const file of new Set([50,250,400,900,2000,12500].map(a=>stack(a))))assert.ok(read(`public${file}`).length>0,file);
+ assert.equal(betChipFor({cosmetic:'regalia'},12500,100),chipFor({cosmetic:'regalia'},'purple'));
+ assert.match(betChipFor({cosmetic:'constellation'},50,100),/constellation-purple-chip\.png$/);
 });
