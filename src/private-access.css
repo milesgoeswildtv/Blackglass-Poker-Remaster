@@ -1,19 +1,49 @@
-/* Entry gate controls share the physical brass/felt language of the production home. */
-.privateGate,.privateLoginStep{display:grid;gap:12px;align-content:start}.privateGate .entryEyebrow,.privateLoginStep .entryEyebrow{color:#bfa572;font-size:9px;font-weight:800;letter-spacing:.22em;text-align:center}.privateGate h2,.privateLoginStep h2{margin:0;color:#f0e2c8;font-family:var(--cp-font-display);font-size:clamp(29px,5vw,42px);line-height:1;text-align:center}.privateGate>p,.privateLoginStep>p{max-width:470px;margin:0 auto;color:#aa9d87;font-size:13px;line-height:1.55;text-align:center}.privateGateChoices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.privateGateChoices button{min-height:92px;padding:15px 18px;border:1px solid #775630;border-radius:3px;background:radial-gradient(circle at 90% 0,#bf79231d,transparent 45%),linear-gradient(145deg,#153e2f,#0a251c);box-shadow:inset 0 0 0 2px #071a14,inset 0 0 0 3px #c49a5b3b;color:#eee1c8;cursor:pointer;text-align:left}.privateGateChoices button:nth-child(2){background:linear-gradient(145deg,#272119,#11100d)}.privateGateChoices button.active{border-color:#dab66e}.privateGateChoices b,.privateGateChoices small{display:block}.privateGateChoices b{font-family:var(--cp-font-display);font-size:15px;letter-spacing:.06em}.privateGateChoices small{margin-top:6px;color:#a99a80;font-size:10px;line-height:1.4}.privateCodeEntry{display:grid;gap:8px;margin-top:4px}.privateCodeEntry label{color:#baa57e;font-size:9px;font-weight:800;letter-spacing:.16em}.privateCodeEntry input{height:54px;border:1px solid #665039;border-radius:2px;background:#080907dd;color:#f2e5ce;padding:0 16px;font-size:18px;font-weight:700;letter-spacing:.14em;outline:none}.privateCodeEntry button{min-height:56px;border:1px solid #b18448;border-radius:3px;background:linear-gradient(#17543b,#0c3628);box-shadow:inset 0 0 0 2px #09271d,inset 0 0 0 3px #d7ac6644;color:#f4e7ce;font-size:11px;font-weight:800;letter-spacing:.1em;cursor:pointer}.privateCodeEntry button:disabled{opacity:.55}.privateSignedIn{color:#897e6d;font-size:10px;text-align:center}.accessBack,.accessUpgrade{border:0;background:transparent;color:#c9b995;font-size:11px;text-decoration:underline;cursor:pointer;padding:6px}.accessUpgrade{display:block;width:100%;margin-top:8px}.accessUpgradeRow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.privateLoginStep .discordLogin{margin-top:6px}.privateGateChoices button:focus-visible,.privateCodeEntry button:focus-visible,.privateCodeEntry input:focus-visible,.discordLogin:focus-visible{outline:2px solid #f2c45f;outline-offset:3px}.providerLinkPrompt{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-top:10px;padding:12px;border:1px solid #5b4931;background:#11100d}.providerLinkPrompt div{display:grid}.providerLinkPrompt b{font-size:11px}.providerLinkPrompt span{color:#928673;font-size:10px}.providerLinkPrompt a{color:#e2bb72;font-size:11px}.providerLinkPrompt.linked{display:grid}.entryEyebrow{color:#bfa572;font-size:9px;font-weight:800;letter-spacing:.18em}.privatePlayerActions{grid-template-columns:1fr}
-@media(max-width:560px){.privateGateChoices{grid-template-columns:1fr}.privateGateChoices button{min-height:76px}.accessUpgradeRow{grid-template-columns:1fr}.providerLinkPrompt{display:grid}.privateGate>p,.privateLoginStep>p{font-size:12px}}
-/* AFTER HOURS V3 entry: worn metal plate, brass, paper tickets. Presentation only. */
-.privateGate,.privateLoginStep{position:relative;padding:26px 22px 22px;border:1px solid #7a4a22;background:radial-gradient(120% 90% at 50% 0,#2a221a 0,#14100c 62%,#0c0a08 100%);box-shadow:inset 0 0 0 1px #00000080,inset 0 0 38px #000000b3,0 18px 40px #000000a6}
-.privateGate:before,.privateLoginStep:before{content:"";position:absolute;inset:7px;pointer-events:none;background:radial-gradient(circle at 0 0,#8a7a66 0 2px,transparent 3px) left top/10px 10px no-repeat,radial-gradient(circle at 100% 0,#8a7a66 0 2px,transparent 3px) right top/10px 10px no-repeat,radial-gradient(circle at 0 100%,#8a7a66 0 2px,transparent 3px) left bottom/10px 10px no-repeat,radial-gradient(circle at 100% 100%,#8a7a66 0 2px,transparent 3px) right bottom/10px 10px no-repeat}
-.privateGate h2,.privateLoginStep h2{font-family:var(--cp-font-display);letter-spacing:.02em;color:#efe3cc}
-.accessSteps{list-style:none;margin:2px 0 6px;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;counter-reset:none}
-.accessSteps li{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:7px;align-items:center;padding:8px 9px;border:1px solid #4a3522;background:#0d0b09cc;color:#8d8170;min-width:0}
-.accessSteps b{grid-row:span 2;width:22px;height:22px;display:grid;place-items:center;border:1px solid #7a5a36;border-radius:50%;font:700 11px/1 var(--cp-font-display);color:#c9a46a}
-.accessSteps span{font:700 10px/1.1 var(--cp-font-display);letter-spacing:.12em;color:#d9c9ad;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.accessSteps small{font-size:10px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.accessSteps li.done{border-color:#a8762f;background:#1d150dcc}.accessSteps li.done b{background:#c8933f;border-color:#c8933f;color:#140f0a}.accessSteps li.done small{color:#e3b964}
-.privateGateChoices button{border:1px solid #6b4a2a!important;border-radius:0!important;background:linear-gradient(180deg,#1c1712,#100d0a)!important;color:#e8dcc6!important;box-shadow:inset 0 0 22px #00000099}
-.privateGateChoices button:first-child,.privateGateChoices button.active{background:linear-gradient(180deg,#efe2c8,#d8c6a3)!important;color:#1b1510!important;border-color:#a8762f!important}
-.privateGateChoices button:first-child small,.privateGateChoices button.active small{color:#4a3d2e!important}
-.privateGateChoices button b{font-family:var(--cp-font-display);letter-spacing:.06em}
-.privateGate .discordLogin,.privateLoginStep .discordLogin{border-radius:0}
-@media(max-width:520px){.accessSteps li{grid-template-columns:1fr;justify-items:center;text-align:center;row-gap:4px;padding:8px 4px}.accessSteps b{grid-row:auto}.accessSteps span{letter-spacing:.05em;font-size:9px}.accessSteps small{font-size:9px}}
+/* CRASHOUT POKER — Entry gate, THE HIDEOUT.
+   A doorman's slip on the table: the room stays visible around it. The backing is local and
+   translucent, only as large as the form, because inputs and copy must stay readable. */
+
+.privateGate,.privateLoginStep{display:grid;gap:12px;align-content:start;padding:18px 18px 16px;
+  border:1px solid #c9964f55;border-radius:2px;background:rgba(9,7,5,.74);box-shadow:0 18px 40px #000a}
+.entryEyebrow{color:#e8c27e;font-size:9px;font-weight:800;letter-spacing:.2em}
+.privateGate h2,.privateLoginStep h2{margin:0;color:#f3e8d4;font-family:var(--cp-font-display);font-size:clamp(24px,6.4vw,32px);line-height:1;letter-spacing:.02em}
+.privateGate>p,.privateLoginStep>p{margin:0;color:#d3c6ae;font-size:12px;line-height:1.5}
+
+/* Progress: Discord · Access key · Cleared, driven only by state the server already returned. */
+.accessSteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.accessSteps li{min-width:0;display:grid;justify-items:center;gap:3px;padding:7px 4px;border-top:2px solid #5a432a;color:#a99c86;text-align:center}
+.accessSteps b{width:20px;height:20px;display:grid;place-items:center;border:1px solid #8a6a40;border-radius:50%;font:700 10px/1 var(--cp-font-display);color:#d9b675}
+.accessSteps span{max-width:100%;font:700 9px/1.1 var(--cp-font-display);letter-spacing:.08em;color:#e6d8bd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.accessSteps small{max-width:100%;font-size:9px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.accessSteps li.done{border-top-color:#d39d4c}.accessSteps li.done b{background:#d39d4c;border-color:#d39d4c;color:#160f08}.accessSteps li.done small{color:#ecc57a}
+
+/* ENTER KEY is the paper ticket; the invite route is the quieter option beside it. */
+.privateGateChoices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.privateGateChoices button{display:grid;gap:4px;align-content:center;min-height:68px;padding:10px 12px;border:1px solid #c9964f59;border-radius:2px;
+  background:rgba(14,11,8,.7);color:#efe4cf;text-align:left;cursor:pointer}
+.privateGateChoices button:first-child{border-color:transparent;background:linear-gradient(180deg,#f1e5cd,#dccaa6);color:#1c1610}
+.privateGateChoices button.active{border-color:#e8c27e;box-shadow:inset 0 0 0 1px #e8c27e}
+.privateGateChoices b{font-family:var(--cp-font-display);font-size:14px;letter-spacing:.06em}
+.privateGateChoices small{color:#b3a68f;font-size:10px;line-height:1.35}
+.privateGateChoices button:first-child small{color:#5a4a37}
+
+.privateCodeEntry{display:grid;gap:8px}
+.privateCodeEntry label{color:#e8c27e;font-size:9px;font-weight:800;letter-spacing:.16em}
+/* 16px+ text keeps iOS from zooming the layout when the field takes focus. */
+.privateCodeEntry input{height:50px;min-width:0;border:1px solid #8a6a40;border-radius:2px;background:#0a0806;color:#f3e8d4;padding:0 14px;
+  font-size:17px;font-weight:700;letter-spacing:.12em;outline:none;scroll-margin:120px 0}
+.privateCodeEntry button{min-height:50px;border:0;border-radius:2px;background:linear-gradient(180deg,#f1e5cd,#dccaa6);color:#1c1610;
+  font-size:12px;font-weight:800;letter-spacing:.12em;cursor:pointer}
+.privateCodeEntry button:disabled{opacity:.55;cursor:progress}
+
+.gateLogin{color:#d8cbb3;font-size:11px;text-decoration:none}
+.gateLogin b{color:#e8c27e;text-decoration:underline;text-underline-offset:3px}
+.privateSignedIn{color:#b3a68f;font-size:10px}
+.privateLoginStep .discordLogin{margin-top:2px}
+.accessBack,.accessUpgrade{border:0;background:transparent;color:#d8cbb3;font-size:11px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px 0;text-align:left}
+.accessUpgrade{display:block;width:100%;text-shadow:0 1px 4px #000}
+.accessUpgradeRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.privatePlayerActions{grid-template-columns:1fr}
+
+:is(.privateGateChoices button,.privateCodeEntry button,.privateCodeEntry input,.gateLogin,.accessBack,.accessUpgrade):focus-visible{outline:2px solid #f2c45f;outline-offset:3px}
+
+@media(max-width:380px){.privateGateChoices{grid-template-columns:1fr}.privateGateChoices button{min-height:58px}.accessUpgradeRow{grid-template-columns:1fr}}

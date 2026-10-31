@@ -1,37 +1,104 @@
-/* CRASHOUT POKER — production Entry/Home presentation.
-   Built from live controls; no flattened mockup panels or text-bearing artwork. */
-.homeShell{--brass:#b98a45;--brass-hi:#e0bd77;--felt:#103c2d;--ink:#090907;--cream:#eee1c8;min-height:100vh;position:relative;overflow-x:hidden;background:#090806;color:var(--cream);font-family:var(--cp-font-ui)}
-.homeShell:before{content:"";position:fixed;inset:0;z-index:0;background:#090806 url('/remaster/afterhours_home_lobby_background.png') center center/cover no-repeat;filter:saturate(.92) contrast(1.08);pointer-events:none}.homeShell:after{content:"";position:fixed;inset:0;z-index:0;background:linear-gradient(90deg,rgba(5,6,5,.88) 0%,rgba(5,6,5,.66) 38%,rgba(5,6,5,.08) 72%,rgba(5,6,5,.27) 100%),linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.38));box-shadow:inset 0 0 160px #000b;pointer-events:none}
-.homeAtmosphere{display:none}
-.homeFrame{position:relative;z-index:2;width:min(1240px,calc(100% - 64px));margin:auto;padding:34px 0 46px}.homeTopline{display:flex;align-items:center;justify-content:space-between;gap:32px;border-bottom:1px solid #b98a4538;padding-bottom:18px}.homeBrand{min-width:0}.homeBrandKicker{display:block;color:#bda77f;font-size:10px;font-weight:700;letter-spacing:.3em}.homeBrand h1{margin:4px 0 0;color:#ddc59c;font-family:var(--cp-font-display);font-size:clamp(38px,4vw,62px);line-height:.85;letter-spacing:-.035em;text-shadow:0 2px #3a2214,0 5px 18px #000}.homeBrand h1 em{color:#a3482f;font-style:normal}.homeBrand p{margin:9px 0 0;color:#aa9b83;font-size:12px;letter-spacing:.08em}
-.homeIdentityTicket{min-width:300px;display:grid;grid-template-columns:50px minmax(0,1fr) auto;gap:13px;align-items:center;padding:12px 18px;border:0;border-radius:0;background:transparent url('/remaster/afterhours_profile_panel.png') center/100% 100% no-repeat;box-shadow:none;color:var(--cream);text-align:left;cursor:pointer}.homeIdentityAvatar{width:48px;height:48px;display:grid;place-items:center;overflow:hidden;border:2px solid #956b36;border-radius:50%;background:#17130f;box-shadow:inset 0 0 14px #000}.homeIdentityAvatar img,.homeIdentityAvatar i{width:100%;height:100%;display:grid;place-items:center;object-fit:cover;font-style:normal;font-weight:700}.homeIdentityCopy{min-width:0;display:grid}.homeIdentityCopy strong,.homeIdentityCopy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.homeIdentityCopy small{color:#998b74;font-size:11px}.homeIdentityAction{color:var(--brass-hi);font-size:9px;font-weight:800;letter-spacing:.12em}
-.homeHero{width:min(680px,56vw);margin-top:34px;padding:18px;border:1px solid #6f4b28;background:linear-gradient(135deg,rgba(17,15,11,.91),rgba(7,8,6,.76));box-shadow:inset 0 0 0 1px #d2a05a28,inset 0 0 0 7px #09080699,0 28px 70px #0009,0 3px 0 #21140b;backdrop-filter:blur(2px)}.homeAssetEntry,.homeEntry{width:100%}.homeHostBoard{display:grid;gap:12px}.homeHostIdentity{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:18px;align-items:center;padding:13px 18px;border:1px solid #58452d;background:#11110ed9;box-shadow:inset 0 1px #d9b97919}.homeHostIdentity>span{color:#ac9877;font-size:9px;font-weight:800;letter-spacing:.16em}.homeHostIdentity strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--cp-font-display);font-size:17px}.homeHostIdentity small{color:#8e826f;font-size:10px;text-align:right}
-.homePlayPair{display:grid;grid-template-columns:1fr 1fr;gap:14px}.homeAction{position:relative;border:0;border-radius:0;color:var(--cream);cursor:pointer;text-align:left;overflow:hidden;transition:transform .16s,filter .16s;background-color:transparent;box-shadow:none}.homeAction:before,.homeAction:after{display:none}.homeActionPrimary{min-height:154px;display:grid;align-content:end;padding:24px 64px 24px 24px;background:transparent url('/remaster/afterhours_create_game_panel.png') center/100% 100% no-repeat;box-shadow:none}.homeActionPrimary:nth-child(2){background-image:url('/remaster/afterhours_join_game_panel.png')}.homeAction small,.homeAction b,.homeAction span{display:block}.homeActionPrimary small{color:#bba47d;font-size:9px;font-weight:800;letter-spacing:.16em}.homeActionPrimary b{margin-top:7px;font-family:var(--cp-font-display);font-size:25px;letter-spacing:.02em}.homeActionPrimary span{max-width:190px;margin-top:6px;color:#9e927d;font-size:10px}.homeActionShop{min-height:82px;display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:14px 62px 14px 22px;background:transparent url('/remaster/afterhours_booster_shop_banner.png') center/100% 100% no-repeat;box-shadow:none}.homeActionIndex{color:#9d6c36;font-family:serif;font-size:20px}.homeActionShop small{color:#9e8a6b;font-size:9px;letter-spacing:.12em}.homeActionShop b{font-family:var(--cp-font-display);font-size:18px}.homeActionShop em{color:#cba968;font-size:9px;font-style:normal}.homeAction:hover{filter:brightness(1.08)}.homeAction:active{transform:translateY(1px)}
-.homeEntry{padding:34px;border:1px solid #76542f;background:linear-gradient(145deg,#16130fe8,#090907f2);box-shadow:inset 0 0 0 3px #050504,inset 0 0 0 4px #ad824933,0 24px 70px #000b}.homeShell:has(.privateGate) .homeFrame,.homeShell:has(.privateLoginStep) .homeFrame,.homeShell:has(.accountLoading) .homeFrame{width:min(780px,calc(100% - 36px))}.homeShell:has(.privateGate) .homeTopline,.homeShell:has(.privateLoginStep) .homeTopline,.homeShell:has(.accountLoading) .homeTopline{justify-content:center;text-align:center}.homeShell:has(.privateGate) .homeHero,.homeShell:has(.privateLoginStep) .homeHero,.homeShell:has(.accountLoading) .homeHero{width:100%;margin-top:42px}.accountLoading{min-height:280px;display:grid;place-items:center;color:#b9aa91}
-.discordLogin,.entryActions button{min-height:56px;display:flex;align-items:center;justify-content:center;border:1px solid #b18448;border-radius:3px;background:linear-gradient(#17543b,#0c3628);box-shadow:inset 0 0 0 2px #09271d,inset 0 0 0 3px #d7ac6644;color:#f4e7ce;text-decoration:none;font-weight:800;cursor:pointer}.entryActions{display:grid;gap:10px}.entryActions small{display:block;margin-left:8px;color:#ad9c7f;font-size:9px}.authError{display:block;margin-top:10px;color:#ffb4a8}.homeIdentityTicket:focus-visible,.homeAction:focus-visible,.homeUtilityEntry button:focus-visible,.homeSkinUtility button:focus-visible,.discordLogin:focus-visible,.entryActions button:focus-visible{outline:2px solid #f1c775;outline-offset:3px}
-.homeSkinUtility,.homeUtilityEntry{width:min(680px,56vw);margin-top:9px}.homeSkinUtility button,.homeUtilityEntry button{width:100%;min-height:54px;display:grid;grid-template-columns:auto 1fr auto;gap:15px;align-items:center;padding:11px 20px;border:0;border-radius:0;background:transparent;color:#bdb09b;text-align:left;cursor:pointer}.homeUtilityEntry button{background:transparent url('/remaster/afterhours_info_row_panel.png') center/100% 100% no-repeat;box-shadow:none}.homeSkinUtility span,.homeUtilityEntry span{font-family:var(--cp-font-display);font-size:13px}.homeSkinUtility small,.homeUtilityEntry small{color:#827969;font-size:10px}.homeSkinUtility em,.homeUtilityEntry em{color:#bd9657;font-size:9px;font-style:normal}.homeFooter{width:min(680px,56vw);display:grid;gap:10px;margin-top:18px;color:#776f62}.studioCredit{display:flex;align-items:center;gap:14px;border-top:1px solid #5a462b66;padding-top:14px}.studioCredit img{width:130px;max-height:42px;object-fit:contain;opacity:.62}.studioCredit p{margin:0;font-size:9px;line-height:1.4}.homeLegal{display:flex;justify-content:space-between;gap:12px;font-size:8px;letter-spacing:.08em}.homeToast{position:fixed;left:50%;bottom:18px;z-index:400;transform:translateX(-50%);padding:12px 16px;border:1px solid #876238;background:#17130f;color:#eee1c8}
-/* Booster cards remain functional inside the production modal. */
-.shopSection{margin-top:20px}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:13px}.sectionHead h2{margin:4px 0;font-size:28px}.sectionHead p{margin:0;color:#9b907f;font-size:11px}.shopBadge{padding:7px 10px;border:1px solid #735927;color:#d6b960;background:#21190b;font-size:8px;font-weight:900}.boosterGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.boosterPack{display:grid;grid-template-columns:92px 1fr;grid-template-rows:1fr auto;gap:10px;padding:14px;border:1px solid #5d4930;background:#12100d;box-shadow:0 16px 40px #0005}.packArt{grid-row:1/3;position:relative;display:grid;place-items:center;min-height:140px;background:#090806;overflow:hidden}.packArt img{width:72px;filter:drop-shadow(0 10px 12px #000b)}.packArt span{position:absolute;left:7px;bottom:7px;color:#ddb958;font-size:7px}.boosterPack h3{margin:8px 0 5px}.boosterPack p{margin:0;color:#9f9483;font-size:9px}.boosterPack>button{height:34px;border:1px solid #654b2f;background:#21170e;color:#e5d7bd;font-size:8px;font-weight:900}
-@media(max-width:760px){.homeShell:before{background-position:67% center}.homeHero{padding:10px;border-color:#6d4d2d;background:linear-gradient(180deg,rgba(8,9,7,.5),rgba(8,9,7,.82));box-shadow:0 20px 50px #0008}.homeShell:after{background:linear-gradient(180deg,rgba(5,6,5,.78) 0%,rgba(5,6,5,.62) 46%,rgba(5,6,5,.42) 72%,rgba(5,6,5,.7) 100%)}.homeFrame{width:calc(100% - 24px);padding:18px 0 30px}.homeTopline{display:grid;gap:14px;border:0}.homeBrand{text-align:center}.homeBrandKicker{font-size:8px}.homeBrand h1{font-size:46px}.homeBrand p{font-size:10px}.homeIdentityTicket{min-width:0;width:100%}.homeHero,.homeSkinUtility,.homeUtilityEntry,.homeFooter{width:100%}.homeHero{margin-top:16px}.homePlayPair{grid-template-columns:1fr}.homeActionPrimary{min-height:116px;padding:17px 20px}.homeActionPrimary b{font-size:23px}.homeActionShop{min-height:72px}.homeHostIdentity{grid-template-columns:auto minmax(0,1fr);gap:7px 12px}.homeHostIdentity small{grid-column:1/-1;text-align:left}.homeEntry{padding:28px 20px}.homeShell:has(.privateGate) .homeHero,.homeShell:has(.privateLoginStep) .homeHero,.homeShell:has(.accountLoading) .homeHero{margin-top:18px}.homeUtilityEntry button,.homeSkinUtility button{grid-template-columns:1fr auto}.homeUtilityEntry small,.homeSkinUtility small{grid-column:1/-1;grid-row:2}.homeFooter{margin-top:14px}.studioCredit{display:grid;justify-items:center;text-align:center}.homeLegal{display:grid;justify-items:center;text-align:center}.boosterGrid{grid-template-columns:1fr}.boosterPack{grid-template-columns:76px 1fr}.packArt{min-height:118px}.packArt img{width:60px}}
-@media(min-width:1000px){.homeHero{margin-top:48px}.homeActionPrimary{min-height:176px}.homeFrame:after{content:"PRIVATE ROOM • MEMBERS ONLY";position:absolute;right:18px;bottom:54px;color:#a67c4838;font-size:9px;font-weight:800;letter-spacing:.32em;writing-mode:vertical-rl}.homeTopline{padding-right:0}}
-@media(prefers-reduced-motion:reduce){.homeAction{transition:none}}
-/* AFTER HOURS V3 home panels: keep each artwork's real proportions and place live text in the art's free areas. */
-.homePlayPair>.homeActionPrimary{aspect-ratio:1448/1086;min-height:0;height:auto;padding:0;display:block;container-type:inline-size;background-size:100% 100%}
-.homeActionPrimary>*{position:absolute;left:14%;right:14%;margin:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.homeActionPrimary>small{top:33%;font:700 max(9px,4.2cqi)/1 var(--cp-font-display);letter-spacing:.18em;color:#c9a46a}
-.homeActionPrimary>b{top:40%;font:800 max(15px,10.5cqi)/1.05 var(--cp-font-display);letter-spacing:.03em;color:#efe3cc}
-.homeActionPrimary>span{top:63%;font:600 max(9px,4.6cqi)/1.2 var(--cp-font-display);letter-spacing:.08em;color:#bcae96;white-space:normal}
-.homePlayPair>.homeActionPrimary:nth-child(2)>b{top:38%;color:#1d1712}
-.homePlayPair>.homeActionPrimary:nth-child(2)>small,.homePlayPair>.homeActionPrimary:nth-child(2)>span{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.homePlayPair>.homeActionPrimary:first-child>small{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.homeActionShop{aspect-ratio:2172/724;min-height:0;padding:0 14% 0 25%;grid-template-columns:minmax(0,1fr);container-type:inline-size}
-.homeActionShop>.homeActionIndex,.homeActionShop>em{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.homeActionShop small{font-size:max(9px,2.4cqi)}.homeActionShop b{font-size:max(15px,5.2cqi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.homeUtilityEntry button{aspect-ratio:2172/724;min-height:0;padding:0 8% 0 31%;grid-template-columns:minmax(0,1fr);align-content:center;gap:3px;container-type:inline-size}
-.homeUtilityEntry button>span{font-size:max(12px,3.9cqi)}.homeUtilityEntry button>small{font-size:max(9px,2.5cqi);line-height:1.25}
-.homeUtilityEntry button>em{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.homeIdentityTicket{aspect-ratio:2172/724;min-height:0;padding:0 27% 0 29%;grid-template-columns:minmax(0,1fr);gap:0;container-type:inline-size;position:relative}
-.homeIdentityTicket .homeIdentityAvatar{position:absolute;left:7.4%;top:22%;height:56%;width:auto;aspect-ratio:1;border-radius:50%;overflow:hidden;display:grid;place-items:center;border:0;box-shadow:none;background:transparent}
-.homeIdentityTicket .homeIdentityAvatar img{width:100%;height:100%;object-fit:cover}
-.homeIdentityTicket .homeIdentityCopy strong{font-size:max(13px,4.6cqi)}.homeIdentityTicket .homeIdentityCopy small{font-size:max(9px,2.8cqi)}
-.homeIdentityTicket .homeIdentityAction{position:absolute;right:3%;top:12%;bottom:12%;width:21%;display:grid;place-items:center;color:#1d1712;font:800 max(10px,3.2cqi)/1 var(--cp-font-display);letter-spacing:.08em}
+/* CRASHOUT POKER — Home / Entry: THE HIDEOUT.
+   The room is the experience. The interface sits on the table and gets out of its way:
+   no full-screen overlay, no blur, no stacked panels. Local shadows only where text needs them. */
+
+.homeShell{--brass:#c9964f;--brass-hi:#e8c27e;--paper:#e9dcc2;--paper-ink:#1c1610;--cream:#efe4cf;--muted:#b3a68f;
+  position:relative;min-height:100vh;min-height:100dvh;overflow-x:hidden;color:var(--cream);font-family:var(--cp-font-ui);background:#0b0907}
+/* The room. Fixed so it stays put while Home scrolls; framed on the table, lamp and chips. */
+.homeShell:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:#0b0907 url('/remaster/afterhours_home_lobby_background.png') 58% 60%/cover no-repeat}
+/* Only a light edge falloff so the top line and the table controls read; the middle of the room stays clear. */
+.homeShell:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(6,5,4,.55) 0,rgba(6,5,4,0) 22%,rgba(6,5,4,0) 52%,rgba(6,5,4,.5) 84%,rgba(6,5,4,.68) 100%)}
+
+.homeFrame{position:relative;z-index:1;min-height:100vh;min-height:100dvh;width:min(1200px,100% - 40px);margin:0 auto;
+  padding:max(18px,env(safe-area-inset-top)) 0 max(18px,env(safe-area-inset-bottom));
+  display:grid;grid-template-rows:auto 1fr auto auto auto;align-content:stretch}
+
+/* Top line: small brand mark and the player's chip. */
+.homeTopline{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.homeBrand{min-width:0;text-shadow:0 2px 10px #000,0 0 2px #000}
+.homeBrand h1{margin:0;color:#e2c99c;font-family:var(--cp-font-display);font-size:clamp(22px,3vw,34px);line-height:.95;letter-spacing:.02em}
+.homeBrand p{margin:6px 0 0;color:#cdbb9b;font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+
+.homeIdentityTicket{flex:0 1 auto;min-width:0;max-width:min(300px,55%);display:flex;align-items:center;gap:10px;padding:5px 12px 5px 5px;
+  border:1px solid #c9964f66;border-radius:999px;background:rgba(10,8,6,.62);color:var(--cream);text-align:left;cursor:pointer;
+  box-shadow:0 6px 18px #0008}
+.homeIdentityAvatar{flex:none;width:38px;height:38px;display:grid;place-items:center;overflow:hidden;border:2px solid var(--brass);border-radius:50%;background:#17120d}
+.homeIdentityAvatar img,.homeIdentityAvatar i{width:100%;height:100%;display:grid;place-items:center;object-fit:cover;font-style:normal;font-weight:800;font-size:13px}
+.homeIdentityCopy{min-width:0;display:grid;line-height:1.15}
+.homeIdentityCopy strong{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.homeIdentityCopy small{color:var(--muted);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.homeIdentityAction{flex:none;color:var(--brass-hi);font-size:9px;font-weight:800;letter-spacing:.14em}
+
+/* The table: everything you act on rests here, at the bottom of the room. */
+.homeHero{grid-row:3;width:min(460px,100%);margin-top:24px}
+.homeAssetEntry,.homeEntry{width:100%}
+
+.homeHostBoard{display:grid;gap:12px}
+.homeHostLine{margin:0;display:flex;align-items:baseline;gap:10px;text-shadow:0 1px 6px #000}
+.homeHostLine span{color:var(--brass-hi);font-size:9px;font-weight:800;letter-spacing:.2em}
+.homeHostLine b{color:var(--cream);font-size:12px;font-weight:600}
+
+/* The one strong action: a paper marker laid on the table. */
+.homeCreate{position:relative;display:grid;gap:4px;justify-items:start;width:100%;padding:18px 22px 17px;border:0;border-radius:2px;
+  background:linear-gradient(180deg,#f1e5cd,#dccaa6);color:var(--paper-ink);text-align:left;cursor:pointer;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%);
+  box-shadow:inset 0 0 0 1px #8f6a3a55;filter:drop-shadow(0 12px 22px #000c);transition:transform .15s,filter .15s}
+.homeCreate b{font-family:var(--cp-font-display);font-size:clamp(28px,7vw,36px);line-height:1;letter-spacing:.03em}
+.homeCreate small{color:#5a4a37;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.homeCreate:hover{transform:translateY(-1px);filter:drop-shadow(0 16px 26px #000d) brightness(1.03)}
+.homeCreate:active{transform:translateY(1px)}
+
+/* Secondary actions: quiet, readable, physically lighter. */
+.homeSecondary{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.homeLink,.shopLaunch{display:grid;gap:3px;justify-items:start;min-height:56px;padding:10px 14px;border:1px solid #c9964f59;border-radius:2px;
+  background:rgba(10,8,6,.58);color:var(--cream);text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
+.homeLink b{font-family:var(--cp-font-display);font-size:15px;letter-spacing:.05em;color:#f3e8d4}
+.homeLink small{color:var(--muted);font-size:10px}
+.homeLink:hover,.shopLaunch:hover{border-color:var(--brass-hi);background:rgba(14,11,8,.72)}
+
+/* Tertiary: Engine + Fairness reads like a note pinned by the door. */
+.homeUtilityEntry{grid-row:4;width:min(460px,100%);margin-top:10px}
+.homeUtilityEntry button{width:100%;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;padding:8px 2px;border:0;
+  border-top:1px solid #c9964f40;background:transparent;color:var(--cream);text-align:left;cursor:pointer;text-shadow:0 1px 6px #000}
+.homeUtilityEntry span{font-family:var(--cp-font-display);font-size:12px;letter-spacing:.08em}
+.homeUtilityEntry small{grid-column:1;color:var(--muted);font-size:10px}
+.homeUtilityEntry em{grid-column:2;grid-row:1/span 2;color:var(--brass-hi);font-size:9px;font-style:normal;letter-spacing:.1em}
+
+.homeFooter{grid-row:5;width:min(460px,100%);display:grid;gap:6px;margin-top:14px;color:#a39783;text-shadow:0 1px 4px #000}
+.studioCredit{display:flex;align-items:center;gap:12px}
+.studioCredit img{width:96px;max-height:32px;object-fit:contain;opacity:.75}
+.studioCredit p{margin:0;font-size:9px;line-height:1.4}
+.homeLegal{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:8px;letter-spacing:.08em}
+
+/* Invited players (no host access): the same table language. */
+.homeEntry>.entryEyebrow{display:block;color:var(--brass-hi);font-size:9px;font-weight:800;letter-spacing:.2em}
+.homeEntry>h2{margin:6px 0 4px;font-family:var(--cp-font-display);font-size:30px;line-height:1;text-shadow:0 2px 10px #000}
+.homeEntry>p{margin:0 0 12px;color:#d8cbb3;font-size:12px;line-height:1.5;text-shadow:0 1px 6px #000}
+.entryActions{display:grid;gap:10px}
+.entryActions button,.discordLogin{min-height:56px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 10px;border:0;border-radius:2px;
+  background:linear-gradient(180deg,#f1e5cd,#dccaa6);color:var(--paper-ink);font-weight:800;text-decoration:none;cursor:pointer;filter:drop-shadow(0 10px 18px #000b)}
+.entryActions small{display:block;width:100%;color:#5a4a37;font-size:10px;text-align:center}
+.shopLaunch{width:100%;margin-top:10px;grid-template-columns:auto 1fr auto;align-items:center;column-gap:10px}
+.shopLaunch span{color:var(--brass-hi)}.shopLaunch b{font-family:var(--cp-font-display)}.shopLaunch small{grid-column:2;color:var(--muted);font-size:10px}.shopLaunch em{grid-column:3;grid-row:1/span 2;color:var(--brass-hi);font-style:normal}
+.providerLinkPrompt{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:10px;padding:10px 12px;border:1px solid #c9964f4d;background:rgba(10,8,6,.62)}
+.providerLinkPrompt div{display:grid}.providerLinkPrompt b{font-size:11px}.providerLinkPrompt span{color:var(--muted);font-size:10px}.providerLinkPrompt a{color:var(--brass-hi);font-size:11px}
+.providerLinkPrompt.linked{display:grid}
+
+.accountLoading{min-height:120px;display:grid;place-items:center;color:#d0c3aa;text-shadow:0 1px 6px #000}
+.authError{display:block;margin-top:8px;color:#ffb8ab;text-shadow:0 1px 4px #000}
+.homeToast{position:fixed;left:50%;bottom:18px;z-index:400;transform:translateX(-50%);padding:12px 16px;border:1px solid #876238;background:#17130f;color:#eee1c8}
+
+:is(.homeIdentityTicket,.homeCreate,.homeLink,.shopLaunch,.homeUtilityEntry button,.discordLogin,.entryActions button):focus-visible{outline:2px solid #f1c775;outline-offset:3px}
+
+/* Desktop: the controls rest on the left of the table, the room opens to the right. */
+@media(min-width:900px){.homeFrame{width:min(1200px,100% - 72px);padding-top:30px;padding-bottom:28px}
+  .homeShell:before{background-position:center 62%}
+  .homeShell:after{background:linear-gradient(90deg,rgba(6,5,4,.62) 0,rgba(6,5,4,.25) 32%,rgba(6,5,4,0) 52%),linear-gradient(180deg,rgba(6,5,4,.45) 0,rgba(6,5,4,0) 20%,rgba(6,5,4,0) 70%,rgba(6,5,4,.45) 100%)}
+  .homeBrand h1{font-size:34px}}
+/* Short landscape screens: the room is still the backdrop; the column simply scrolls. */
+@media(max-height:520px) and (orientation:landscape){.homeFrame{grid-template-rows:auto auto auto auto auto}.homeHero{margin-top:14px}}
+/* Narrow phones: the chip is avatar + name; it remains the profile button (aria-label). */
+@media(max-width:479px){.homeIdentityAction{display:none}.homeIdentityTicket{max-width:52%}.homeBrand p{letter-spacing:.1em}}
+@media(prefers-reduced-motion:reduce){.homeCreate,.homeLink{transition:none}}

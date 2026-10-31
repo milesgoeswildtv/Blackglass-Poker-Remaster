@@ -27,9 +27,9 @@ const SLOT_DEFS={
  home:{
   'poker.logo':{selector:'.homeBrand h1',assetMode:'background'},
   'poker.identity':{selector:'.homeIdentityTicket',assetMode:'background'},
-  'poker.hostBar':{selector:'.homeHostIdentity',assetMode:'background'},
-  'poker.create':{selector:'.homePlayPair .homeActionPrimary:first-child',assetMode:'background'},
-  'poker.join':{selector:'.homePlayPair .homeActionPrimary:nth-child(2)',assetMode:'background'},
+  'poker.hostBar':{selector:'.homeHostLine',assetMode:'background'},
+  'poker.create':{selector:'.homeCreate',assetMode:'background'},
+  'poker.join':{selector:'.homeSecondary .homeLink:first-child',assetMode:'background'},
   'poker.shop':{selector:'.homeActionShop',assetMode:'background'},
   'poker.utility':{selector:'.homeUtilityEntry'},
   'poker.background':{selector:'.homeShell',assetMode:'cssVar',assetName:'--home-bg'}
@@ -175,7 +175,7 @@ function depth(el){let n=0;for(let p=el;p;p=p.parentElement)n++;return n}
 function HomePreview(){
  return <main className="homeShell"><div className="homeFrame">
   <header className="homeTopline"><div className="homeBrand"><h1>CRASHOUT POKER</h1><p>Private tables • Tournaments • Invite only.</p></div><button className="homeIdentityTicket" type="button"><span className="homeIdentityAvatar"><i>MH</i></span><span className="homeIdentityCopy"><strong>Miles</strong><small>@milesgoeswild</small></span><span className="homeIdentityAction">PROFILE</span></button></header>
-  <section className="homeHero"><div className="homeAssetEntry"><div className="homeHostBoard"><div className="homeHostIdentity"><span>HOST ACCESS</span><strong>Miles</strong><small>Permanent Host</small></div><div className="homePlayPair"><button type="button" className="homeAction homeActionPrimary"><small>OPEN A ROOM</small><b>CREATE GAME</b><span>Quick Table or Tournament</span></button><button type="button" className="homeAction homeActionPrimary"><small>USE A CODE</small><b>JOIN GAME</b><span>Six-character private game code</span></button></div><button type="button" className="homeAction homeActionShop"><span className="homeActionIndex">03</span><span><small>COSMETICS + BOOSTERS</small><b>BOOSTER SHOP</b></span><em>OPEN →</em></button></div></div></section>
+  <section className="homeHero"><div className="homeAssetEntry"><div className="homeHostBoard"><p className="homeHostLine"><span>HOST ACCESS</span><b>Permanent Host</b></p><button type="button" className="homeCreate"><b>CREATE GAME</b><small>Quick Table or Tournament</small></button><div className="homeSecondary"><button type="button" className="homeLink"><b>JOIN GAME</b><small>Table or tournament code</small></button><button type="button" className="homeLink homeActionShop"><b>BOOSTER SHOP</b><small>Cosmetics + boosters</small></button></div></div></div></section>
   <section className="homeUtilityEntry"><button type="button"><span>ENGINE + FAIRNESS</span><small>Architecture, fairness and published mass-simulation audit</small><em>OPEN REPORT →</em></button></section>
   <footer className="homeFooter"><div className="homeLegal"><span>CRASHOUT POKER</span><span>PRIVATE PLAY-CHIP POKER • CRASHOUT ACCOUNT REQUIRED</span></div></footer>
  </div></main>;
