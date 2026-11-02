@@ -74,3 +74,17 @@ Checkpoints on this branch (newest last):
 
 Known limitation: at 320×568 the seat tickets overlap (skin contract starts at 330px wide); the dock itself fits.
 Tests: unit 333/333, browser 75/75 (mocked API).
+
+### Checkpoint 3 — Settings on Home
+- Table sound already had a per-device mute/volume API (`src/poker-audio.js`, `localStorage`) but no UI. New `src/HomeSettings.jsx` sheet: Table sound ON/OFF + Volume; Telegram turn alerts stay in the profile drawer (linked from Settings when the account has Telegram).
+- Home: SETTINGS joins Engine + Fairness as a quiet note row; Create Game keeps the strongest weight.
+- Styling reuses the shared modal system in `home-internal-surfaces.css` (added to its `:is()` lists) and the existing `.notificationToggle` row.
+- Browser test drives the real component and checks the stored preference. Gameplay states: computed styles identical to before (2,196 elements).
+
+### Decision needed — typography
+`styles.css` forces `button, h1–h4, .eyebrow` to `var(--crash-display)` ("Metal Mania", never loaded) and `html, body, input` to "Oswald" (never loaded), all `!important`. Result: every button and heading renders in the system font (San Francisco on iPhone); the loaded design-system fonts (Archivo Narrow / Source Sans 3) only reach non-button text. Fixing it changes the approved gameplay typography, so it is **not applied**. Prepared patch + side-by-side: `use-design-system-fonts.patch` (removes the forcing; 4 lines in `styles.css`). Apply only on approval, then re-run the browser suites.
+
+### Other findings (not changed)
+- `global-royal-grade.css` still paints a purple body/root (`!important`) from the old theme; it shows only behind pages that do not paint their own background (overscroll).
+- `production-assets.css` sets the table page background twice (element + fixed pseudo-elements).
+- At 320×568 seat tickets overlap (skin contract starts at 330px).

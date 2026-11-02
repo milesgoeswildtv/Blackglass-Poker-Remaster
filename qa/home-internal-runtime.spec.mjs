@@ -362,3 +362,25 @@ test('Profile long identity stays contained inside the drawer', async ({ page })
   const overflow = await drawer.evaluate(el => el.scrollWidth - el.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 });
+
+test('Settings controls the real table-sound preference on this device', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openHome(page);
+  await page.getByRole('button', { name: /^SETTINGS/ }).click();
+  const dialog = page.getByRole('dialog', { name: 'Settings' });
+  await expect(dialog).toBeVisible();
+  const sound = dialog.getByRole('button', { name: /Table sound/ });
+  const volume = dialog.getByRole('slider', { name: 'Table sound volume' });
+  await expect(sound).toHaveAttribute('aria-pressed', 'true');
+  await sound.click();
+  await expect(sound).toHaveAttribute('aria-pressed', 'false');
+  await expect(volume).toBeDisabled();
+  expect(await page.evaluate(() => localStorage.getItem('crashout_sfx_muted'))).toBe('1');
+  await sound.click();
+  await expect(volume).toBeEnabled();
+  await volume.fill('40');
+  expect(await page.evaluate(() => localStorage.getItem('crashout_sfx_volume'))).toBe('0.4');
+  await shot(page, 'internal-settings-390x844');
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+});
