@@ -88,3 +88,14 @@ Tests: unit 333/333, browser 75/75 (mocked API).
 - `global-royal-grade.css` still paints a purple body/root (`!important`) from the old theme; it shows only behind pages that do not paint their own background (overscroll).
 - `production-assets.css` sets the table page background twice (element + fixed pseudo-elements).
 - At 320×568 seat tickets overlap (skin contract starts at 330px).
+
+### Checkpoint 4 — engine audit by fuzzing
+- Random legal play against the real `PokerTable` (2–9 players, stacks from 7 to 1,500 chips, fold/check/call/raise/all-in): **40,000 hands, ~199,000 actions, 28,409 hands with an all-in, 7,921 tables — 0 violations** (chips conserved every hand, stacks whole and non-negative, every hand reaches showdown, a legal action always exists).
+- `tests/engine-fuzz.test.js` keeps a deterministic slice (3 seeds × 400 hands, ~0.6 s) in the unit suite.
+- Not covered here: hand-ranking correctness (covered by `poker-eval` / `showdown` tests), and **reconnection / multiplayer sync**, which run over WebSockets inside the Durable Object and need the Workers runtime (`wrangler dev`), which cannot be installed in the agent sandbox. Test those with two phones on a deployed version.
+
+## Next steps (priority order)
+1. Decide on the typography fix (`use-design-system-fonts.patch`), then run the browser suites.
+2. Deploy the latest branch version from the Deployments tab when satisfied; smoke-test login, key entry, Create, Join, a hand with test bots, reconnect (lock phone, reopen).
+3. Optional: retire the old purple theme layer in `global-royal-grade.css` (verify with a computed-style snapshot).
+4. Optional: seat layout below 330px wide (skin contract change).
