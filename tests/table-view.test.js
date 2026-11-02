@@ -39,13 +39,18 @@ test('pots: one POT box with the authoritative total unless an all-in makes side
 });
 
 test('pots: MAIN POT and SIDE POT n while a player still in the hand is all-in, at most four boxes',()=>{
+ // exactly four contested levels keep their own boxes
+ const four=potDisplay(table({players:[{id:'a',chips:0},{id:'b',chips:0},{id:'c',chips:9}],livePots:[{amount:300,participantCount:3},{amount:200,participantCount:2},{amount:100,participantCount:2},{amount:50,participantCount:2}]}));
+ assert.deepEqual(four.map(p=>p.label),['MAIN POT','SIDE POT 1','SIDE POT 2','SIDE POT 3']);
  const players=[{id:'a',chips:0},{id:'b',chips:0},{id:'c',chips:0},{id:'d',chips:500},{id:'e',chips:800}];
  const s=table({players,pot:8300,livePots:[{amount:3600,participantCount:5},{amount:2400,participantCount:4},{amount:1500,participantCount:3},{amount:600,participantCount:2},{amount:200,participantCount:2},{amount:50,participantCount:1}]});
  const pots=potDisplay(s);
  assert.equal(MAX_POT_BOXES,4);
- assert.deepEqual(pots.map(p=>p.label),['MAIN POT','SIDE POT 1','SIDE POT 2','SIDE POT 3']);
+ // five contested levels in four boxes: the last box carries levels 3 and 4, so every contested chip is shown
+ assert.deepEqual(pots.map(p=>p.label),['MAIN POT','SIDE POT 1','SIDE POT 2','SIDE POT 3+']);
  assert.deepEqual(pots.map(p=>p.kind),['main','side','side','side']);
- assert.deepEqual(pots.map(p=>p.amount),[3600,2400,1500,600]);
+ assert.deepEqual(pots.map(p=>p.amount),[3600,2400,1500,800]);
+ assert.equal(pots.reduce((n,p)=>n+p.amount,0),8300,'all five contested levels are shown (the 50-chip uncalled bet is not a pot)');
  // a folded or eliminated player with no chips does not make side pots
  const quiet=table({players:[{id:'a',chips:0,folded:true},{id:'b',chips:0,eliminated:true},{id:'c',chips:900}],livePots:[{amount:900,participantCount:3},{amount:400,participantCount:2}]});
  assert.deepEqual(potDisplay(quiet).map(p=>p.kind),['pot']);

@@ -357,6 +357,7 @@ body:has(.gameplayV3Page) {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
+  container-type: inline-size;
 }
 .ftp3ActionRow button,
 .ftp3PregameControls .ftp3Start {
@@ -386,6 +387,12 @@ body:has(.gameplayV3Page) {
   text-transform: uppercase;
   text-shadow: 0 1px 3px #000;
   cursor: pointer;
+}
+/* Labels stay on one line and shrink only when a quarter of the row (minus the shell's fixed border and padding)
+   can no longer hold them at 15px; from a ~341px row up (375px phones and wider) this resolves to 15px. */
+.ftp3ActionRow > button {
+  white-space: nowrap;
+  font-size: clamp(11px, calc(7.1cqi - 8.7px), 15px);
 }
 .ftp3ActionRow button::before,
 .ftp3PregameControls .ftp3Start::before {

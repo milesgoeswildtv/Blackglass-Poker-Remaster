@@ -34,7 +34,12 @@ export function potDisplay(state){
  const players=Array.isArray(state?.players)?state.players:[];
  const allInInHand=!!state?.started&&players.some(p=>Number(p.chips)===0&&!p.eliminated&&!p.folded);
  const contested=(Array.isArray(state?.livePots)?state.livePots:[]).filter(p=>Number(p.amount)>0&&Number(p.participantCount??2)>=2);
- if(allInInHand&&contested.length>=2)return contested.slice(0,MAX_POT_BOXES).map((p,i)=>({kind:i?'side':'main',label:i?`SIDE POT ${i}`:'MAIN POT',amount:Number(p.amount)}));
+ if(allInInHand&&contested.length>=2){
+  const boxes=contested.slice(0,MAX_POT_BOXES).map((p,i)=>({kind:i?'side':'main',label:i?`SIDE POT ${i}`:'MAIN POT',amount:Number(p.amount)}));
+  // More levels than boxes: the last box carries every remaining level so no chips disappear from view.
+  if(contested.length>MAX_POT_BOXES){const last=MAX_POT_BOXES-1;boxes[last]={kind:'side',label:`SIDE POT ${last}+`,amount:contested.slice(last).reduce((n,p)=>n+Number(p.amount),0)}}
+  return boxes;
+ }
  return[{kind:'pot',label:'POT',amount:Number(state?.pot||0)}];
 }
 

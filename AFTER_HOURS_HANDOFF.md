@@ -63,3 +63,14 @@ Checkpoints on this branch (newest last):
 - Deleted `lobby.css` and `lobby-mobile-tabs.css`: no component imports them.
 - Proof: Chromium's CSS parser shows every surviving rule byte-identical in declarations and `@media` context (only the unimported `lobbyCardIn` keyframes went away). Home/Entry/builder screenshots pixel-identical; gameplay/internal diffs match run-to-run animation noise measured on the unchanged HEAD.
 - Tests: unit 332/332, browser 73/73 (mocked API).
+
+### Checkpoint 2 — known gameplay defects
+| Defect | Finding | Result |
+|---|---|---|
+| Fractional raises | `/action` passed `Number(b.amount)` straight to the engine; a raise to `60.5` left stacks at `939.5`. The UI never sends decimals (slider step 1, quick sizes rounded), so this was a server-side hole. | `worker/index.js`: a non-integer raise target is rejected (`Raise must be a whole number of chips.`) before chips move. Regression test in `tests/betting.test.js` (fails on the old engine). |
+| Side-pot presentation | `potDisplay` capped at four boxes by dropping levels 5+, so the table under-showed contested chips. | Last box now carries every remaining level (`SIDE POT 3+`), so the boxes always sum to every contested level. Unit + browser test (`fold into the last box`), label fits at Telegram 375×591. |
+| End Game confirmation | Already implemented in V3: host menu → "End the game for everyone at this table?" with Cancel, 450 ms arm delay, Escape/outside closes; tournament end has its own confirm. Covered by the host-menu browser test. | No change. |
+| Players near the action dock | Seat-vs-dock geometry already enforced by `sceneProblems`. New finding: on phones ≤360px wide "ALL IN" wrapped, the action buttons grew 46→60px and the bet presets (25%/50%/75%/MAX) were pushed 17px out of the dock. | `gameplay.css`: action labels stay one line and scale with the row (`clamp(11px, 7.1cqi − 8.7px, 15px)`) — exactly 15px from 375px phones up, so approved layouts are unchanged. Browser test at 390, 375×591, 360, 320, 414. |
+
+Known limitation: at 320×568 the seat tickets overlap (skin contract starts at 330px wide); the dock itself fits.
+Tests: unit 333/333, browser 75/75 (mocked API).

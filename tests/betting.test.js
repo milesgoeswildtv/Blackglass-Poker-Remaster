@@ -36,3 +36,21 @@ test('short all-in increases current bet without lowering minimum raise',()=>{
 test('full raise replaces minimum raise with its actual raise size',()=>{
  assert.deepEqual(applyRaiseState({currentBet:100,minRaise:100,target:250,isAllIn:false}),{currentBet:250,minRaise:150,fullRaise:true});
 });
+
+// Chips are whole numbers. A raise target that is not an integer is rejected before any chips move.
+import{PokerTable as FractionTable}from'../worker/index.js';
+test('fractional raise targets are rejected and leave stacks untouched',()=>{
+ const st=()=>({handsPlayed:0,handsWon:0,vpipHands:0,pfrHands:0,biggestPotWon:0,knockouts:0});
+ const pl=(id)=>({id,token:`t${id}`,name:id,chips:1000,bet:0,contributed:0,host:id==='a',folded:false,eliminated:false,finishPlace:null,cards:[],stats:st(),handStartChips:1000,vpipThisHand:false,pfrThisHand:false});
+ for(const amount of[60.5,70.25,60.000000001,Infinity,NaN]){
+  const t=new FractionTable({storage:{setAlarm(){},deleteAlarm(){},put(){},get(){}},getWebSockets(){return[]}},{});
+  t.data={code:'ABC123',startingChips:1000,blindMinutes:10,blindLevel:0,smallBlind:10,bigBlind:20,levelStartedAt:Date.now(),started:true,paused:false,players:[pl('a'),pl('b'),pl('c')],board:[],burned:[],pot:0,deck:[],dealerIndex:2,turnIndex:0,street:'preflop',currentBet:0,minRaise:20,acted:{},chat:[],spectators:[],actionLog:[],handNumber:0};
+  t.newHand();const p=t.data.players[t.data.turnIndex],before=t.data.players.map(x=>[x.chips,x.bet]);
+  assert.throws(()=>t.act(p,'raise',amount),/whole number/);
+  assert.deepEqual(t.data.players.map(x=>[x.chips,x.bet]),before);
+ }
+ const t=new FractionTable({storage:{setAlarm(){},deleteAlarm(){},put(){},get(){}},getWebSockets(){return[]}},{});
+ t.data={code:'ABC123',startingChips:1000,blindMinutes:10,blindLevel:0,smallBlind:10,bigBlind:20,levelStartedAt:Date.now(),started:true,paused:false,players:[pl('a'),pl('b'),pl('c')],board:[],burned:[],pot:0,deck:[],dealerIndex:2,turnIndex:0,street:'preflop',currentBet:0,minRaise:20,acted:{},chat:[],spectators:[],actionLog:[],handNumber:0};
+ t.newHand();const p=t.data.players[t.data.turnIndex];t.act(p,'raise',60);
+ assert.equal(p.bet,60);assert.ok(t.data.players.every(x=>Number.isInteger(x.chips)&&Number.isInteger(x.bet)));
+});
