@@ -3,7 +3,7 @@ import'./styles.css';
 import'./production-assets.css';
 import'./history.css';
 import'./social.css';
-import'./support-ui.css';
+
 import Lobby from'./Lobby.jsx';
 import AfterdarkPreview from'./AfterdarkPreview.jsx';
 import DesktopQA from'./DesktopQA.jsx';

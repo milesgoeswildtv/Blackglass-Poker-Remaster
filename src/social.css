@@ -16,31 +16,9 @@
   opacity: .55;
   cursor: wait;
 }
-.railBadge {
-  padding: 11px 14px;
-  border: 1px solid #5a3e68;
-  border-radius: 13px;
-  background: #17101e;
-  color: #cdb8d7;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .12em;
-  text-align: center;
-}
-.railBadge small {
-  font-size: 8px;
-  color: #7f7087;
-}
-.readOnlyNote {
-  align-self: center;
-  padding: 8px 11px;
-  border: 1px solid #46334f;
-  border-radius: 999px;
-  color: #95869c;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .1em;
-}
+
+
+
 
 /*
   AFTER HOURS chat/history panel (afterhours_chat_history_panel, as its optimized WebP copy). The art is drawn as a nine-slice border image so its
