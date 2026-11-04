@@ -8,7 +8,7 @@ function normalizeKey(value=''){return String(value||'').toUpperCase().replace(/
 async function sha256(value){const bytes=new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(String(value||''))));return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('')}
 function randomChars(n){let out='';for(let i=0;i<n;i++)out+=ALPHABET[secureInt(ALPHABET.length)];return out}
 function displayKey(raw){const chars=raw.match(/.{1,5}/g)||[];return'CRASH-'+chars.join('-')}
-function validType(value){return value==='permanent'?'permanent':value==='one-time'?'one-time':null}
+function validType(value){return value==='permanent'?'permanent':value==='one-time'?'one-time':value==='shyst-admin'?'shyst-admin':null}
 function cleanRecord(record={}){return{id:String(record.id||''),type:validType(record.type)||'one-time',createdAt:Number(record.createdAt)||0,status:record.revokedAt?'revoked':record.boundAccountId?'bound':'unused',boundAccountId:record.boundAccountId?String(record.boundAccountId):null,boundAt:record.boundAt||null,revokedAt:record.revokedAt||null}}
 function ticketId(){return crypto.randomUUID().replace(/-/g,'')}
 
@@ -41,7 +41,7 @@ export class AccessRegistry{
   return{keyId:record.id,type:record.type,alreadyBound,boundAccountId:String(record.boundAccountId||accountId)};
  })}
  async generate(body={}){
-  const type=validType(String(body.type||''));if(!type)throw Object.assign(Error('Key type must be one-time or permanent.'),{status:400});
+  const type=validType(String(body.type||''));if(!type)throw Object.assign(Error('Key type must be one-time, permanent, or shyst-admin.'),{status:400});
   const count=Math.max(1,Math.min(100,Math.trunc(Number(body.count)||1))),created=[];
   let index=await this.state.storage.get('keyIndex')||[];
   for(let i=0;i<count;i++){
