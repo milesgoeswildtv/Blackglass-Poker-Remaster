@@ -54,6 +54,18 @@ export async function handleAccessApi(req,env){
  const u=new URL(req.url);if(!u.pathname.startsWith('/api/access/'))return null;
  let body={};if(req.method==='POST')try{body=await req.json()}catch{}
  try{
+  if(u.pathname==='/api/access/shyst-admin/redeem'&&req.method==='POST'){
+   const expected=String(env?.SHYST_ADMIN_BRIDGE_SECRET||''),provided=String(req.headers.get('authorization')||'');
+   if(!expected||provided!=='Bearer '+expected)return json({ok:false,error:'Service authorization required.'},401);
+   const key=typeof body.key==='string'?body.key.trim():'',accountId=typeof body.accountId==='string'?body.accountId.trim():'';
+   if(key.length<12||key.length>100||!accountId||accountId.length>128)return json({ok:false,error:'Valid key and account id required.'},400);
+   const fingerprint=await digest('shyst-admin|'+accountId);
+   const prepared=await callRegistry(env,'/prepare',{body:{key,fingerprint}});
+   if(prepared.type!=='shyst-admin')return json({ok:false,error:'This is not a SHYST Admin Key.'},403);
+   const redeemed=await callRegistry(env,'/redeem',{body:{ticket:prepared.ticket,accountId}});
+   if(redeemed.type!=='shyst-admin')return json({ok:false,error:'Key type mismatch.'},403);
+   return json({ok:true,keyId:redeemed.keyId,alreadyBound:!!redeemed.alreadyBound});
+  }
   if(u.pathname==='/api/access/key/prepare'&&req.method==='POST'){
    const identity=await authenticatedIdentity(req,env),fingerprint=await requestFingerprint(req,'host-key'),prepared=await callRegistry(env,'/prepare',{body:{key:body.key,fingerprint}});
    if(identity){const result=await redeemTicket(req,env,identity,prepared.ticket);return json(result)}
