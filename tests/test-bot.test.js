@@ -1,5 +1,12 @@
 import test from'node:test';
 import assert from'node:assert/strict';
-import{nextTestBotName,TEST_BOT_NAMES}from'../worker/test-bot.js';
+import{nextTestBotName,TEST_BOT_NAMES,testBotThinkDelayMs}from'../worker/test-bot.js';
+import{PokerTable}from'../worker/app.js';
 test('test bot names are unique until pool exhausted',()=>{const players=[];for(const name of TEST_BOT_NAMES){const next=nextTestBotName(players);assert.equal(next,name);players.push({name,testBot:true})}});
 test('bot names fall back safely after pool exhausted',()=>{const players=TEST_BOT_NAMES.map(name=>({name,testBot:true}));assert.equal(nextTestBotName(players),'Test Bot 9')});
+
+test('test bot thinking delay is randomized from five through ten seconds',()=>{for(let i=0;i<500;i++){const delay=testBotThinkDelayMs();assert.ok(delay>=5000&&delay<=10000);assert.equal(delay%1,0)}});
+function botTable(toCall){const alarms=[],bot={id:'bot-1',name:'Muck Rat',testBot:true,chips:100,bet:0,folded:false,eliminated:false},human={id:'human-1',name:'Human',testBot:false,chips:100,bet:0,folded:false,eliminated:false};const table=Object.create(PokerTable.prototype);table.data={started:true,paused:false,street:'preflop',turnIndex:0,turnSerial:7,players:[bot,human],minRaise:20};table.state={storage:{setAlarm(at){alarms.push(at)}}};table.betToMatch=()=>20;table.toCall=()=>toCall;table.raiseIsOpen=()=>true;table.hasRaiseOpponent=()=>true;table.actOne=(p,type)=>{table.actions.push({id:p.id,type});table.data.turnIndex=1;table.data.turnSerial++};table.actions=[];return{table,alarms}}
+test('test bot checks immediately without a thinking delay',()=>{const{table,alarms}=botTable(0);table.driveTestBots();assert.deepEqual(table.actions,[{id:'bot-1',type:'check'}]);assert.equal(alarms.length,0);assert.equal(table.data.botActionAt,null)});
+test('test bot schedules a single server alarm before facing-bet decision',()=>{const{table,alarms}=botTable(10);const now=Date.now();table.driveTestBots(now);assert.equal(table.actions.length,0);assert.equal(alarms.length,1);assert.ok(alarms[0]-now>=5000&&alarms[0]-now<=10000);assert.equal(table.data.botActionPlayerId,'bot-1');assert.equal(table.data.botActionTurnSerial,7)});
+test('due bot alarm executes exactly one decision and clears its pending marker',()=>{const{table}=botTable(10);table.driveTestBots(Date.now());const due=table.data.botActionAt;table.driveTestBots(due);assert.equal(table.actions.length,1);assert.equal(table.actions[0].id,'bot-1');assert.equal(table.data.botActionAt,null);assert.equal(table.data.botActionPlayerId,null)});
