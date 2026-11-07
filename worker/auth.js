@@ -31,6 +31,34 @@ export async function handleAuthApi(req,env){const u=new URL(req.url),c=config(e
  if(u.pathname==='/api/auth/callback'&&req.method==='GET'){if(!c.clientId||!c.clientSecret||!c.authSecret)return json({error:'Discord login is not configured yet.'},503);const cookies=parseCookies(req),state=u.searchParams.get('state')||'',code=u.searchParams.get('code')||'',linking=cookies[LINK_COOKIE]==='discord';if(!code||!state||state!==cookies[STATE_COOKIE])return json({error:'Discord login state expired. Try again.'},400,{'set-cookie':clearCookie(STATE_COOKIE)});const redirect=env.DISCORD_REDIRECT_URI||`${u.origin}/api/auth/callback`,tokenRes=await fetch('https://discord.com/api/oauth2/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:c.clientId,client_secret:c.clientSecret,grant_type:'authorization_code',code,redirect_uri:redirect})});if(!tokenRes.ok)return json({error:'Discord rejected the login exchange.'},502);const token=await tokenRes.json(),userRes=await fetch('https://discord.com/api/users/@me',{headers:{authorization:`Bearer ${token.access_token}`}});if(!userRes.ok)return json({error:'Could not load your Discord profile.'},502);const discordIdentity=identityFromDiscord(await userRes.json());if(linking){const telegramIdentity=await authenticatedIdentity(req,env),headers=new Headers({'cache-control':'no-store'});appendClear(headers,STATE_COOKIE,LINK_COOKIE,NEXT_COOKIE);if(!telegramIdentity||String(telegramIdentity.provider)!=='telegram'){headers.set('location',`${u.origin}/?link=failed`);return new Response(null,{status:302,headers})}try{await linkTelegramToDiscord(env,telegramIdentity,discordIdentity);headers.set('location',`${u.origin}/?linked=discord`);return new Response(null,{status:302,headers})}catch(error){console.error('account_link_failed',{telegramId:telegramIdentity.id,discordId:discordIdentity.id,error:error.message});headers.set('location',`${u.origin}/?link=failed`);return new Response(null,{status:302,headers})}}
  const identity=discordIdentity;await accountRequest(env,identity,'/sync');const signed=await sessionToken(identity,c.authSecret),next=safeNext(cookies[NEXT_COOKIE]),headers=new Headers({location:`${u.origin}/${next}`,'cache-control':'no-store'});headers.append('set-cookie',secureCookie(SESSION_COOKIE,signed,SESSION_SECONDS));appendClear(headers,STATE_COOKIE,NEXT_COOKIE,LINK_COOKIE);return new Response(null,{status:302,headers})}
  if(u.pathname==='/api/auth/me'&&req.method==='GET'){const identity=await authenticatedIdentity(req,env);if(!identity)return json({error:'Not logged in.'},401);const profile=await accountRequest(env,identity,'/profile'),safe=publicIdentity(identity),canonicalAccountId=String(profile?.canonicalId||identity.id),ownerAccountId=String(env?.CRASHOUT_OWNER_ACCOUNT_ID||'').trim(),ownerToolsConfigured=!!ownerAccountId;return json({identity:safe,discord:safe.provider==='discord'?safe:null,telegram:safe.provider==='telegram'?safe:null,account:profile?.account||null,canonicalAccountId,ownerToolsConfigured,ownerTools:ownerToolsConfigured&&canonicalAccountId===ownerAccountId,testBotToolsEnabled:testBotToolsEnabled(env)})}
+ if(u.pathname==='/api/crashout/link'&&req.method==='POST'){
+  const identity=await authenticatedIdentity(req,env);
+  if(!identity)return json({error:'Crashout Poker sign-in required.'},401);
+  const adapterKey=String(env?.CRASHOUT_POKER_ADAPTER_KEY||'');
+  if(adapterKey.length<32)return json({error:'Crashout account linking is not configured on this server.'},503);
+  let body={};try{body=await req.json()}catch{return json({error:'A valid link token is required.'},400)}
+  const linkToken=String(body?.token||'');
+  if(!/^[a-f0-9]{64}$/.test(linkToken))return json({error:'The Crashout link token is invalid.'},400);
+  let canonicalId;
+  try{canonicalId=await resolveAccountId(env,identity.id)}catch(error){return json({error:error.message||'Poker account could not be resolved.'},503)}
+  let gateway;
+  try{
+   gateway=await fetch('https://qcmfnkuyinhfdxnuvneb.supabase.co/functions/v1/complete-destination-link',{
+    method:'POST',
+    headers:{'content-type':'application/json','x-crashout-adapter-key':adapterKey},
+    body:JSON.stringify({game_key:'poker',token:linkToken,external_player_id:canonicalId}),
+    signal:AbortSignal.timeout(10000)
+   });
+  }catch{return json({error:'Crashout could not be reached. Your Poker account has not been changed.'},503)}
+  if(!gateway.ok){
+   if(gateway.status===400||gateway.status===409)return json({error:'This link is expired, already used, or cannot be completed. Start a new link from Crashout.'},409);
+   if(gateway.status===401||gateway.status===403)return json({error:'The Crashout Poker adapter credentials need attention.'},503);
+   return json({error:'Crashout could not complete the link. Try again later.'},503);
+  }
+  let result={};try{result=await gateway.json()}catch{return json({error:'Crashout returned an invalid response.'},502)}
+  if(typeof result?.link_id!=='string'||!result.link_id)return json({error:'Crashout returned an invalid response.'},502);
+  return json({ok:true,linked:true,destination:'poker',linkId:result.link_id});
+ }
  if(u.pathname==='/api/auth/logout'&&req.method==='POST')return json({ok:true},200,{'set-cookie':clearCookie(SESSION_COOKIE)});
  if(u.pathname==='/api/account/equip'&&req.method==='POST'){const identity=await authenticatedIdentity(req,env);if(!identity)return json({error:'Crashout Poker login required.'},401);let body={};try{body=await req.json()}catch{}const result=await accountRequest(env,identity,'/equip',{cosmetic:body.cosmetic});return json(result||{error:'Account storage unavailable.'},result?.error?403:200)}
  if(u.pathname==='/api/account/notifications'&&req.method==='POST'){const identity=await authenticatedIdentity(req,env);if(!identity)return json({error:'Crashout Poker login required.'},401);let body={};try{body=await req.json()}catch{}const result=await accountRequest(env,identity,'/notifications/preferences',{notifications:body.notifications||{}});return json(result||{error:'Account storage unavailable.'},result?.error?400:200)}
