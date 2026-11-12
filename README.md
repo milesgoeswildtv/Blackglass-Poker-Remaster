@@ -80,6 +80,28 @@ not infer it from the script name or reuse an older account's hostname.
 <verified-existing-worker-origin>/api/auth/callback
 ```
 
+## Crashout Network identity linking
+
+Crashout Poker links an already-authenticated Discord or Telegram Poker account to the user's Crashout Network identity without replacing the Poker account or changing its stats, purchases, sessions, or canonical player ID.
+
+Worker secrets:
+
+```text
+CRASHOUT_OIDC_CLIENT_ID
+CRASHOUT_OIDC_CLIENT_SECRET
+CRASHOUT_POKER_ADAPTER_KEY
+```
+
+The confidential OAuth client must be registered in the shared Supabase project's Authentication → OAuth Apps with this exact redirect URI:
+
+```text
+https://blackglass-poker-remaster.afterdarklabs.workers.dev/api/auth/crashout/callback
+```
+
+The shared `claim-destination-identity` Edge Function also requires the SHA-256 hex digest of `CRASHOUT_POKER_ADAPTER_KEY` as the Supabase function secret `CRASHOUT_POKER_ADAPTER_KEY_SHA256`. The Edge Function verifies the OAuth ID token, issuer, audience, nonce, and adapter key before claiming the existing Poker canonical account ID.
+
+The profile's Connected Accounts section starts the link flow. OAuth state, PKCE verifier, and nonce are held in secure, HTTP-only, short-lived cookies. The callback only marks the canonical Poker account as linked after the shared identity claim succeeds.
+
 ## Stripe configuration
 
 Required Worker secrets:
