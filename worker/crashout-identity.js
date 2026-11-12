@@ -1,6 +1,6 @@
 import{authenticatedIdentity}from'./auth.js';
 import{accountRequest,resolveAccountId}from'./account-links.js';
-const enc=new TextEncoder(),dec=new TextDecoder();
+const enc=new TextEncoder();
 const STATE='ftp_crashout_state',VERIFIER='ftp_crashout_verifier',NONCE='ftp_crashout_nonce',ISSUER='https://qcmfnkuyinhfdxnuvneb.supabase.co/auth/v1',CLAIM_URL='https://qcmfnkuyinhfdxnuvneb.supabase.co/functions/v1/claim-destination-identity';
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json','cache-control':'no-store'}})}
 function cookies(req){const out={};for(const part of String(req.headers.get('cookie')||'').split(';')){const i=part.indexOf('=');if(i>0)out[part.slice(0,i).trim()]=decodeURIComponent(part.slice(i+1).trim())}return out}
