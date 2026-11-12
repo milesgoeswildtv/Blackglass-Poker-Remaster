@@ -98,7 +98,7 @@ The confidential OAuth client must be registered in the shared Supabase project'
 https://blackglass-poker-remaster.afterdarklabs.workers.dev/api/auth/crashout/callback
 ```
 
-The shared `claim-destination-identity` Edge Function also requires the SHA-256 hex digest of `CRASHOUT_POKER_ADAPTER_KEY` as the Supabase function secret `CRASHOUT_POKER_ADAPTER_KEY_SHA256`. The Edge Function verifies the OAuth ID token, issuer, audience, nonce, and adapter key before claiming the existing Poker canonical account ID.
+The shared `claim-destination-identity` Edge Function also requires these Supabase function secrets: `CRASHOUT_POKER_ADAPTER_KEY_SHA256` (SHA-256 hex digest of the Worker adapter key) and `CRASHOUT_OIDC_CLIENT_ID_POKER` (the registered confidential OAuth client ID). The Edge Function verifies the OAuth ID token, issuer, audience, nonce, and adapter key before claiming the existing Poker canonical account ID.
 
 The profile's Connected Accounts section starts the link flow. OAuth state, PKCE verifier, and nonce are held in secure, HTTP-only, short-lived cookies. The callback only marks the canonical Poker account as linked after the shared identity claim succeeds.
 
