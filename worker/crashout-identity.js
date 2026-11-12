@@ -6,7 +6,7 @@ function json(data,status=200){return new Response(JSON.stringify(data),{status,
 function cookies(req){const out={};for(const part of String(req.headers.get('cookie')||'').split(';')){const i=part.indexOf('=');if(i>0)out[part.slice(0,i).trim()]=decodeURIComponent(part.slice(i+1).trim())}return out}
 function cookie(name,value,maxAge){return `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`}
 function clear(name){return `${name}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`}
-function b64url(bytes){let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'')}
+function b64url(bytes){let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'')}
 function random(size=32){const b=new Uint8Array(size);crypto.getRandomValues(b);return b64url(b)}
 async function sha256(value){return new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(value)))}
 function appendClear(headers){for(const name of[STATE,VERIFIER,NONCE])headers.append('set-cookie',clear(name));return headers}
