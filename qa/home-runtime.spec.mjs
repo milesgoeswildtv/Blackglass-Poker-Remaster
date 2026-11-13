@@ -266,6 +266,7 @@ test('version 300 approved visual assets are actually wired and served', async (
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await expect(page.getByRole('button', { name: /ENTER KEY/i })).toBeVisible();
+  await page.getByRole('button', { name: /ENTER KEY/i }).click();
   const gate = await page.evaluate(() => ({
     background: getComputedStyle(document.querySelector('.homeShell'), '::before').backgroundImage,
     action: getComputedStyle(document.querySelector('.privateGateChoices button')).backgroundImage,
