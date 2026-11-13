@@ -2,6 +2,18 @@ name: Deploy Crashout Poker Worker
 
 on:
   workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: Type the production release confirmation
+        required: true
+        type: choice
+        options:
+          - deploy
+  push:
+    branches:
+      - 'release/poker-production'
+    tags:
+      - 'poker-production-*'
 
 permissions:
   contents: read
@@ -11,13 +23,56 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Test, build, and deploy production Worker
+  release:
+    name: Verify After Hours, test, build, and deploy
+    if: (github.ref == 'refs/heads/rebuild/after-hours-v2' && inputs.confirm_production == 'deploy') || (github.ref == 'refs/heads/release/poker-production') || startsWith(github.ref, 'refs/tags/poker-production-')
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
+    env:
+      BLACKGLASS_SOURCE_SHA: ${{ github.sha }}
+      BLACKGLASS_SOURCE_REF: ${{ github.ref_name }}
     steps:
-      - name: Checkout selected commit
+      - name: Enforce the approved production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/rebuild/after-hours-v2:refs/remotes/origin/rebuild/after-hours-v2
+          approved_sha="$(git rev-parse refs/remotes/origin/rebuild/after-hours-v2)"
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            case "$GITHUB_REF_NAME" in
+              poker-production-*) ;;
+              *) echo "::error::Unrecognized production release tag."; exit 1 ;;
+            esac
+            test "$approved_sha" = "$GITHUB_SHA" || {
+              echo "::error::Release tag must point to the exact current approved After Hours branch head."
+              exit 1
+            }
+          elif [ "$GITHUB_REF_NAME" = "release/poker-production" ]; then
+            git merge-base --is-ancestor "$approved_sha" "$GITHUB_SHA" || {
+              echo "::error::Production release branch must descend from the approved After Hours source."
+              exit 1
+            }
+            changed_files="$(git diff --name-only "$approved_sha" "$GITHUB_SHA")"
+            test "$changed_files" = ".release/production.json" || {
+              echo "::error::Release branch may differ from approved source only by .release/production.json."
+              exit 1
+            }
+          else
+            test "$GITHUB_REF" = "refs/heads/rebuild/after-hours-v2" || {
+              echo "::error::Production deploys are only permitted from rebuild/after-hours-v2."
+              exit 1
+            }
+            test "${{ inputs.confirm_production }}" = "deploy" || {
+              echo "::error::Explicit production confirmation is required."
+              exit 1
+            }
+          fi
+
+      - name: Checkout the exact approved source commit
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
 
       - name: Set up Node 22
         uses: actions/setup-node@v6
@@ -25,20 +80,55 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
 
-      - name: Run tests
+      - name: Audit production dependencies
+        run: npm run audit:prod
+
+      - name: Run complete unit and engine tests
         run: npm test
 
-      - name: Build production assets
+      - name: Build production frontend
         run: npm run build
 
-      - name: Validate Worker configuration
+      - name: Verify approved After Hours assets and stamp provenance
+        run: node scripts/verify-after-hours-release.mjs
+
+      - name: Validate Cloudflare Worker package
         run: npm run check:worker
 
-      - name: Deploy Worker to Cloudflare production
+      - name: Install Chromium for real browser QA
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Home and Entry Gate browser QA
+        run: npm run qa:home
+
+      - name: Run Home modal and profile browser QA
+        run: npm run qa:home-internal
+
+      - name: Run complete Afterdark surface browser QA
+        run: npm run qa:afterdark
+
+      - name: Run gameplay and table browser QA
+        run: npm run qa:gameplay
+
+      - name: Deploy the verified Worker and frontend assets
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
+
+      - name: Preserve release provenance and browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crashout-poker-release-${{ env.BLACKGLASS_SOURCE_SHA }}
+          path: |
+            dist/BLACKGLASS_BUILD.json
+            artifacts/browser-qa/
+            artifacts/browser-qa-internal/
+            artifacts/browser-qa-afterdark/
+            artifacts/browser-qa-gameplay/
+          if-no-files-found: warn
+          retention-days: 30
