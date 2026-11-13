@@ -59,6 +59,19 @@ async function mockHomeApis(page, displayName = 'Miles QA') {
   return unexpected;
 }
 
+async function waitForImageAssets(page, paths) {
+  const failed = await page.evaluate(async assetPaths => {
+    const results = await Promise.all(assetPaths.map(path => new Promise(resolve => {
+      const image = new Image();
+      image.onload = () => resolve({ path, loaded: image.naturalWidth > 0 && image.naturalHeight > 0 });
+      image.onerror = () => resolve({ path, loaded: false });
+      image.src = path;
+    })));
+    return results.filter(result => !result.loaded).map(result => result.path);
+  }), paths);
+  expect(failed, `Approved visual assets failed to decode: ${failed.join(', ')}`).toEqual([]);
+}
+
 async function openHome(page, displayName = 'Miles QA') {
   const unexpected = await mockHomeApis(page, displayName);
   await page.goto('/');
@@ -67,6 +80,15 @@ async function openHome(page, displayName = 'Miles QA') {
   await expect(page.getByRole('button', { name: /JOIN GAME/i })).toBeVisible();
   await expect(page.getByRole('button', { name: /BOOSTER SHOP/i })).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
+  const mobile = (page.viewportSize()?.width || 1440) <= 760;
+  await waitForImageAssets(page, [
+    mobile ? '/assets/remaster/homescreen/CRASHOUT_MOBILE_BG.PNG' : '/assets/remaster/homescreen/CRASHOUT_DESKTOP_BG.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_LOGO.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_PLAYER_IDENTITY.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_CREATE_GAME_PANEL.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_JOIN_GAME_PANEL.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_BOOSTER_PANEL.PNG'
+  ]);
   expect(unexpected).toEqual([]);
 }
 
@@ -202,6 +224,13 @@ async function openEntryGate(page) {
   await expect(page.getByRole('button', { name: /ENTER INVITE CODE/i })).toBeVisible();
   await expect(page.getByRole('button', { name: /ENGINE \+ FAIRNESS/i })).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
+  const mobile = (page.viewportSize()?.width || 1440) <= 760;
+  await waitForImageAssets(page, [
+    mobile ? '/assets/remaster/entry-gate/CRASHOUT_MOBILE_BG.PNG' : '/assets/remaster/entry-gate/CRASHOUT_DESKTOP_BG.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_LOGO.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_INPUT_FIELD.PNG'
+  ]);
   expect(unexpected).toEqual([]);
 }
 
