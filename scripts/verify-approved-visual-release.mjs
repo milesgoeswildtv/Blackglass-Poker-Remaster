@@ -31,7 +31,7 @@ const requiredAssets = {
 
 function gitBlobSha(bytes) {
   return createHash('sha1')
-    .update(Buffer.from(`blob ${bytes.byteLength}\\0`))
+    .update(Buffer.from(`blob ${bytes.byteLength}\0`))
     .update(bytes)
     .digest('hex');
 }
@@ -96,5 +96,5 @@ const manifest = {
   approvedVisualCss: cssRecords,
   assets: assetRecords
 };
-await writeFile(join(root, 'dist/BLACKGLASS_BUILD.json'), JSON.stringify(manifest, null, 2) + '\\n');
+await writeFile(join(root, 'dist/BLACKGLASS_BUILD.json'), JSON.stringify(manifest, null, 2) + '\n');
 console.log(`Verified version 300 visual baseline: ${assetRecords.length} exact approved image assets; source ${manifest.sourceSha}`);
