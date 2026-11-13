@@ -24,7 +24,7 @@ concurrency:
 
 jobs:
   release:
-    name: Verify After Hours, test, build, and deploy
+    name: Verify approved version 300 visuals, test, build, and deploy
     if: (github.ref == 'refs/heads/rebuild/after-hours-v2' && inputs.confirm_production == 'deploy') || (github.ref == 'refs/heads/release/poker-production') || startsWith(github.ref, 'refs/tags/poker-production-')
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -50,7 +50,7 @@ jobs:
               *) echo "::error::Unrecognized production release tag."; exit 1 ;;
             esac
             test "$approved_sha" = "$GITHUB_SHA" || {
-              echo "::error::Release tag must point to the exact current approved After Hours branch head."
+              echo "::error::Release tag must point to the exact current approved Poker source branch head."
               exit 1
             }
           elif [ "$GITHUB_REF_NAME" = "release/poker-production" ]; then
@@ -91,8 +91,8 @@ jobs:
       - name: Build production frontend
         run: npm run build
 
-      - name: Verify approved After Hours assets and stamp provenance
-        run: node scripts/verify-after-hours-release.mjs
+      - name: Verify exact version 300 approved assets and stamp provenance
+        run: node scripts/verify-approved-visual-release.mjs
 
       - name: Validate Cloudflare Worker package
         run: npm run check:worker
