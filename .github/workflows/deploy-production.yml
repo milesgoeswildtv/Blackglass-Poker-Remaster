@@ -10,6 +10,8 @@ on:
         options:
           - deploy
   push:
+    branches:
+      - 'release/poker-production'
     tags:
       - 'poker-production-*'
 
@@ -23,7 +25,7 @@ concurrency:
 jobs:
   release:
     name: Verify After Hours, test, build, and deploy
-    if: (github.ref == 'refs/heads/rebuild/after-hours-v2' && inputs.confirm_production == 'deploy') || startsWith(github.ref, 'refs/tags/poker-production-')
+    if: (github.ref == 'refs/heads/rebuild/after-hours-v2' && inputs.confirm_production == 'deploy') || (github.ref == 'refs/heads/release/poker-production') || startsWith(github.ref, 'refs/tags/poker-production-')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -34,15 +36,25 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          git fetch origin refs/heads/rebuild/after-hours-v2:refs/remotes/origin/rebuild/after-hours-v2
+          approved_sha="$(git rev-parse refs/remotes/origin/rebuild/after-hours-v2)"
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
             case "$GITHUB_REF_NAME" in
               poker-production-*) ;;
               *) echo "::error::Unrecognized production release tag."; exit 1 ;;
             esac
-            git fetch origin refs/heads/rebuild/after-hours-v2:refs/remotes/origin/rebuild/after-hours-v2
-            approved_sha="$(git rev-parse refs/remotes/origin/rebuild/after-hours-v2)"
             test "$approved_sha" = "$GITHUB_SHA" || {
               echo "::error::Release tag must point to the exact current approved After Hours branch head."
+              exit 1
+            }
+          elif [ "$GITHUB_REF_NAME" = "release/poker-production" ]; then
+            git merge-base --is-ancestor "$approved_sha" "$GITHUB_SHA" || {
+              echo "::error::Production release branch must descend from the approved After Hours source."
+              exit 1
+            }
+            changed_files="$(git diff --name-only "$approved_sha" "$GITHUB_SHA")"
+            test "$changed_files" = ".release/production.json" || {
+              echo "::error::Release branch may differ from approved source only by .release/production.json."
               exit 1
             }
           else
