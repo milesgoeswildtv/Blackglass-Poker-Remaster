@@ -241,3 +241,65 @@ test('Entry Gate action surfaces preserve existing interaction ownership', async
   await page.getByRole('button', { name: /ENGINE \+ FAIRNESS/i }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
 });
+
+
+test('version 300 approved visual assets are actually wired and served', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openHome(page);
+  const home = await page.evaluate(() => {
+    const shell = document.querySelector('.homeShell');
+    const pseudo = getComputedStyle(shell, '::before').backgroundImage;
+    const identity = getComputedStyle(document.querySelector('.homeIdentityTicket')).backgroundImage;
+    const actions = [...document.querySelectorAll('.homeActionPrimary')].map(el => getComputedStyle(el).backgroundImage);
+    const shop = getComputedStyle(document.querySelector('.homeActionShop')).backgroundImage;
+    const logo = getComputedStyle(document.querySelector('.homeBrand h1')).backgroundImage;
+    return { pseudo, identity, actions, shop, logo };
+  });
+  expect(home.pseudo).toContain('/assets/remaster/homescreen/CRASHOUT_DESKTOP_BG.PNG');
+  expect(home.identity).toContain('/assets/remaster/homescreen/CRASHOUT_PLAYER_IDENTITY.PNG');
+  expect(home.actions[0]).toContain('/assets/remaster/homescreen/CRASHOUT_CREATE_GAME_PANEL.PNG');
+  expect(home.actions[1]).toContain('/assets/remaster/homescreen/CRASHOUT_JOIN_GAME_PANEL.PNG');
+  expect(home.shop).toContain('/assets/remaster/homescreen/CRASHOUT_BOOSTER_PANEL.PNG');
+  expect(home.logo).toContain('/assets/remaster/entry-gate/CRASHOUT_LOGO.PNG');
+
+  const entryUnexpected = await mockEntryGateApis(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: /ENTER KEY/i })).toBeVisible();
+  const gate = await page.evaluate(() => ({
+    background: getComputedStyle(document.querySelector('.homeShell'), '::before').backgroundImage,
+    action: getComputedStyle(document.querySelector('.privateGateChoices button')).backgroundImage,
+    input: getComputedStyle(document.querySelector('.privateCodeEntry input')).backgroundImage
+  }));
+  expect(gate.background).toContain('/assets/remaster/entry-gate/CRASHOUT_MOBILE_BG.PNG');
+  expect(gate.action).toContain('/assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG');
+  expect(gate.input).toContain('/assets/remaster/entry-gate/CRASHOUT_INPUT_FIELD.PNG');
+  expect(entryUnexpected).toEqual([]);
+
+  const assetPaths = [
+    '/assets/remaster/entry-gate/CRASHOUT_APPROVED_ENTRY_GATE_REFERENCE.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_DESKTOP_BG.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_INFO_BAR_2.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_INPUT_FIELD.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_LANDSCAPE_BG.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_LOGO.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_MASTER_FULL_SCREEN_PANEL.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_MOBILE_BG.PNG',
+    '/assets/remaster/entry-gate/CRASHOUT_PRIMARY_ACTION.PNG',
+    '/assets/remaster/entry-gate/UTILITY_INFO_BADGE.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_APPROVED_HOMESCREEN_REFERENCE.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_BOOSTER_PANEL.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_CREATE_GAME_PANEL.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_DESKTOP_BG.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_INPUT_FIELD.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_JOIN_GAME_PANEL.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_LANDSCAPE_BG.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_MOBILE_BG.PNG',
+    '/assets/remaster/homescreen/CRASHOUT_PLAYER_IDENTITY.PNG'
+  ];
+  const results = await page.evaluate(async paths => Promise.all(paths.map(async path => {
+    const response = await fetch(path, { cache: 'no-store' });
+    return { path, status: response.status, type: response.headers.get('content-type') };
+  })), assetPaths);
+  expect(results.filter(item => item.status !== 200 || !item.type?.startsWith('image/')).map(item => item.path)).toEqual([]);
+});
