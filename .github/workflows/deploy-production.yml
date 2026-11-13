@@ -1,0 +1,105 @@
+name: Deploy Crashout Poker Worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: Type the production release confirmation
+        required: true
+        type: choice
+        options:
+          - deploy
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crashout-poker-production
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Verify After Hours, test, build, and deploy
+    if: github.ref == 'refs/heads/rebuild/after-hours-v2' && inputs.confirm_production == 'deploy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BLACKGLASS_SOURCE_SHA: ${{ github.sha }}
+      BLACKGLASS_SOURCE_REF: ${{ github.ref_name }}
+    steps:
+      - name: Enforce the approved production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/rebuild/after-hours-v2" || {
+            echo "::error::Production deploys are only permitted from rebuild/after-hours-v2."
+            exit 1
+          }
+          test "${{ inputs.confirm_production }}" = "deploy" || {
+            echo "::error::Explicit production confirmation is required."
+            exit 1
+          }
+
+      - name: Checkout the exact approved source commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Audit production dependencies
+        run: npm run audit:prod
+
+      - name: Run complete unit and engine tests
+        run: npm test
+
+      - name: Build production frontend
+        run: npm run build
+
+      - name: Verify approved After Hours assets and stamp provenance
+        run: node scripts/verify-after-hours-release.mjs
+
+      - name: Validate Cloudflare Worker package
+        run: npm run check:worker
+
+      - name: Install Chromium for real browser QA
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Home and Entry Gate browser QA
+        run: npm run qa:home
+
+      - name: Run Home modal and profile browser QA
+        run: npm run qa:home-internal
+
+      - name: Run complete Afterdark surface browser QA
+        run: npm run qa:afterdark
+
+      - name: Run gameplay and table browser QA
+        run: npm run qa:gameplay
+
+      - name: Deploy the verified Worker and frontend assets
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+
+      - name: Preserve release provenance and browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crashout-poker-release-${{ env.BLACKGLASS_SOURCE_SHA }}
+          path: |
+            dist/BLACKGLASS_BUILD.json
+            artifacts/browser-qa/
+            artifacts/browser-qa-internal/
+            artifacts/browser-qa-afterdark/
+            artifacts/browser-qa-gameplay/
+          if-no-files-found: warn
+          retention-days: 30
