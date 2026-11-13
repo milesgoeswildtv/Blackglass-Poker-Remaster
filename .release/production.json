@@ -1,0 +1,9 @@
+{
+  "application": "Crashout Poker",
+  "presentation": "Confirmed version 300 Home and Entry Gate artwork; After Hours gameplay retained",
+  "releaseSourceBranch": "rebuild/after-hours-v2",
+  "releaseSourceSha": "2bda828e783cfd292cf81478f0db31d3001c3782",
+  "approvedBy": "user",
+  "releasePurpose": "Restore the confirmed-good Home and Entry Gate artwork, preserve current Crashout identity integration and backend, and keep gameplay unchanged.",
+  "createdAt": "2026-11-13T01:45:00Z"
+}
