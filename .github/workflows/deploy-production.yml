@@ -55,7 +55,7 @@ jobs:
             }
           elif [ "$GITHUB_REF_NAME" = "release/poker-production" ]; then
             git merge-base --is-ancestor "$approved_sha" "$GITHUB_SHA" || {
-              echo "::error::Production release branch must descend from the approved After Hours source."
+              echo "::error::Production release branch must descend from the approved Poker source."
               exit 1
             }
             changed_files="$(git diff --name-only "$approved_sha" "$GITHUB_SHA")"
