@@ -68,7 +68,7 @@ async function waitForImageAssets(page, paths) {
       image.src = path;
     })));
     return results.filter(result => !result.loaded).map(result => result.path);
-  }), paths);
+  }, paths);
   expect(failed, `Approved visual assets failed to decode: ${failed.join(', ')}`).toEqual([]);
 }
 
