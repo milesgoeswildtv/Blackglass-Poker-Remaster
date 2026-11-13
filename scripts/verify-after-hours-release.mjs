@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const root = process.cwd();
-const requiredAssets = [
+const requiredCoreAssets = [
   'afterhours_home_lobby_background.png',
   'afterhours_create_game_panel.png',
   'afterhours_join_game_panel.png',
@@ -20,14 +20,19 @@ const homeCss = await readFile(join(root, 'src/home.css'), 'utf8');
 if (!homeCss.includes('/remaster/afterhours_home_lobby_background.png')) {
   throw new Error('Release rejected: src/home.css is not the approved After Hours Home presentation.');
 }
-if (/CRASHOUT_DESKTOP_BG|CRASHOUT_MOBILE_BG|CRASHOUT_CREATE_GAME_PANEL/.test(homeCss)) {
+if (homeCss.includes('CRASHOUT_DESKTOP_BG') || homeCss.includes('CRASHOUT_MOBILE_BG') || homeCss.includes('CRASHOUT_CREATE_GAME_PANEL')) {
   throw new Error('Release rejected: legacy Home presentation markers detected.');
 }
 
+const publicAssetNames = await readdir(join(root, 'public/remaster'));
+const requiredAssets = [...new Set([
+  ...requiredCoreAssets,
+  ...publicAssetNames.filter(name => name.startsWith('afterhours_'))
+])].sort();
+
 const assetRecords = [];
 for (const name of requiredAssets) {
-  const path = join(root, 'dist/remaster', name);
-  const bytes = await readFile(path).catch(() => {
+  const bytes = await readFile(join(root, 'dist/remaster', name)).catch(() => {
     throw new Error(`Release rejected: required After Hours asset missing from dist/remaster: ${name}`);
   });
   assetRecords.push({
@@ -38,18 +43,17 @@ for (const name of requiredAssets) {
 }
 
 const html = await readFile(join(root, 'dist/index.html'), 'utf8');
-if (!/assets\\/index-[^"]+\\.js/.test(html) || !/assets\\/index-[^"]+\\.css/.test(html)) {
-  throw new Error('Release rejected: Vite production HTML is missing its fingerprinted JS/CSS entrypoints.');
+if (!html.includes('assets/index-') || !html.includes('.js') || !html.includes('.css')) {
+  throw new Error('Release rejected: Vite production HTML is missing fingerprinted JS/CSS entrypoints.');
 }
 
-const sourceCssSha256 = createHash('sha256').update(homeCss).digest('hex');
 const manifest = {
   application: 'Crashout Poker',
   presentation: 'After Hours',
   sourceRef: process.env.BLACKGLASS_SOURCE_REF || 'unknown',
   sourceSha: process.env.BLACKGLASS_SOURCE_SHA || 'unknown',
   workflowRunId: process.env.GITHUB_RUN_ID || 'local',
-  sourceHomeCssSha256: sourceCssSha256,
+  sourceHomeCssSha256: createHash('sha256').update(homeCss).digest('hex'),
   assets: assetRecords
 };
 await writeFile(join(root, 'dist/BLACKGLASS_BUILD.json'), JSON.stringify(manifest, null, 2) + '\n');
