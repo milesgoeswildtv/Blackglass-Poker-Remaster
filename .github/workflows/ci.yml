@@ -42,9 +42,9 @@ jobs:
         run: npm test
       - name: Build application
         run: npm run build
-      - name: Verify After Hours release assets and provenance
-        if: github.ref == 'refs/heads/rebuild/after-hours-v2'
-        run: node scripts/verify-after-hours-release.mjs
+      - name: Verify exact version 300 approved visual assets and provenance
+        if: github.ref == 'refs/heads/rebuild/after-hours-v2' || github.event_name == 'pull_request'
+        run: node scripts/verify-approved-visual-release.mjs
       - name: Validate Cloudflare Worker package
         run: npm run check:worker
       - name: Stamp BLACKGLASS build provenance

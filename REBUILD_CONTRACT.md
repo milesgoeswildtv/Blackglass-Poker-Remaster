@@ -46,7 +46,7 @@ Before any visual rebuild:
 Never expose, reset, replace, or regenerate Miles's real host key as part of QA.
 
 ## Visual rules after Phase 0
-AFTER HOURS is the presentation authority. Use the supplied mockups as composition references and `public/remaster/` as production assets. Keep dynamic content live in React/HTML/CSS.
+Version 300 is the production presentation authority until Miles explicitly approves a replacement. Restore and preserve its exact Home and Entry Gate composition, CSS, and image files. The newer `public/remaster/afterhours_*` kit is not the approved production Home/Entry artwork and must not be wired into those screens. Keep dynamic content live in React/HTML/CSS; do not flatten interactive controls into mockup images.
 
 ## Delivery discipline
 - clean replacement, not patches-on-patches;
