@@ -4,6 +4,6 @@
   "releaseSourceBranch": "rebuild/after-hours-v2",
   "releaseSourceSha": "2bda828e783cfd292cf81478f0db31d3001c3782",
   "approvedBy": "user",
-  "releasePurpose": "Restore the confirmed-good Home and Entry Gate artwork, preserve current Crashout identity integration and backend, and keep gameplay unchanged.",
-  "createdAt": "2026-11-13T01:45:00Z"
+  "releasePurpose": "Re-run the guarded production release from the exact approved source after the deliberate rollback. Preserve Poker accounts, balances, rules, realtime state, and gameplay behavior.",
+  "createdAt": "2026-11-14T03:00:00Z"
 }
