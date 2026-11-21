@@ -18,7 +18,7 @@
     "qa:afterdark": "playwright test qa/afterdark-runtime.spec.mjs --reporter=line"
   },
   "dependencies": {
-    "react": "19.2.8",
+    "react": "19.3.1",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
